@@ -17,27 +17,55 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
+import com.example.automate.ui.theme.AutomateTheme
+import com.example.automate.ui.viewmodel.AuthUiState
 import com.example.automate.ui.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
-    onSuccess: (String) -> Unit
+    onSuccess: (String) -> Unit,
+    onNavigateToSignUp: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
             onSuccess(email)
         }
     }
+
+    LoginScreenContent(
+        uiState = uiState,
+        email = email,
+        onEmailChange = { email = it; viewModel.clearError() },
+        password = password,
+        onPasswordChange = { password = it; viewModel.clearError() },
+        onForgotPassword = { viewModel.onForgotPassword(email) },
+        onLogin = { viewModel.onLogin(email, password) },
+        onNavigateToSignUp = onNavigateToSignUp
+    )
+}
+
+@Composable
+private fun LoginScreenContent(
+    uiState: AuthUiState,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    onForgotPassword: () -> Unit,
+    onLogin: () -> Unit,
+    onNavigateToSignUp: () -> Unit
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -61,7 +89,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = if (uiState.isLoginMode) "Sign in" else "Create account",
+            text = "Sign in",
             color = Color.White,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
@@ -70,9 +98,10 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+
         AppTextField(
             value = email,
-            onValueChange = { email = it; viewModel.clearError() },
+            onValueChange = onEmailChange,
             label = "Email address",
             keyboardType = KeyboardType.Email
         )
@@ -81,7 +110,7 @@ fun LoginScreen(
 
         AppTextField(
             value = password,
-            onValueChange = { password = it; viewModel.clearError() },
+            onValueChange = onPasswordChange,
             label = "Password",
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardType = KeyboardType.Password,
@@ -96,17 +125,15 @@ fun LoginScreen(
             }
         )
 
-        if (uiState.isLoginMode) {
-            Text(
-                text = "Forgot password?",
-                color = Color(0xFF007BFF),
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(top = 8.dp)
-                    .clickable { viewModel.onForgotPassword(email) }
-            )
-        }
+        Text(
+            text = "Forgot password?",
+            color = Color(0xFF007BFF),
+            fontSize = 14.sp,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(top = 8.dp)
+                .clickable(onClick = onForgotPassword)
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -126,8 +153,8 @@ fun LoginScreen(
         }
 
         PrimaryButton(
-            text = if (uiState.isLoginMode) "Sign in" else "Register",
-            onClick = { viewModel.onAuthAction(email, password) },
+            text = "Sign in",
+            onClick = onLogin,
             enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading
         )
 
@@ -139,17 +166,17 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = if (uiState.isLoginMode) "Don't have an account? " else "Already have an account? ",
+                text = "Don't have an account? ",
                 color = Color.Gray,
                 fontSize = 14.sp
             )
             Text(
-                text = if (uiState.isLoginMode) "Sign up" else "Login",
+                text = "Sign up",
                 color = Color(0xFF007BFF),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 textDecoration = TextDecoration.Underline,
-                modifier = Modifier.clickable { viewModel.toggleAuthMode() }
+                modifier = Modifier.clickable(onClick = onNavigateToSignUp)
             )
         }
 
@@ -163,5 +190,57 @@ fun LoginScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoginScreenPreview() {
+    AutomateTheme {
+        LoginScreenContent(
+            uiState = AuthUiState(),
+            email = "",
+            onEmailChange = {},
+            password = "",
+            onPasswordChange = {},
+            onForgotPassword = {},
+            onLogin = {},
+            onNavigateToSignUp = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Loading")
+@Composable
+private fun LoginScreenLoadingPreview() {
+    AutomateTheme {
+        LoginScreenContent(
+            uiState = AuthUiState(isLoading = true),
+            email = "user@example.com",
+            onEmailChange = {},
+            password = "password123",
+            onPasswordChange = {},
+            onForgotPassword = {},
+            onLogin = {},
+            onNavigateToSignUp = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Error")
+@Composable
+private fun LoginScreenErrorPreview() {
+    AutomateTheme {
+        LoginScreenContent(
+            uiState = AuthUiState(error = "Please enter a valid email address."),
+            email = "not-an-email",
+            onEmailChange = {},
+            password = "123",
+            onPasswordChange = {},
+            onForgotPassword = {},
+            onLogin = {},
+            onNavigateToSignUp = {}
+        )
     }
 }

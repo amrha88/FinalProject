@@ -29,32 +29,6 @@ fun BiometricScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
     ) {
         Spacer(modifier = Modifier.height(48.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            // Biometric placeholders
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(Color.Gray.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Face", color = Color.White, fontSize = 12.sp)
-            }
-            Spacer(modifier = Modifier.width(24.dp))
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(Color.Gray.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Finger", color = Color.White, fontSize = 12.sp)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
         Text(
             text = "Set up biometric authentication",
             color = Color.White,
@@ -77,6 +51,32 @@ fun BiometricScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
                     modifier = Modifier.padding(16.dp),
                     textAlign = TextAlign.Center
                 )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // Biometric placeholders
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .background(Color.Gray.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Face", color = Color.White, fontSize = 12.sp)
+            }
+            Spacer(modifier = Modifier.width(24.dp))
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .background(Color.Gray.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Finger", color = Color.White, fontSize = 12.sp)
             }
         }
 

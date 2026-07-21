@@ -14,11 +14,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    fun toggleAuthMode() {
-        _uiState.update { it.copy(isLoginMode = !it.isLoginMode, error = null) }
-    }
-
-    fun onAuthAction(email: String, password: String) {
+    fun onLogin(email: String, password: String) {
         if (_uiState.value.isLoading) return
 
         if (!isValidEmail(email)) {
@@ -34,13 +30,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         _uiState.update { it.copy(isLoading = true, error = null) }
 
         viewModelScope.launch {
-            val result = if (_uiState.value.isLoginMode) {
-                repository.login(email, password)
-            } else {
-                repository.register(email, password)
-            }
-
-            result.fold(
+            repository.login(email, password).fold(
                 onSuccess = {
                     _uiState.update { it.copy(isLoading = false, isSuccess = true) }
                 },
@@ -49,6 +39,37 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                 }
             )
         }
+    }
+
+    fun onRegister(email: String, password: String) {
+        if (_uiState.value.isLoading) return
+
+        if (!isValidEmail(email)) {
+            _uiState.update { it.copy(error = "Please enter a valid email address.") }
+            return
+        }
+
+        if (password.length < 6) {
+            _uiState.update { it.copy(error = "Password must be at least 6 characters.") }
+            return
+        }
+
+        _uiState.update { it.copy(isLoading = true, error = null) }
+
+        viewModelScope.launch {
+            repository.register(email, password).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                },
+                onFailure = { throwable ->
+                    _uiState.update { it.copy(isLoading = false, error = throwable.message) }
+                }
+            )
+        }
+    }
+
+    fun resetState() {
+        _uiState.update { AuthUiState() }
     }
 
     fun onForgotPassword(email: String) {
