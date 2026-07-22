@@ -98,7 +98,6 @@ private fun LoginScreenContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-
         AppTextField(
             value = email,
             onValueChange = onEmailChange,

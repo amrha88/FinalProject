@@ -8,6 +8,7 @@ android {
     namespace = "com.example.automate"
     compileSdk = 37
 
+
     defaultConfig {
         applicationId = "com.example.automate"
         minSdk = 24
@@ -39,6 +40,7 @@ android {
 dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

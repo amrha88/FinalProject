@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.domain.model.UserProfile
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -41,10 +42,16 @@ fun SignUpScreen(
     var hasLicense by remember { mutableStateOf<Boolean?>(null) }
     var formError by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
-            onSuccess(email)
-        }
+    if (uiState.isSuccess) {
+        SignUpSuccessContent(
+            email = email,
+            uiState = uiState,
+            onCheckVerification = {
+                viewModel.checkEmailVerification(onVerified = { onSuccess(email) })
+            },
+            onResendEmail = { viewModel.resendVerificationEmail() }
+        )
+        return
     }
 
     SignUpScreenContent(
@@ -74,10 +81,87 @@ fun SignUpScreen(
             if (validationError != null) {
                 formError = validationError
             } else {
-                viewModel.onRegister(email, password)
+                viewModel.onRegister(
+                    profile = UserProfile(
+                        fullName = fullName,
+                        age = age.toInt(),
+                        email = email,
+                        hasLicense = hasLicense == true
+                    ),
+                    password = password
+                )
             }
         }
     )
+}
+
+@Composable
+private fun SignUpSuccessContent(
+    email: String,
+    uiState: AuthUiState,
+    onCheckVerification: () -> Unit,
+    onResendEmail: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF000C1F))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Verify your email",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "We've sent a verification link to $email. Please check your inbox, verify your address, then tap Continue.",
+            color = Color.LightGray,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        uiState.verificationMessage?.let { message ->
+            Text(
+                text = message,
+                color = Color(0xFFFFA726),
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+
+        if (uiState.isCheckingVerification) {
+            CircularProgressIndicator(color = Color(0xFF007BFF))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        PrimaryButton(
+            text = "Continue",
+            onClick = onCheckVerification,
+            enabled = !uiState.isCheckingVerification
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Resend verification email",
+            color = Color(0xFF007BFF),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier
+                .clickable(enabled = !uiState.isCheckingVerification, onClick = onResendEmail)
+                .padding(8.dp)
+        )
+    }
 }
 
 private fun validateSignUpForm(
@@ -262,7 +346,7 @@ private fun LicenseOption(
     }
 }
 
-goo@Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 private fun SignUpScreenPreview() {
     AutomateTheme {

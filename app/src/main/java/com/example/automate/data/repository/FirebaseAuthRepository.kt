@@ -1,17 +1,40 @@
 package com.example.automate.data.repository
 
+import com.example.automate.domain.model.UserProfile
 import com.example.automate.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class FirebaseAuthRepository(
-    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : AuthRepository {
 
-    override suspend fun register(email: String, password: String): Result<Unit> {
+    override suspend fun register(profile: UserProfile, password: String): Result<Unit> {
         return try {
-            firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+            val authResult = firebaseAuth
+                .createUserWithEmailAndPassword(profile.email, password)
+                .await()
+            val user = authResult.user
+                ?: throw IllegalStateException("Registration succeeded but no user was returned.")
+
+            firestore.collection("users").document(user.uid)
+                .set(
+                    mapOf(
+                        "fullName" to profile.fullName,
+                        "age" to profile.age,
+                        "email" to profile.email,
+                        "hasLicense" to profile.hasLicense,
+                        "createdAt" to FieldValue.serverTimestamp()
+                    )
+                )
+                .await()
+
+            user.sendEmailVerification().await()
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(mapExceptionToThrowable(e))
@@ -30,6 +53,27 @@ class FirebaseAuthRepository(
     override suspend fun sendPasswordReset(email: String): Result<Unit> {
         return try {
             firebaseAuth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(mapExceptionToThrowable(e))
+        }
+    }
+
+    override suspend fun isCurrentUserEmailVerified(): Boolean {
+        val user = firebaseAuth.currentUser ?: return false
+        return try {
+            user.reload().await()
+            user.isEmailVerified
+        } catch (e: Exception) {
+            user.isEmailVerified
+        }
+    }
+
+    override suspend fun resendVerificationEmail(): Result<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser
+                ?: throw IllegalStateException("No signed-in user to verify.")
+            user.sendEmailVerification().await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(mapExceptionToThrowable(e))
