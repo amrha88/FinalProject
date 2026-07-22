@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HomePlaceholderScreen(onBackClick: () -> Unit) {
+fun AddVehicleScreen(onBackClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,7 +32,7 @@ fun HomePlaceholderScreen(onBackClick: () -> Unit) {
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "Home Placeholder", color = Color.White, fontSize = 24.sp)
+            Text(text = "Add Vehicle", color = Color.White, fontSize = 24.sp)
         }
     }
 }

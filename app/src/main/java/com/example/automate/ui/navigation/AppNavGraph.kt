@@ -31,23 +31,17 @@ fun AppNavGraph(navController: NavHostController) {
     ) {
         composable(Screen.Splash.route) {
             SplashScreen(onNavigateToLogin = {
-                val startRoute = if (authRepository.isUserLoggedIn()) {
-                    // If logged in, we might want to go to PIN or Home, 
-                    // but the prompt says "navigate to the existing PIN screen" after login.
-                    // Usually splash should check if logged in.
-                    Screen.Login.route // Keeping it simple as per instructions "Do not change the rest of the onboarding flow"
-                } else {
-                    Screen.Login.route
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
                 }
-                navController.navigate(startRoute)
             })
         }
-        
+
         composable(Screen.Login.route) {
             LoginScreen(
                 viewModel = authViewModel,
-                onSuccess = { email ->
-                    navController.navigate("${Screen.Pin.route}/$email") {
+                onSuccess = {
+                    navController.navigate(Screen.Biometric.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -61,39 +55,53 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Screen.SignUp.route) {
             SignUpScreen(
                 viewModel = authViewModel,
-                onSuccess = { email ->
-                    navController.navigate("${Screen.Pin.route}/$email") {
-                        popUpTo(Screen.SignUp.route) { inclusive = true }
+                onSuccess = {
+                    navController.navigate(Screen.Biometric.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
-        
-        composable(
-            route = "${Screen.Pin.route}/{email}",
-            arguments = listOf(navArgument("email") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-            PinScreen(
-                email = email,
+
+        composable(Screen.Biometric.route) {
+            BiometricScreen(
                 onContinue = {
-                    navController.navigate(Screen.Biometric.route)
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Biometric.route) { inclusive = true }
+                    }
+                },
+                onSkip = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Biometric.route) { inclusive = true }
+                    }
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
-        
-        composable(Screen.Biometric.route) {
-            BiometricScreen(
-                onContinue = { navController.navigate(Screen.HomePlaceholder.route) },
-                onSkip = { navController.navigate(Screen.HomePlaceholder.route) },
-                onBackClick = { navController.popBackStack() }
+
+        composable(Screen.Home.route) {
+            HomeScreen(
+                onAddVehicleClick = { navController.navigate(Screen.AddVehicle.route) },
+                onVehicleClick = { vehicleId ->
+                    navController.navigate("vehicle_details/$vehicleId")
+                }
             )
         }
-        
-        composable(Screen.HomePlaceholder.route) {
-            HomePlaceholderScreen(onBackClick = { navController.popBackStack() })
+
+        composable(Screen.AddVehicle.route) {
+            AddVehicleScreen(onBackClick = { navController.popBackStack() })
+        }
+
+        composable(
+            route = Screen.VehicleDetails.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            VehicleDetailsScreen(
+                vehicleId = vehicleId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }
