@@ -5,8 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Alignment
@@ -30,7 +31,8 @@ import com.example.automate.ui.viewmodel.AuthViewModel
 @Composable
 fun SignUpScreen(
     viewModel: AuthViewModel,
-    onSuccess: (String) -> Unit
+    onSuccess: (String) -> Unit,
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -69,6 +71,7 @@ fun SignUpScreen(
         onPasswordChange = { password = it; formError = null; viewModel.clearError() },
         hasLicense = hasLicense,
         onHasLicenseChange = { hasLicense = it; formError = null },
+        onBackClick = onBackClick,
         onSubmit = {
             val validationError = validateSignUpForm(
                 fullName = fullName,
@@ -198,6 +201,7 @@ private fun SignUpScreenContent(
     onPasswordChange: (String) -> Unit,
     hasLicense: Boolean?,
     onHasLicenseChange: (Boolean) -> Unit,
+    onBackClick: () -> Unit,
     onSubmit: () -> Unit
 ) {
     Column(
@@ -208,7 +212,17 @@ private fun SignUpScreenContent(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Create account",
@@ -259,7 +273,6 @@ private fun SignUpScreenContent(
             value = password,
             onValueChange = onPasswordChange,
             label = "Password",
-            isPassword = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardType = KeyboardType.Password
         )
@@ -365,6 +378,7 @@ private fun SignUpScreenPreview() {
             onPasswordChange = {},
             hasLicense = null,
             onHasLicenseChange = {},
+            onBackClick = {},
             onSubmit = {}
         )
     }
@@ -389,6 +403,7 @@ private fun SignUpScreenFilledPreview() {
             onPasswordChange = {},
             hasLicense = true,
             onHasLicenseChange = {},
+            onBackClick = {},
             onSubmit = {}
         )
     }
@@ -413,6 +428,7 @@ private fun SignUpScreenLoadingPreview() {
             onPasswordChange = {},
             hasLicense = true,
             onHasLicenseChange = {},
+            onBackClick = {},
             onSubmit = {}
         )
     }
@@ -437,6 +453,7 @@ private fun SignUpScreenErrorPreview() {
             onPasswordChange = {},
             hasLicense = false,
             onHasLicenseChange = {},
+            onBackClick = {},
             onSubmit = {}
         )
     }
