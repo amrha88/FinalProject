@@ -39,9 +39,7 @@ fun AppNavGraph(navController: NavHostController) {
                 } else {
                     Screen.Login.route
                 }
-                navController.navigate(startRoute) {
-                    popUpTo(Screen.Splash.route) { inclusive = true }
-                }
+                navController.navigate(startRoute)
             })
         }
         
