@@ -3,9 +3,9 @@ package com.example.automate.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,31 +19,45 @@ import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
 
 @Composable
-fun BiometricScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF000C1F))
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(48.dp))
-
-        Text(
-            text = "Set up biometric authentication",
-            color = Color.White,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-            modifier = Modifier.fillMaxWidth()
+fun BiometricScreen(onContinue: () -> Unit, onSkip: () -> Unit, onBackClick: () -> Unit) {
+    Scaffold(
+        topBar = {
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
+        },
+        containerColor = Color(0xFF000C1F)
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            PaddingValues(16.dp).let {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Set up biometric authentication",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = "Use your biometric data for faster and more secure access to your account.",
                     color = Color.LightGray,
@@ -52,54 +66,60 @@ fun BiometricScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
                     textAlign = TextAlign.Center
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            // Biometric placeholders
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(Color.Gray.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.CircleShape),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text("Face", color = Color.White, fontSize = 12.sp)
+                // Biometric placeholders
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(
+                            Color.Gray.copy(alpha = 0.3f),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Face", color = Color.White, fontSize = 12.sp)
+                }
+                Spacer(modifier = Modifier.width(24.dp))
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(
+                            Color.Gray.copy(alpha = 0.3f),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Finger", color = Color.White, fontSize = 12.sp)
+                }
             }
-            Spacer(modifier = Modifier.width(24.dp))
-            Box(
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            PrimaryButton(
+                text = "Continue",
+                onClick = onContinue
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Skip for now",
+                color = Color(0xFF007BFF),
                 modifier = Modifier
-                    .size(60.dp)
-                    .background(Color.Gray.copy(alpha = 0.3f), shape = androidx.compose.foundation.shape.CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Finger", color = Color.White, fontSize = 12.sp)
-            }
+                    .clickable { onSkip() }
+                    .padding(8.dp),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        PrimaryButton(
-            text = "Continue",
-            onClick = onContinue
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Skip for now",
-            color = Color(0xFF007BFF),
-            modifier = Modifier
-                .clickable { onSkip() }
-                .padding(8.dp),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -107,6 +127,6 @@ fun BiometricScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
 @Composable
 fun BiometricScreenPreview() {
     AutomateTheme {
-        BiometricScreen(onContinue = {}, onSkip = {})
+        BiometricScreen(onContinue = {}, onSkip = {}, onBackClick = {})
     }
 }

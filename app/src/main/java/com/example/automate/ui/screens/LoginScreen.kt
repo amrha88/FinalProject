@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -30,7 +31,8 @@ import com.example.automate.ui.viewmodel.AuthViewModel
 fun LoginScreen(
     viewModel: AuthViewModel,
     onSuccess: (String) -> Unit,
-    onNavigateToSignUp: () -> Unit
+    onNavigateToSignUp: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
@@ -50,7 +52,8 @@ fun LoginScreen(
         onPasswordChange = { password = it; viewModel.clearError() },
         onForgotPassword = { viewModel.onForgotPassword(email) },
         onLogin = { viewModel.onLogin(email, password) },
-        onNavigateToSignUp = onNavigateToSignUp
+        onNavigateToSignUp = onNavigateToSignUp,
+        onBackClick = onBackClick
     )
 }
 
@@ -63,7 +66,8 @@ private fun LoginScreenContent(
     onPasswordChange: (String) -> Unit,
     onForgotPassword: () -> Unit,
     onLogin: () -> Unit,
-    onNavigateToSignUp: () -> Unit
+    onNavigateToSignUp: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -74,7 +78,17 @@ private fun LoginScreenContent(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Logo Placeholder
         Box(
@@ -206,7 +220,8 @@ private fun LoginScreenPreview() {
             onPasswordChange = {},
             onForgotPassword = {},
             onLogin = {},
-            onNavigateToSignUp = {}
+            onNavigateToSignUp = {},
+            onBackClick = {}
         )
     }
 }
@@ -223,7 +238,8 @@ private fun LoginScreenLoadingPreview() {
             onPasswordChange = {},
             onForgotPassword = {},
             onLogin = {},
-            onNavigateToSignUp = {}
+            onNavigateToSignUp = {},
+            onBackClick = {}
         )
     }
 }
@@ -240,7 +256,8 @@ private fun LoginScreenErrorPreview() {
             onPasswordChange = {},
             onForgotPassword = {},
             onLogin = {},
-            onNavigateToSignUp = {}
+            onNavigateToSignUp = {},
+            onBackClick = {}
         )
     }
 }
