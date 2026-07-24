@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,10 +22,36 @@ import com.example.automate.ui.components.RobotSection
 import com.example.automate.ui.components.VehicleCard
 import com.example.automate.ui.components.WelcomeCard
 import com.example.automate.ui.theme.AutomateTheme
+import com.example.automate.ui.viewmodel.AuthViewModel
 import com.example.automate.ui.viewmodel.VehicleUiModel
 
 @Composable
 fun HomeScreen(
+    viewModel: AuthViewModel,
+    onAddVehicleClick: () -> Unit,
+    onVehicleClick: (String) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    HomeScreenContent(
+        userName = uiState.userName,
+        vehicles = uiState.vehicles.map { vehicle ->
+            VehicleUiModel(
+                id = vehicle.id,
+                manufacturer = vehicle.manufacturer,
+                model = vehicle.model,
+                year = vehicle.year,
+                plate = vehicle.plate,
+                isDark = false
+            )
+        },
+        onAddVehicleClick = onAddVehicleClick,
+        onVehicleClick = onVehicleClick
+    )
+}
+
+@Composable
+fun HomeScreenContent(
     userName: String? = null,
     vehicles: List<VehicleUiModel> = emptyList(),
     onAddVehicleClick: () -> Unit,
@@ -60,7 +88,9 @@ fun HomeScreen(
                 ) {
                     items(vehicles) { vehicle ->
                         VehicleCard(
-                            name = vehicle.name,
+                            manufacturer = vehicle.manufacturer,
+                            model = vehicle.model,
+                            year = vehicle.year,
                             plate = vehicle.plate,
                             isDark = vehicle.isDark,
                             onClick = { onVehicleClick(vehicle.id) }
@@ -114,11 +144,11 @@ fun EmptyVehicleState(onAddVehicleClick: () -> Unit) {
 @Composable
 fun HomeScreenPreview() {
     val mockVehicles = listOf(
-        VehicleUiModel("1", "polo 2011", "2011", "91-272-30", isDark = false),
-        VehicleUiModel("2", "toyota 2022", "2022", "301-33-444", isDark = true)
+        VehicleUiModel("1", "Volkswagen", "Polo", "2011", "91-272-30", isDark = false),
+        VehicleUiModel("2", "Toyota", "Corolla", "2022", "301-33-444", isDark = true)
     )
     AutomateTheme {
-        HomeScreen(
+        HomeScreenContent(
             userName = "George",
             vehicles = mockVehicles,
             onAddVehicleClick = {},
@@ -131,7 +161,7 @@ fun HomeScreenPreview() {
 @Composable
 fun HomeScreenEmptyPreview() {
     AutomateTheme {
-        HomeScreen(
+        HomeScreenContent(
             userName = null,
             vehicles = emptyList(),
             onAddVehicleClick = {},

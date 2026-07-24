@@ -19,7 +19,9 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun VehicleCard(
-    name: String,
+    manufacturer: String,
+    model: String,
+    year: String,
     plate: String,
     isDark: Boolean,
     onClick: () -> Unit,
@@ -52,20 +54,20 @@ fun VehicleCard(
                 contentAlignment = Alignment.Center
             ) {
                 // Placeholder image/emoji
-                Text("👤", fontSize = 28.sp)
+                Text("🚗", fontSize = 28.sp)
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = name,
+                    text = "$manufacturer $model",
                     color = contentColor,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "number:$plate",
+                    text = "$year • number:$plate",
                     color = plateColor,
                     fontSize = 13.sp
                 )

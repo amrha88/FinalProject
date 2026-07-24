@@ -36,12 +36,12 @@ fun AppNavGraph(navController: NavHostController) {
                 }
             })
         }
-
+        
         composable(Screen.Login.route) {
             LoginScreen(
                 viewModel = authViewModel,
-                onSuccess = {
-                    navController.navigate(Screen.Biometric.route) {
+                onSuccess = { email ->
+                    navController.navigate("${Screen.Pin.route}/$email") {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -55,34 +55,51 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Screen.SignUp.route) {
             SignUpScreen(
                 viewModel = authViewModel,
-                onSuccess = {
-                    navController.navigate(Screen.Biometric.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                onSuccess = { email ->
+                    navController.navigate("${Screen.Pin.route}/$email") {
+                        popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
-
+        
+        composable(
+            route = "${Screen.Pin.route}/{email}",
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            PinScreen(
+                email = email,
+                onContinue = {
+                    navController.navigate(Screen.Biometric.route)
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        
         composable(Screen.Biometric.route) {
             BiometricScreen(
-                onContinue = {
+                onContinue = { 
                     navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Biometric.route) { inclusive = true }
+                        popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
-                onSkip = {
+                onSkip = { 
                     navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Biometric.route) { inclusive = true }
+                        popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
-
+        
         composable(Screen.Home.route) {
             HomeScreen(
-                onAddVehicleClick = { navController.navigate(Screen.AddVehicle.route) },
+                viewModel = authViewModel,
+                onAddVehicleClick = {
+                    navController.navigate(Screen.AddVehicle.route)
+                },
                 onVehicleClick = { vehicleId ->
                     navController.navigate("vehicle_details/$vehicleId")
                 }
@@ -90,7 +107,11 @@ fun AppNavGraph(navController: NavHostController) {
         }
 
         composable(Screen.AddVehicle.route) {
-            AddVehicleScreen(onBackClick = { navController.popBackStack() })
+            AddVehicleScreen(
+                viewModel = authViewModel,
+                onBackClick = { navController.popBackStack() },
+                onSaveSuccess = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -100,8 +121,45 @@ fun AppNavGraph(navController: NavHostController) {
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
             VehicleDetailsScreen(
                 vehicleId = vehicleId,
-                onBackClick = { navController.popBackStack() }
+                viewModel = authViewModel,
+                onBackClick = { navController.popBackStack() },
+                onChatbotClick = { id -> navController.navigate("chatbot/$id") },
+                onLicencesClick = { id -> navController.navigate("licences/$id") },
+                onNotificationsClick = { id -> navController.navigate("notifications/$id") },
+                onHistoryClick = { id -> navController.navigate("history/$id") }
             )
+        }
+
+        composable(
+            route = Screen.Chatbot.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            ChatbotScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
+        }
+
+        composable(
+            route = Screen.Licences.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            LicencesScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
+        }
+
+        composable(
+            route = Screen.Notifications.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            NotificationsScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
+        }
+
+        composable(
+            route = Screen.History.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            VehicleHistoryScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
         }
     }
 }

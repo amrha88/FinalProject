@@ -2,6 +2,7 @@ package com.example.automate.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.UserProfile
 import com.example.automate.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
@@ -42,10 +44,21 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    fun onRegister(profile: UserProfile, password: String) {
+    fun onRegister(
+        email: String, 
+        password: String, 
+        fullName: String, 
+        age: Int, 
+        hasLicense: Boolean
+    ) {
         if (_uiState.value.isLoading) return
 
-        if (!isValidEmail(profile.email)) {
+        if (fullName.isBlank()) {
+            _uiState.update { it.copy(error = "Please enter your full name.") }
+            return
+        }
+
+        if (!isValidEmail(email)) {
             _uiState.update { it.copy(error = "Please enter a valid email address.") }
             return
         }
@@ -57,10 +70,23 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
         _uiState.update { it.copy(isLoading = true, error = null) }
 
+        val profile = UserProfile(
+            fullName = fullName,
+            age = age,
+            email = email,
+            hasLicense = hasLicense
+        )
+
         viewModelScope.launch {
             repository.register(profile, password).fold(
                 onSuccess = {
-                    _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false, 
+                            isSuccess = true,
+                            userName = fullName 
+                        ) 
+                    }
                 },
                 onFailure = { throwable ->
                     _uiState.update { it.copy(isLoading = false, error = throwable.message) }
@@ -69,40 +95,16 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    fun checkEmailVerification(onVerified: () -> Unit) {
-        if (_uiState.value.isCheckingVerification) return
-
-        _uiState.update { it.copy(isCheckingVerification = true, verificationMessage = null) }
-
-        viewModelScope.launch {
-            val verified = repository.isCurrentUserEmailVerified()
-            _uiState.update { it.copy(isCheckingVerification = false) }
-            if (verified) {
-                onVerified()
-            } else {
-                _uiState.update {
-                    it.copy(verificationMessage = "Your email isn't verified yet. Check your inbox, tap the link, then try again.")
-                }
-            }
-        }
-    }
-
-    fun resendVerificationEmail() {
-        if (_uiState.value.isCheckingVerification) return
-
-        _uiState.update { it.copy(isCheckingVerification = true, verificationMessage = null) }
-
-        viewModelScope.launch {
-            repository.resendVerificationEmail().fold(
-                onSuccess = {
-                    _uiState.update {
-                        it.copy(isCheckingVerification = false, verificationMessage = "Verification email resent.")
-                    }
-                },
-                onFailure = { throwable ->
-                    _uiState.update { it.copy(isCheckingVerification = false, verificationMessage = throwable.message) }
-                }
-            )
+    fun addVehicle(manufacturer: String, model: String, year: String, plate: String) {
+        val newVehicle = Vehicle(
+            id = UUID.randomUUID().toString(),
+            manufacturer = manufacturer,
+            model = model,
+            year = year,
+            plate = plate
+        )
+        _uiState.update { state ->
+            state.copy(vehicles = state.vehicles + newVehicle)
         }
     }
 
