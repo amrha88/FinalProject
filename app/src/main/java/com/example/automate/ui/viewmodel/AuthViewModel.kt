@@ -112,6 +112,11 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         _uiState.update { AuthUiState() }
     }
 
+    fun logout() {
+        repository.logout()
+        resetState()
+    }
+
     fun onForgotPassword(email: String) {
         if (email.isBlank() || !isValidEmail(email)) {
             _uiState.update { it.copy(error = "Please enter a valid email to reset password.") }
