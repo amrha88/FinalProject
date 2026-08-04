@@ -34,9 +34,10 @@ fun VehicleCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(90.dp),
+            .height(92.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         onClick = onClick
     ) {
         Row(
@@ -45,16 +46,18 @@ fun VehicleCard(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Vehicle Avatar Placeholder
             Box(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFD7EAD8)), // Light green from design
+                    .background(
+                        androidx.compose.ui.graphics.Brush.linearGradient(
+                            colors = listOf(Color(0xFFB9E4C9), Color(0xFF8FD3A8))
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                // Placeholder image/emoji
-                Text("🚗", fontSize = 28.sp)
+                Text("🚗", fontSize = 26.sp)
             }
 
             Spacer(modifier = Modifier.width(16.dp))

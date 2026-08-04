@@ -8,6 +8,8 @@ interface AuthRepository {
     suspend fun sendPasswordReset(email: String): Result<Unit>
     suspend fun isCurrentUserEmailVerified(): Boolean
     suspend fun resendVerificationEmail(): Result<Unit>
+    suspend fun getCurrentUserProfile(): Result<UserProfile>
+    suspend fun updateCurrentUserProfile(profile: UserProfile): Result<Unit>
     fun logout()
     fun isUserLoggedIn(): Boolean
 }

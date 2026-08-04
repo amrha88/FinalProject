@@ -107,7 +107,7 @@ private fun LoginScreenContent(
 
                 .background(Color.Gray, shape = MaterialTheme.shapes.small),
             contentAlignment = Alignment.Center
-        ) {
+        ){
             Text("Logo", color = Color.White, fontSize = 10.sp)
         }
 

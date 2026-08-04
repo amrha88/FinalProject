@@ -86,7 +86,17 @@ fun AppNavGraph(navController: NavHostController) {
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(onBackClick = { navController.popBackStack() })
+            SettingsScreen(
+                onBackClick = { navController.popBackStack() },
+                onProfileClick = { navController.navigate(Screen.Profile.route) }
+            )
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                viewModel = authViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.AddVehicle.route) {
