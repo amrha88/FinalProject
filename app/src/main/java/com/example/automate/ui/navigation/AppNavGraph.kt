@@ -68,9 +68,9 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Screen.Login.route) {
             LoginScreen(
                 viewModel = authViewModel,
-                onSuccess = { email ->
-                    navController.navigate("${Screen.Pin.route}/$email") {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                onSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
                 onNavigateToSignUp = {
@@ -83,45 +83,15 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Screen.SignUp.route) {
             SignUpScreen(
                 viewModel = authViewModel,
-                onSuccess = { email ->
-                    navController.navigate("${Screen.Pin.route}/$email") {
+                onSuccess = {
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
-        
-        composable(
-            route = "${Screen.Pin.route}/{email}",
-            arguments = listOf(navArgument("email") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-            PinScreen(
-                email = email,
-                onContinue = {
-                    navController.navigate(Screen.Biometric.route)
-                },
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-        
-        composable(Screen.Biometric.route) {
-            BiometricScreen(
-                onContinue = { 
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
-                },
-                onSkip = { 
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
-                },
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-        
+
         composable(Screen.Home.route) {
             HomeScreen(
                 viewModel = authViewModel,
@@ -130,7 +100,30 @@ fun AppNavGraph(navController: NavHostController) {
                 },
                 onVehicleClick = { vehicleId ->
                     navController.navigate("vehicle_details/$vehicleId")
+                },
+                onSettingsClick = {
+                    navController.navigate(Screen.Settings.route)
+                },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
+            )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onBackClick = { navController.popBackStack() },
+                onProfileClick = { navController.navigate(Screen.Profile.route) }
+            )
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                viewModel = authViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

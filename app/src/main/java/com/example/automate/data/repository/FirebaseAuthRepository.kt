@@ -80,6 +80,45 @@ class FirebaseAuthRepository(
         }
     }
 
+    override suspend fun getCurrentUserProfile(): Result<UserProfile> {
+        return try {
+            val user = firebaseAuth.currentUser
+                ?: throw IllegalStateException("No signed-in user.")
+            val snapshot = firestore.collection("users").document(user.uid).get().await()
+            val profile = UserProfile(
+                fullName = snapshot.getString("fullName") ?: "",
+                age = (snapshot.getLong("age") ?: 0L).toInt(),
+                email = snapshot.getString("email") ?: user.email ?: "",
+                hasLicense = snapshot.getBoolean("hasLicense") ?: false,
+                photoBase64 = snapshot.getString("photoBase64")
+            )
+            Result.success(profile)
+        } catch (e: Exception) {
+            Result.failure(mapExceptionToThrowable(e))
+        }
+    }
+
+    override suspend fun updateCurrentUserProfile(profile: UserProfile): Result<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser
+                ?: throw IllegalStateException("No signed-in user.")
+            val updates = mutableMapOf<String, Any>(
+                "fullName" to profile.fullName,
+                "age" to profile.age,
+                "hasLicense" to profile.hasLicense
+            )
+            if (profile.photoBase64 != null) {
+                updates["photoBase64"] = profile.photoBase64
+            }
+            firestore.collection("users").document(user.uid)
+                .set(updates, com.google.firebase.firestore.SetOptions.merge())
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(mapExceptionToThrowable(e))
+        }
+    }
+
     override fun logout() {
         firebaseAuth.signOut()
     }

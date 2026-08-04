@@ -7,5 +7,15 @@ data class AuthUiState(
     val isSuccess: Boolean = false,
     val error: String? = null,
     val userName: String? = null,
-    val vehicles: List<Vehicle> = emptyList()
+    val userAge: Int? = null,
+    val userEmail: String? = null,
+    val userHasLicense: Boolean = false,
+    val userPhotoBase64: String? = null,
+    val vehicles: List<Vehicle> = emptyList(),
+    val isSavingVehicle: Boolean = false,
+    val vehicleSaved: Boolean = false,
+    val vehicleError: String? = null,
+    val isSavingProfile: Boolean = false,
+    val profileSaved: Boolean = false,
+    val profileError: String? = null
 )
