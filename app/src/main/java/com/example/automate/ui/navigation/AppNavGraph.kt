@@ -1,6 +1,8 @@
 package com.example.automate.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -10,9 +12,12 @@ import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.automate.data.repository.FirebaseAuthRepository
 import com.example.automate.data.repository.FakeWarningLightRepository
+import com.example.automate.data.repository.FirebaseAiChatRepository
 import com.example.automate.ui.screens.*
 import com.example.automate.ui.viewmodel.AiAssistantViewModel
+import com.example.automate.ui.viewmodel.AiChatViewModel
 import com.example.automate.ui.viewmodel.AuthViewModel
+import com.example.automate.ui.viewmodel.VehicleUiModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
@@ -20,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 fun AppNavGraph(navController: NavHostController) {
     val authRepository = remember { FirebaseAuthRepository() }
     val warningLightRepository = remember { FakeWarningLightRepository() }
+    val aiChatRepository = remember { FirebaseAiChatRepository() }
     
     val authViewModel: AuthViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -36,6 +42,16 @@ fun AppNavGraph(navController: NavHostController) {
             }
         }
     )
+
+    val aiChatViewModel: AiChatViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AiChatViewModel(aiChatRepository) as T
+            }
+        }
+    )
+
+    val authUiState by authViewModel.uiState.collectAsState()
 
     NavHost(
         navController = navController,
@@ -148,9 +164,13 @@ fun AppNavGraph(navController: NavHostController) {
                 viewModel = aiAssistantViewModel,
                 onBackClick = { navController.popBackStack() },
                 onNavigateToChat = { result ->
-                    // For now, navigating back to chatbot with context if possible, 
-                    // or just a TODO as requested.
-                    navController.navigate("chatbot/context_${result.id}")
+                    // Find the vehicle ID if possible or navigate with a generic context
+                    // For now, navigating to chatbot without a specific vehicleId or the current one if we knew it.
+                    // But chatbot route REQUIRES vehicleId. 
+                    // Let's assume we navigate to the generic chatbot or just stay here.
+                    // Actually, let's use the first vehicle as a fallback or a TODO.
+                    val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
+                    navController.navigate("chatbot/$firstVehicleId")
                 }
             )
         }
@@ -160,7 +180,21 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
         ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
-            ChatbotScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
+            val vehicle = authUiState.vehicles.find { it.id == vehicleId }?.let {
+                VehicleUiModel(
+                    id = it.id,
+                    manufacturer = it.manufacturer,
+                    model = it.model,
+                    year = it.year,
+                    plate = it.plate,
+                    isDark = false
+                )
+            }
+            ChatbotScreen(
+                vehicle = vehicle,
+                viewModel = aiChatViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -188,4 +222,3 @@ fun AppNavGraph(navController: NavHostController) {
         }
     }
 }
-
