@@ -9,7 +9,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.automate.data.repository.FirebaseAuthRepository
+import com.example.automate.data.repository.FakeWarningLightRepository
 import com.example.automate.ui.screens.*
+import com.example.automate.ui.viewmodel.AiAssistantViewModel
 import com.example.automate.ui.viewmodel.AuthViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -17,10 +19,20 @@ import androidx.lifecycle.ViewModelProvider
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     val authRepository = remember { FirebaseAuthRepository() }
+    val warningLightRepository = remember { FakeWarningLightRepository() }
+    
     val authViewModel: AuthViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return AuthViewModel(authRepository) as T
+            }
+        }
+    )
+
+    val aiAssistantViewModel: AiAssistantViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AiAssistantViewModel(warningLightRepository) as T
             }
         }
     )
@@ -126,7 +138,20 @@ fun AppNavGraph(navController: NavHostController) {
                 onChatbotClick = { id -> navController.navigate("chatbot/$id") },
                 onLicencesClick = { id -> navController.navigate("licences/$id") },
                 onNotificationsClick = { id -> navController.navigate("notifications/$id") },
-                onHistoryClick = { id -> navController.navigate("history/$id") }
+                onHistoryClick = { id -> navController.navigate("history/$id") },
+                onAiScannerClick = { navController.navigate(Screen.AiAssistant.route) }
+            )
+        }
+
+        composable(Screen.AiAssistant.route) {
+            AiAssistantScreen(
+                viewModel = aiAssistantViewModel,
+                onBackClick = { navController.popBackStack() },
+                onNavigateToChat = { result ->
+                    // For now, navigating back to chatbot with context if possible, 
+                    // or just a TODO as requested.
+                    navController.navigate("chatbot/context_${result.id}")
+                }
             )
         }
 
@@ -163,3 +188,4 @@ fun AppNavGraph(navController: NavHostController) {
         }
     }
 }
+
