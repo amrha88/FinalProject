@@ -24,39 +24,45 @@ import com.example.automate.ui.theme.AutomateTheme
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF000C1F))
-            .padding(24.dp)
-    ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
+    Scaffold(
+        containerColor = Color(0xFF000C1F),
+        bottomBar = bottomBar
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(24.dp)
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Settings",
+                color = Color.White,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            SettingsRow(
+                icon = Icons.Default.Person,
+                title = "Profile",
+                subtitle = "View and edit your personal information",
+                onClick = onProfileClick
             )
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Settings",
-            color = Color.White,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        SettingsRow(
-            icon = Icons.Default.Person,
-            title = "Profile",
-            subtitle = "View and edit your personal information",
-            onClick = onProfileClick
-        )
     }
 }
 

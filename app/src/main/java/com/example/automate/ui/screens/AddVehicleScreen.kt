@@ -1,6 +1,7 @@
 package com.example.automate.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -8,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,7 +26,9 @@ import androidx.compose.ui.unit.sp
 import com.example.automate.domain.model.CarCatalog
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.AutocompleteTextField
+import com.example.automate.ui.components.AvatarImage
 import com.example.automate.ui.components.PrimaryButton
+import com.example.automate.ui.components.rememberProfileImagePicker
 import com.example.automate.ui.viewmodel.AuthViewModel
 
 @Composable
@@ -34,6 +38,7 @@ fun AddVehicleScreen(
     onSaveSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var carPhoto by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(uiState.vehicleSaved) {
         if (uiState.vehicleSaved) {
@@ -42,13 +47,17 @@ fun AddVehicleScreen(
         }
     }
 
+    val pickCarPhoto = rememberProfileImagePicker(onImagePicked = { carPhoto = it })
+
     AddVehicleScreenContent(
         isSaving = uiState.isSavingVehicle,
         serverError = uiState.vehicleError,
         onBackClick = onBackClick,
+        onPickPhotoClick = pickCarPhoto,
+        carPhotoBase64 = carPhoto,
         onSave = { manufacturer, model, year, plate ->
             viewModel.clearVehicleError()
-            viewModel.addVehicle(manufacturer, model, year, plate)
+            viewModel.addVehicle(manufacturer, model, year, plate, carPhoto)
         }
     )
 }
@@ -58,6 +67,8 @@ fun AddVehicleScreenContent(
     isSaving: Boolean = false,
     serverError: String? = null,
     onBackClick: () -> Unit,
+    onPickPhotoClick: (() -> Unit)? = null,
+    carPhotoBase64: String? = null,
     onSave: (String, String, String, String) -> Unit
 ) {
     var manufacturer by remember { mutableStateOf("") }
@@ -73,6 +84,7 @@ fun AddVehicleScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF000C1F))
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
@@ -125,6 +137,56 @@ fun AddVehicleScreenContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        if (onPickPhotoClick != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .size(96.dp)
+                    .clickable(onClick = onPickPhotoClick)
+            ) {
+                if (carPhotoBase64 != null) {
+                    AvatarImage(
+                        photoBase64 = carPhotoBase64,
+                        name = null,
+                        size = 96.dp
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(96.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.06f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DirectionsCar,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.5f),
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .align(Alignment.BottomEnd)
+                        .clip(CircleShape)
+                        .background(Color(0xFF007BFF)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = "Add car photo",
+                        tint = Color.White,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
         if (hasPreview) {
             Row(
                 modifier = Modifier
@@ -134,18 +196,31 @@ fun AddVehicleScreenContent(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(Color(0xFFB9E4C9), Color(0xFF8FD3A8))
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("🚗", fontSize = 22.sp)
+                if (carPhotoBase64 != null) {
+                    AvatarImage(
+                        photoBase64 = carPhotoBase64,
+                        name = null,
+                        size = 48.dp
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(Color(0xFF4FC3F7), Color(0xFF0057D8))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DirectionsCar,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(14.dp))
@@ -230,15 +305,21 @@ fun AddVehicleScreenContent(
                     options = CarCatalog.yearsFor(manufacturer, model),
                     placeholder = "e.g. 2020",
                     keyboardType = KeyboardType.Number,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(0.4f)
                 )
 
                 AppTextField(
                     value = plate,
-                    onValueChange = { plate = it; validationError = null },
+                    onValueChange = { newValue ->
+                        plate = newValue
+                            .uppercase()
+                            .filter { it.isLetterOrDigit() || it == '-' || it == ' ' }
+                            .take(10)
+                        validationError = null
+                    },
                     label = "Plate",
                     placeholder = "AB-123-CD",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(0.6f)
                 )
             }
         }

@@ -189,7 +189,13 @@ class AuthViewModel(
         }
     }
 
-    fun addVehicle(manufacturer: String, model: String, year: String, plate: String) {
+    fun addVehicle(
+        manufacturer: String,
+        model: String,
+        year: String,
+        plate: String,
+        photoBase64: String? = null
+    ) {
         if (_uiState.value.isSavingVehicle) return
 
         val newVehicle = Vehicle(
@@ -197,7 +203,8 @@ class AuthViewModel(
             manufacturer = manufacturer,
             model = model,
             year = year,
-            plate = plate
+            plate = plate,
+            photoBase64 = photoBase64
         )
         _uiState.update { it.copy(isSavingVehicle = true, vehicleError = null) }
         viewModelScope.launch {

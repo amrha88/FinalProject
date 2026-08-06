@@ -42,7 +42,9 @@ fun HomeScreen(
     onAddVehicleClick: () -> Unit,
     onVehicleClick: (String) -> Unit,
     onSettingsClick: () -> Unit,
-    onLogout: () -> Unit
+    onNeedHelpClick: () -> Unit,
+    onLogout: () -> Unit,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pickImage = rememberProfileImagePicker(onImagePicked = { viewModel.updateProfilePhoto(it) })
@@ -58,13 +60,16 @@ fun HomeScreen(
                 model = vehicle.model,
                 year = vehicle.year,
                 plate = vehicle.plate,
-                isDark = false
+                isDark = false,
+                photoBase64 = vehicle.photoBase64
             )
         },
         onAddVehicleClick = onAddVehicleClick,
         onVehicleClick = onVehicleClick,
         onSettingsClick = onSettingsClick,
-        onLogout = onLogout
+        onNeedHelpClick = onNeedHelpClick,
+        onLogout = onLogout,
+        bottomBar = bottomBar
     )
 }
 
@@ -78,12 +83,15 @@ fun HomeScreenContent(
     onAddVehicleClick: () -> Unit,
     onVehicleClick: (String) -> Unit,
     onSettingsClick: () -> Unit = {},
-    onLogout: () -> Unit = {}
+    onNeedHelpClick: () -> Unit = {},
+    onLogout: () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {}
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color(0xFF000C1F), // Dark navy background
+        bottomBar = bottomBar,
         topBar = {
             TopAppBar(
                 title = { Text("Automate", color = Color.White, fontWeight = FontWeight.Bold) },
@@ -138,7 +146,7 @@ fun HomeScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AssistantBanner()
+            AssistantBanner(onClick = onNeedHelpClick)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -184,6 +192,7 @@ fun HomeScreenContent(
                             year = vehicle.year,
                             plate = vehicle.plate,
                             isDark = vehicle.isDark,
+                            photoBase64 = vehicle.photoBase64,
                             onClick = { onVehicleClick(vehicle.id) }
                         )
                     }

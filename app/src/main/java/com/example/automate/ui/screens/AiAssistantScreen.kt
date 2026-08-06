@@ -40,7 +40,8 @@ import com.example.automate.util.FileUtils
 fun AiAssistantScreen(
     viewModel: AiAssistantViewModel,
     onBackClick: () -> Unit,
-    onNavigateToChat: (WarningLightResult) -> Unit
+    onNavigateToChat: (WarningLightResult) -> Unit,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -87,7 +88,8 @@ fun AiAssistantScreen(
         onRetake = { viewModel.onRemoveImage() },
         onRemove = { viewModel.onRemoveImage() },
         onAnalyze = { viewModel.startAnalysis() },
-        onAskAi = { result -> onNavigateToChat(result) }
+        onAskAi = { result -> onNavigateToChat(result) },
+        bottomBar = bottomBar
     )
 }
 
@@ -101,9 +103,11 @@ fun AiAssistantContent(
     onRetake: () -> Unit,
     onRemove: () -> Unit,
     onAnalyze: () -> Unit,
-    onAskAi: (WarningLightResult) -> Unit
+    onAskAi: (WarningLightResult) -> Unit,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     Scaffold(
+        bottomBar = bottomBar,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("AI Car Assistant", fontWeight = FontWeight.Bold) },

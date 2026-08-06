@@ -43,7 +43,8 @@ fun AutocompleteTextField(
 
     ExposedDropdownMenuBox(
         expanded = showMenu,
-        onExpandedChange = { expanded = it }
+        onExpandedChange = { expanded = it },
+        modifier = modifier
     ) {
         OutlinedTextField(
             value = value,
@@ -53,7 +54,7 @@ fun AutocompleteTextField(
             },
             label = { Text(label) },
             placeholder = placeholder?.let { { Text(it, color = Color.Gray) } },
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),

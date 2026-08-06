@@ -25,7 +25,8 @@ class FirestoreVehicleRepository(
                     manufacturer = doc.getString("manufacturer") ?: return@mapNotNull null,
                     model = doc.getString("model") ?: return@mapNotNull null,
                     year = doc.getString("year") ?: return@mapNotNull null,
-                    plate = doc.getString("plate") ?: return@mapNotNull null
+                    plate = doc.getString("plate") ?: return@mapNotNull null,
+                    photoBase64 = doc.getString("photoBase64")
                 )
             }
             Result.success(vehicles)
@@ -42,6 +43,7 @@ class FirestoreVehicleRepository(
                     "model" to vehicle.model,
                     "year" to vehicle.year,
                     "plate" to vehicle.plate,
+                    "photoBase64" to vehicle.photoBase64,
                     "createdAt" to FieldValue.serverTimestamp()
                 )
             ).await()

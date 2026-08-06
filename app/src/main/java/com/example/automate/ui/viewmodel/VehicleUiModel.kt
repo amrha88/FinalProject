@@ -6,5 +6,6 @@ data class VehicleUiModel(
     val model: String,
     val year: String,
     val plate: String,
-    val isDark: Boolean = false
+    val isDark: Boolean = false,
+    val photoBase64: String? = null
 )

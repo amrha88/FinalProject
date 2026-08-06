@@ -31,7 +31,8 @@ import com.example.automate.ui.viewmodel.AuthViewModel
 @Composable
 fun ProfileScreen(
     viewModel: AuthViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pickImage = rememberProfileImagePicker(onImagePicked = { viewModel.updateProfilePhoto(it) })
@@ -44,7 +45,8 @@ fun ProfileScreen(
             viewModel.clearProfileError()
             viewModel.updateProfile(fullName, age, hasLicense)
         },
-        onDismissSaved = { viewModel.clearProfileSaved() }
+        onDismissSaved = { viewModel.clearProfileSaved() },
+        bottomBar = bottomBar
     )
 }
 
@@ -54,7 +56,8 @@ private fun ProfileScreenContent(
     onAvatarClick: () -> Unit,
     onBackClick: () -> Unit,
     onSave: (String, Int, Boolean) -> Unit,
-    onDismissSaved: () -> Unit
+    onDismissSaved: () -> Unit,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     var fullName by remember { mutableStateOf(uiState.userName ?: "") }
     var age by remember { mutableStateOf(uiState.userAge?.takeIf { it > 0 }?.toString() ?: "") }
@@ -68,10 +71,14 @@ private fun ProfileScreenContent(
         }
     }
 
+    Scaffold(
+        containerColor = Color(0xFF000C1F),
+        bottomBar = bottomBar
+    ) { paddingValues ->
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF000C1F))
+            .padding(paddingValues)
             .padding(24.dp)
     ) {
         IconButton(onClick = onBackClick) {
@@ -220,6 +227,7 @@ private fun ProfileScreenContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
     }
 }
 
