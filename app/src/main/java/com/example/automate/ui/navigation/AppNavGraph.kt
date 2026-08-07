@@ -1,31 +1,25 @@
 package com.example.automate.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.automate.data.repository.FirebaseAuthRepository
 import com.example.automate.data.repository.FakeWarningLightRepository
 import com.example.automate.data.repository.FirebaseAiChatRepository
-import com.example.automate.ui.components.BottomNavBar
-import com.example.automate.ui.components.BottomNavItem
+import com.example.automate.data.repository.FirebaseVehicleLicenceAnalysisRepository
+import com.example.automate.data.repository.FirestoreVehicleLicenceRepository
 import com.example.automate.ui.screens.*
 import com.example.automate.ui.viewmodel.AiAssistantViewModel
 import com.example.automate.ui.viewmodel.AiChatViewModel
 import com.example.automate.ui.viewmodel.AuthViewModel
+import com.example.automate.ui.viewmodel.VehicleLicenceViewModel
 import com.example.automate.ui.viewmodel.VehicleUiModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -60,48 +54,20 @@ fun AppNavGraph(navController: NavHostController) {
         }
     )
 
-    val authUiState by authViewModel.uiState.collectAsState()
-
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
-    fun navigateToTab(route: String) {
-        navController.navigate(route) {
-            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
+    val vehicleLicenceAnalysisRepository = remember { FirebaseVehicleLicenceAnalysisRepository() }
+    val vehicleLicenceRepository = remember { FirestoreVehicleLicenceRepository() }
+    val vehicleLicenceViewModel: VehicleLicenceViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return VehicleLicenceViewModel(
+                    vehicleLicenceAnalysisRepository,
+                    vehicleLicenceRepository
+                ) as T
+            }
         }
-    }
+    )
 
-    val mainBottomBar: @Composable () -> Unit = {
-        BottomNavBar(
-            items = listOf(
-                BottomNavItem(
-                    icon = Icons.Default.DirectionsCar,
-                    label = "My Cars",
-                    selected = currentRoute == Screen.Home.route,
-                    onClick = { navigateToTab(Screen.Home.route) }
-                ),
-                BottomNavItem(
-                    icon = Icons.AutoMirrored.Filled.Chat,
-                    label = "Assistant",
-                    selected = currentRoute == Screen.AiAssistant.route,
-                    onClick = { navigateToTab(Screen.AiAssistant.route) }
-                ),
-                BottomNavItem(
-                    icon = Icons.Default.Person,
-                    label = "Profile",
-                    selected = currentRoute == Screen.Profile.route,
-                    onClick = { navigateToTab(Screen.Profile.route) }
-                ),
-                BottomNavItem(
-                    icon = Icons.Default.Settings,
-                    label = "Settings",
-                    selected = currentRoute == Screen.Settings.route,
-                    onClick = { navigateToTab(Screen.Settings.route) }
-                )
-            )
-        )
-    }
+    val authUiState by authViewModel.uiState.collectAsState()
 
     NavHost(
         navController = navController,
@@ -162,24 +128,21 @@ fun AppNavGraph(navController: NavHostController) {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
-                },
-                bottomBar = mainBottomBar
+                }
             )
         }
 
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBackClick = { navController.popBackStack() },
-                onProfileClick = { navController.navigate(Screen.Profile.route) },
-                bottomBar = mainBottomBar
+                onProfileClick = { navController.navigate(Screen.Profile.route) }
             )
         }
 
         composable(Screen.Profile.route) {
             ProfileScreen(
                 viewModel = authViewModel,
-                onBackClick = { navController.popBackStack() },
-                bottomBar = mainBottomBar
+                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -220,8 +183,7 @@ fun AppNavGraph(navController: NavHostController) {
                     // Actually, let's use the first vehicle as a fallback or a TODO.
                     val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
                     navController.navigate("chatbot/$firstVehicleId")
-                },
-                bottomBar = mainBottomBar
+                }
             )
         }
 
@@ -252,7 +214,22 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
         ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
-            LicencesScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
+            val vehicle = authUiState.vehicles.find { it.id == vehicleId }?.let {
+                com.example.automate.domain.model.Vehicle(
+                    id = it.id,
+                    manufacturer = it.manufacturer,
+                    model = it.model,
+                    year = it.year,
+                    plate = it.plate,
+                    isDark = it.isDark
+                )
+            }
+            VehicleLicenceScreen(
+                vehicleId = vehicleId,
+                vehicle = vehicle,
+                viewModel = vehicleLicenceViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(

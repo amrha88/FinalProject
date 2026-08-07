@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,6 +33,8 @@ import com.example.automate.ui.components.AssistantBanner
 import com.example.automate.ui.components.VehicleCard
 import com.example.automate.ui.components.WelcomeCard
 import com.example.automate.ui.components.rememberProfileImagePicker
+import com.example.automate.ui.components.BottomNavBar
+import com.example.automate.ui.components.BottomNavItem
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AuthViewModel
 import com.example.automate.ui.viewmodel.VehicleUiModel
@@ -43,8 +46,7 @@ fun HomeScreen(
     onVehicleClick: (String) -> Unit,
     onSettingsClick: () -> Unit,
     onNeedHelpClick: () -> Unit,
-    onLogout: () -> Unit,
-    bottomBar: @Composable () -> Unit = {}
+    onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pickImage = rememberProfileImagePicker(onImagePicked = { viewModel.updateProfilePhoto(it) })
@@ -69,7 +71,30 @@ fun HomeScreen(
         onSettingsClick = onSettingsClick,
         onNeedHelpClick = onNeedHelpClick,
         onLogout = onLogout,
-        bottomBar = bottomBar
+        bottomBar = {
+            BottomNavBar(
+                items = listOf(
+                    BottomNavItem(
+                        icon = Icons.Default.Home,
+                        label = "Home",
+                        selected = true,
+                        onClick = { /* Already here */ }
+                    ),
+                    BottomNavItem(
+                        icon = Icons.Default.Settings,
+                        label = "Settings",
+                        selected = false,
+                        onClick = onSettingsClick
+                    ),
+                    BottomNavItem(
+                        icon = Icons.Default.Person,
+                        label = "Profile",
+                        selected = false,
+                        onClick = { /* Navigate to profile if needed */ }
+                    )
+                )
+            )
+        }
     )
 }
 
