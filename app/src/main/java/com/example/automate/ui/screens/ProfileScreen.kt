@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,7 +30,6 @@ import com.example.automate.ui.viewmodel.AuthViewModel
 @Composable
 fun ProfileScreen(
     viewModel: AuthViewModel,
-    onBackClick: () -> Unit,
     bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -40,7 +38,6 @@ fun ProfileScreen(
     ProfileScreenContent(
         uiState = uiState,
         onAvatarClick = pickImage,
-        onBackClick = onBackClick,
         onSave = { fullName, age, hasLicense ->
             viewModel.clearProfileError()
             viewModel.updateProfile(fullName, age, hasLicense)
@@ -54,7 +51,6 @@ fun ProfileScreen(
 private fun ProfileScreenContent(
     uiState: AuthUiState,
     onAvatarClick: () -> Unit,
-    onBackClick: () -> Unit,
     onSave: (String, Int, Boolean) -> Unit,
     onDismissSaved: () -> Unit,
     bottomBar: @Composable () -> Unit = {}
@@ -81,14 +77,6 @@ private fun ProfileScreenContent(
             .padding(paddingValues)
             .padding(24.dp)
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
-            )
-        }
-
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
@@ -268,7 +256,6 @@ private fun ProfileScreenPreview() {
                 userHasLicense = true
             ),
             onAvatarClick = {},
-            onBackClick = {},
             onSave = { _, _, _ -> },
             onDismissSaved = {}
         )

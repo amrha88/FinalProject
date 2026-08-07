@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -23,7 +22,6 @@ import com.example.automate.ui.theme.AutomateTheme
 
 @Composable
 fun SettingsScreen(
-    onBackClick: () -> Unit,
     onProfileClick: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
@@ -37,14 +35,6 @@ fun SettingsScreen(
                 .padding(paddingValues)
                 .padding(24.dp)
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
-            }
-
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
@@ -115,6 +105,6 @@ private fun SettingsRow(
 @Composable
 fun SettingsScreenPreview() {
     AutomateTheme {
-        SettingsScreen(onBackClick = {})
+        SettingsScreen()
     }
 }

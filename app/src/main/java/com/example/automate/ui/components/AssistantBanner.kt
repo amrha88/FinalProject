@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun AssistantBanner(
     modifier: Modifier = Modifier,
+    title: String = "Need a hand?",
+    subtitle: String = "Ask your car assistant about maintenance, licences, or history.",
     onClick: (() -> Unit)? = null
 ) {
     Row(
@@ -57,13 +59,13 @@ fun AssistantBanner(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Need a hand?",
+                text = title,
                 color = Color.White,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Ask your car assistant about maintenance, licences, or history.",
+                text = subtitle,
                 color = Color.White.copy(alpha = 0.75f),
                 fontSize = 12.sp,
                 lineHeight = 16.sp

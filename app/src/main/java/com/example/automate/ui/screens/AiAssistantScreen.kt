@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Warning
@@ -30,6 +29,7 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.automate.domain.model.WarningLightResult
 import com.example.automate.domain.model.WarningSeverity
+import com.example.automate.ui.components.AssistantBanner
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AiAssistantUiState
@@ -39,8 +39,8 @@ import com.example.automate.util.FileUtils
 @Composable
 fun AiAssistantScreen(
     viewModel: AiAssistantViewModel,
-    onBackClick: () -> Unit,
     onNavigateToChat: (WarningLightResult) -> Unit,
+    onOpenChatClick: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,7 +73,6 @@ fun AiAssistantScreen(
 
     AiAssistantContent(
         uiState = uiState,
-        onBackClick = onBackClick,
         onTakePhoto = {
             val permissionCheckResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
             if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
@@ -89,6 +88,7 @@ fun AiAssistantScreen(
         onRemove = { viewModel.onRemoveImage() },
         onAnalyze = { viewModel.startAnalysis() },
         onAskAi = { result -> onNavigateToChat(result) },
+        onOpenChatClick = onOpenChatClick,
         bottomBar = bottomBar
     )
 }
@@ -97,13 +97,13 @@ fun AiAssistantScreen(
 @Composable
 fun AiAssistantContent(
     uiState: AiAssistantUiState,
-    onBackClick: () -> Unit,
     onTakePhoto: () -> Unit,
     onChooseGallery: () -> Unit,
     onRetake: () -> Unit,
     onRemove: () -> Unit,
     onAnalyze: () -> Unit,
     onAskAi: (WarningLightResult) -> Unit,
+    onOpenChatClick: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
     Scaffold(
@@ -111,11 +111,6 @@ fun AiAssistantContent(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("AI Car Assistant", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF000C1F),
                     titleContentColor = Color.White,
@@ -167,6 +162,12 @@ fun AiAssistantContent(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(24.dp))
+                AssistantBanner(
+                    title = "Chat with the AI Assistant",
+                    subtitle = "Skip the photo and ask a question about your car directly.",
+                    onClick = onOpenChatClick
+                )
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
@@ -361,7 +362,6 @@ fun AiAssistantPreview() {
     AutomateTheme {
         AiAssistantContent(
             uiState = AiAssistantUiState.Initial,
-            onBackClick = {},
             onTakePhoto = {},
             onChooseGallery = {},
             onRetake = {},
@@ -388,7 +388,6 @@ fun AiAssistantResultPreview() {
     AutomateTheme {
         AiAssistantContent(
             uiState = AiAssistantUiState.Success(Uri.EMPTY, mockResult),
-            onBackClick = {},
             onTakePhoto = {},
             onChooseGallery = {},
             onRetake = {},

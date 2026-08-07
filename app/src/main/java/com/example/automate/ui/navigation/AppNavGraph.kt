@@ -1,13 +1,20 @@
 package com.example.automate.ui.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.automate.data.repository.FirebaseAuthRepository
@@ -15,6 +22,8 @@ import com.example.automate.data.repository.FakeWarningLightRepository
 import com.example.automate.data.repository.FirebaseAiChatRepository
 import com.example.automate.data.repository.FirebaseVehicleLicenceAnalysisRepository
 import com.example.automate.data.repository.FirestoreVehicleLicenceRepository
+import com.example.automate.ui.components.BottomNavBar
+import com.example.automate.ui.components.BottomNavItem
 import com.example.automate.ui.screens.*
 import com.example.automate.ui.viewmodel.AiAssistantViewModel
 import com.example.automate.ui.viewmodel.AiChatViewModel
@@ -68,6 +77,47 @@ fun AppNavGraph(navController: NavHostController) {
     )
 
     val authUiState by authViewModel.uiState.collectAsState()
+
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    fun navigateToTab(route: String) {
+        navController.navigate(route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    val mainBottomBar: @Composable () -> Unit = {
+        BottomNavBar(
+            items = listOf(
+                BottomNavItem(
+                    icon = Icons.Default.DirectionsCar,
+                    label = "My Cars",
+                    selected = currentRoute == Screen.Home.route,
+                    onClick = { navigateToTab(Screen.Home.route) }
+                ),
+                BottomNavItem(
+                    icon = Icons.AutoMirrored.Filled.Chat,
+                    label = "AI Assistant",
+                    selected = currentRoute == Screen.AiAssistant.route,
+                    onClick = { navigateToTab(Screen.AiAssistant.route) }
+                ),
+                BottomNavItem(
+                    icon = Icons.Default.Person,
+                    label = "Profile",
+                    selected = currentRoute == Screen.Profile.route,
+                    onClick = { navigateToTab(Screen.Profile.route) }
+                ),
+                BottomNavItem(
+                    icon = Icons.Default.Settings,
+                    label = "Settings",
+                    selected = currentRoute == Screen.Settings.route,
+                    onClick = { navigateToTab(Screen.Settings.route) }
+                )
+            )
+        )
+    }
 
     NavHost(
         navController = navController,
@@ -128,21 +178,22 @@ fun AppNavGraph(navController: NavHostController) {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
+                bottomBar = mainBottomBar
             )
         }
 
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onBackClick = { navController.popBackStack() },
-                onProfileClick = { navController.navigate(Screen.Profile.route) }
+                onProfileClick = { navController.navigate(Screen.Profile.route) },
+                bottomBar = mainBottomBar
             )
         }
 
         composable(Screen.Profile.route) {
             ProfileScreen(
                 viewModel = authViewModel,
-                onBackClick = { navController.popBackStack() }
+                bottomBar = mainBottomBar
             )
         }
 
@@ -172,18 +223,17 @@ fun AppNavGraph(navController: NavHostController) {
         }
 
         composable(Screen.AiAssistant.route) {
+            val openChat = {
+                // Chatbot route requires a vehicleId; fall back to the user's first vehicle
+                // since the assistant isn't scoped to one specific vehicle here.
+                val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
+                navController.navigate("chatbot/$firstVehicleId")
+            }
             AiAssistantScreen(
                 viewModel = aiAssistantViewModel,
-                onBackClick = { navController.popBackStack() },
-                onNavigateToChat = { result ->
-                    // Find the vehicle ID if possible or navigate with a generic context
-                    // For now, navigating to chatbot without a specific vehicleId or the current one if we knew it.
-                    // But chatbot route REQUIRES vehicleId. 
-                    // Let's assume we navigate to the generic chatbot or just stay here.
-                    // Actually, let's use the first vehicle as a fallback or a TODO.
-                    val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
-                    navController.navigate("chatbot/$firstVehicleId")
-                }
+                onNavigateToChat = { openChat() },
+                onOpenChatClick = openChat,
+                bottomBar = mainBottomBar
             )
         }
 

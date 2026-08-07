@@ -281,6 +281,7 @@ private fun LicenseOption(
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 private fun SignUpScreenPreview() {
