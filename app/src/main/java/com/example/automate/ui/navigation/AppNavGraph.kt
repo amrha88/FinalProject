@@ -23,6 +23,8 @@ import com.example.automate.data.repository.FirebaseWarningLightRepository
 import com.example.automate.data.repository.FirebaseAiChatRepository
 import com.example.automate.data.repository.FirebaseVehicleLicenceAnalysisRepository
 import com.example.automate.data.repository.FirestoreVehicleLicenceRepository
+import com.example.automate.data.repository.FirebaseVehicleDocumentAnalysisRepository
+import com.example.automate.data.repository.FirestoreVehicleDocumentRepository
 import com.example.automate.ui.components.BottomNavBar
 import com.example.automate.ui.components.BottomNavItem
 import com.example.automate.ui.screens.*
@@ -30,6 +32,7 @@ import com.example.automate.ui.viewmodel.AiAssistantViewModel
 import com.example.automate.ui.viewmodel.AiChatViewModel
 import com.example.automate.ui.viewmodel.AuthViewModel
 import com.example.automate.ui.viewmodel.VehicleLicenceViewModel
+import com.example.automate.ui.viewmodel.VehicleDocumentsViewModel
 import com.example.automate.ui.viewmodel.VehicleUiModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -72,6 +75,19 @@ fun AppNavGraph(navController: NavHostController) {
                 return VehicleLicenceViewModel(
                     vehicleLicenceAnalysisRepository,
                     vehicleLicenceRepository
+                ) as T
+            }
+        }
+    )
+
+    val vehicleDocumentAnalysisRepository = remember { FirebaseVehicleDocumentAnalysisRepository() }
+    val vehicleDocumentRepository = remember { FirestoreVehicleDocumentRepository() }
+    val vehicleDocumentsViewModel: VehicleDocumentsViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return VehicleDocumentsViewModel(
+                    vehicleDocumentAnalysisRepository,
+                    vehicleDocumentRepository
                 ) as T
             }
         }
@@ -230,8 +246,32 @@ fun AppNavGraph(navController: NavHostController) {
                 onLicencesClick = { id -> navController.navigate("licences/$id") },
                 onNotificationsClick = { id -> navController.navigate("notifications/$id") },
                 onHistoryClick = { id -> navController.navigate("history/$id") },
+                onDocumentsClick = { id -> navController.navigate("vehicle_documents/$id") },
                 onAiScannerClick = { navController.navigate(Screen.AiAssistant.route) },
                 onEditClick = { id -> navController.navigate("edit_vehicle/$id") }
+            )
+        }
+
+        composable(
+            route = Screen.VehicleDocuments.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            val vehicle = authUiState.vehicles.find { it.id == vehicleId }?.let {
+                com.example.automate.domain.model.Vehicle(
+                    id = it.id,
+                    manufacturer = it.manufacturer,
+                    model = it.model,
+                    year = it.year,
+                    plate = it.plate,
+                    isDark = it.isDark
+                )
+            }
+            VehicleDocumentsScreen(
+                vehicleId = vehicleId,
+                vehicle = vehicle,
+                viewModel = vehicleDocumentsViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

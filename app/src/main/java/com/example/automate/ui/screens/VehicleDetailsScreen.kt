@@ -3,11 +3,12 @@ package com.example.automate.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,7 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.automate.domain.model.VehicleSpecs
 import com.example.automate.ui.components.AiDisclaimerNote
-import com.example.automate.ui.components.VehicleActionCard
+import com.example.automate.ui.components.VehicleCard
+import com.example.automate.ui.components.VehicleFeatureCard
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AuthViewModel
 
@@ -39,17 +41,17 @@ fun VehicleDetailsScreen(
     onLicencesClick: (String) -> Unit,
     onNotificationsClick: (String) -> Unit,
     onHistoryClick: (String) -> Unit,
+    onDocumentsClick: (String) -> Unit,
     onAiScannerClick: () -> Unit,
     onEditClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val vehicle = uiState.vehicles.find { it.id == vehicleId }
 
-    val title = vehicle?.let {
-        listOf(it.manufacturer, it.model, it.year)
-            .filter { field -> field.isNotBlank() }
-            .joinToString(" ")
-    } ?: "Vehicle Details"
+    val vehicleName = vehicle?.let { "${it.manufacturer} ${it.model}" } ?: "Vehicle"
+    val vehicleYear = vehicle?.year ?: ""
+    val vehiclePlate = vehicle?.plate ?: ""
+    val vehiclePhoto = vehicle?.photoBase64
 
     LaunchedEffect(uiState.vehicleDeleted) {
         if (uiState.vehicleDeleted) {
@@ -63,7 +65,10 @@ fun VehicleDetailsScreen(
     }
 
     VehicleDetailsContent(
-        title = title,
+        vehicleName = vehicleName,
+        vehicleYear = vehicleYear,
+        vehiclePlate = vehiclePlate,
+        vehiclePhoto = vehiclePhoto,
         specs = vehicle?.specs,
         isLoadingSpecs = uiState.isLoadingSpecs,
         onBackClick = onBackClick,
@@ -71,15 +76,20 @@ fun VehicleDetailsScreen(
         onLicencesClick = { onLicencesClick(vehicleId) },
         onNotificationsClick = { onNotificationsClick(vehicleId) },
         onHistoryClick = { onHistoryClick(vehicleId) },
+        onDocumentsClick = { onDocumentsClick(vehicleId) },
         onAiScannerClick = onAiScannerClick,
         onEditClick = { onEditClick(vehicleId) },
         onDeleteConfirmed = { viewModel.deleteVehicle(vehicleId) }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleDetailsContent(
-    title: String,
+    vehicleName: String,
+    vehicleYear: String,
+    vehiclePlate: String,
+    vehiclePhoto: String? = null,
     specs: VehicleSpecs? = null,
     isLoadingSpecs: Boolean = false,
     onBackClick: () -> Unit,
@@ -87,180 +97,167 @@ fun VehicleDetailsContent(
     onLicencesClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onHistoryClick: () -> Unit,
+    onDocumentsClick: () -> Unit,
     onAiScannerClick: () -> Unit,
-    onEditClick: () -> Unit = {},
-    onDeleteConfirmed: () -> Unit = {}
+    onEditClick: () -> Unit,
+    onDeleteConfirmed: () -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+
     Scaffold(
-        containerColor = Color(0xFF000C1F) // Very dark blue/black background
+        containerColor = Color(0xFF000C1F), // Dark navy background
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(
+                        text = "Vehicle details",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.05f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                },
+                actions = {
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Menu",
+                                tint = Color.White
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Edit vehicle") },
+                                leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                                onClick = {
+                                    menuExpanded = false
+                                    onEditClick()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete vehicle") },
+                                leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) },
+                                onClick = {
+                                    menuExpanded = false
+                                    showDeleteConfirm = true
+                                }
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
+        }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = 24.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(20.dp))
-                // Header bar
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    color = Color.White.copy(alpha = 0.9f)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = onBackClick) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(Color.Black, shape = RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        Text(
-                            text = title,
-                            color = Color.Black,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        Box {
-                            IconButton(onClick = { menuExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "Vehicle options",
-                                    tint = Color.Black,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Edit vehicle") },
-                                    onClick = {
-                                        menuExpanded = false
-                                        onEditClick()
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Delete vehicle") },
-                                    onClick = {
-                                        menuExpanded = false
-                                        showDeleteConfirm = true
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Vehicle Summary Card
+                val manufacturer = vehicleName.split(" ").firstOrNull() ?: ""
+                val model = vehicleName.split(" ").drop(1).joinToString(" ")
+                
+                VehicleCard(
+                    manufacturer = manufacturer,
+                    model = model,
+                    year = vehicleYear,
+                    plate = vehiclePlate,
+                    isDark = false, // White card as per HomeScreen
+                    photoBase64 = vehiclePhoto,
+                    onClick = { /* No action needed here */ }
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (isLoadingSpecs && specs == null) {
+                if (isLoadingSpecs) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .padding(24.dp),
+                            .padding(vertical = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFF007BFF))
+                        CircularProgressIndicator(color = Color(0xFF007BFF), modifier = Modifier.size(32.dp))
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
                 } else if (specs != null) {
                     VehicleInfoCard(specs)
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                // AI Warning Scanner Card
-                VehicleActionCard(
-                    title = "AI Warning Scanner",
-                    subtitle = "scan dashboard warning lights",
-                    leadingText = "AI",
-                    trailingColor = Color(0xFF007BFF),
-                    onClick = onAiScannerClick
+                Text(
+                    text = "Vehicle services",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                // Service Cards
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    VehicleFeatureCard(
+                        title = "AI Warning Scanner",
+                        subtitle = "Scan dashboard warning lights",
+                        icon = Icons.Default.CameraAlt,
+                        isHighlighted = true,
+                        onClick = onAiScannerClick
+                    )
 
-                // Action Cards
-                VehicleActionCard(
-                    title = "Go to chatbot",
-                    subtitle = "ask what ever you want",
-                    leadingText = "-",
-                    trailingColor = Color(0xFFE8EAF6),
-                    trailingIcon = Icons.AutoMirrored.Filled.ArrowBack, // Placeholder for chevron-left-like
-                    onClick = onChatbotClick,
-                    showAlert = true
-                )
+                    VehicleFeatureCard(
+                        title = "Documents",
+                        subtitle = "Upload and manage vehicle documents",
+                        icon = Icons.Default.Description,
+                        highlightLabel = "AI powered",
+                        onClick = onDocumentsClick
+                    )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    VehicleFeatureCard(
+                        title = "AI Assistant",
+                        subtitle = "Ask about your vehicle",
+                        icon = Icons.AutoMirrored.Filled.Chat,
+                        showAlert = true, // Preserve alert logic if needed
+                        onClick = onChatbotClick
+                    )
 
-                VehicleActionCard(
-                    title = "licence",
-                    subtitle = "view all of your licenses",
-                    leadingText = "A",
-                    trailingColor = Color(0xFF64B5F6),
-                    onClick = onLicencesClick
-                )
+                    VehicleFeatureCard(
+                        title = "Notifications",
+                        subtitle = "Maintenance and licence reminders",
+                        icon = Icons.Default.Notifications,
+                        onClick = onNotificationsClick
+                    )
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                VehicleActionCard(
-                    title = "Notifications",
-                    subtitle = "get all your notifications",
-                    leadingText = "A",
-                    trailingColor = Color(0xFF448AFF),
-                    onClick = onNotificationsClick,
-                    showAlert = true
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                VehicleActionCard(
-                    title = "history",
-                    subtitle = "your car history",
-                    leadingText = "A",
-                    trailingColor = Color(0xFF5E35B1),
-                    onClick = onHistoryClick
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Bottom Navigation/Icon
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(40.dp)
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
+                    VehicleFeatureCard(
+                        title = "Vehicle history",
+                        subtitle = "View maintenance and service history",
+                        icon = Icons.Default.History,
+                        onClick = onHistoryClick
+                    )
+                }
             }
         }
     }
@@ -292,7 +289,7 @@ fun VehicleInfoCard(specs: VehicleSpecs) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(Color.White.copy(alpha = 0.05f))
             .padding(20.dp)
     ) {
@@ -350,13 +347,18 @@ fun VehicleInfoCard(specs: VehicleSpecs) {
 fun VehicleDetailsPreview() {
     AutomateTheme {
         VehicleDetailsContent(
-            title = "Volkswagen Polo 2011",
+            vehicleName = "Volkswagen Polo",
+            vehicleYear = "2011",
+            vehiclePlate = "91-272-30",
             onBackClick = {},
             onChatbotClick = {},
             onLicencesClick = {},
             onNotificationsClick = {},
             onHistoryClick = {},
-            onAiScannerClick = {}
+            onDocumentsClick = {},
+            onAiScannerClick = {},
+            onEditClick = {},
+            onDeleteConfirmed = {}
         )
     }
 }
