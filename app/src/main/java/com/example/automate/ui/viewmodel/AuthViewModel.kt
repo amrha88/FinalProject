@@ -2,11 +2,13 @@ package com.example.automate.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.automate.data.repository.FirebaseVehicleSpecsRepository
 import com.example.automate.data.repository.FirestoreVehicleRepository
 import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.UserProfile
 import com.example.automate.domain.repository.AuthRepository
 import com.example.automate.domain.repository.VehicleRepository
+import com.example.automate.domain.repository.VehicleSpecsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +18,8 @@ import java.util.UUID
 
 class AuthViewModel(
     private val repository: AuthRepository,
-    private val vehicleRepository: VehicleRepository = FirestoreVehicleRepository()
+    private val vehicleRepository: VehicleRepository = FirestoreVehicleRepository(),
+    private val vehicleSpecsRepository: VehicleSpecsRepository = FirebaseVehicleSpecsRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -225,6 +228,93 @@ class AuthViewModel(
                             vehicleError = throwable.message ?: "Failed to save vehicle."
                         )
                     }
+                }
+            )
+        }
+    }
+
+    fun updateVehicle(
+        vehicleId: String,
+        manufacturer: String,
+        model: String,
+        year: String,
+        plate: String,
+        photoBase64: String? = null
+    ) {
+        if (_uiState.value.isSavingVehicle) return
+
+        val updatedVehicle = Vehicle(
+            id = vehicleId,
+            manufacturer = manufacturer,
+            model = model,
+            year = year,
+            plate = plate,
+            photoBase64 = photoBase64
+        )
+        _uiState.update { it.copy(isSavingVehicle = true, vehicleError = null) }
+        viewModelScope.launch {
+            vehicleRepository.updateVehicle(updatedVehicle).fold(
+                onSuccess = {
+                    _uiState.update { state ->
+                        state.copy(
+                            isSavingVehicle = false,
+                            vehicleSaved = true,
+                            vehicles = state.vehicles.map { if (it.id == vehicleId) updatedVehicle else it }
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            isSavingVehicle = false,
+                            vehicleError = throwable.message ?: "Failed to update vehicle."
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun deleteVehicle(vehicleId: String) {
+        viewModelScope.launch {
+            vehicleRepository.deleteVehicle(vehicleId).fold(
+                onSuccess = {
+                    _uiState.update { state ->
+                        state.copy(
+                            vehicleDeleted = true,
+                            vehicles = state.vehicles.filterNot { it.id == vehicleId }
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _uiState.update { it.copy(vehicleError = throwable.message ?: "Failed to delete vehicle.") }
+                }
+            )
+        }
+    }
+
+    fun clearVehicleDeleted() {
+        _uiState.update { it.copy(vehicleDeleted = false) }
+    }
+
+    fun loadSpecsIfNeeded(vehicleId: String) {
+        val vehicle = _uiState.value.vehicles.find { it.id == vehicleId } ?: return
+        if (vehicle.specs != null || _uiState.value.isLoadingSpecs) return
+
+        _uiState.update { it.copy(isLoadingSpecs = true) }
+        viewModelScope.launch {
+            vehicleSpecsRepository.getSpecs(vehicle).fold(
+                onSuccess = { specs ->
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoadingSpecs = false,
+                            vehicles = state.vehicles.map { if (it.id == vehicleId) it.copy(specs = specs) else it }
+                        )
+                    }
+                    vehicleRepository.saveSpecs(vehicleId, specs)
+                },
+                onFailure = {
+                    _uiState.update { it.copy(isLoadingSpecs = false) }
                 }
             )
         }

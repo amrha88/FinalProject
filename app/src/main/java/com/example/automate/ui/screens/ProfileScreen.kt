@@ -1,11 +1,13 @@
 package com.example.automate.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +32,7 @@ import com.example.automate.ui.viewmodel.AuthViewModel
 @Composable
 fun ProfileScreen(
     viewModel: AuthViewModel,
+    onLogout: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -43,6 +46,7 @@ fun ProfileScreen(
             viewModel.updateProfile(fullName, age, hasLicense)
         },
         onDismissSaved = { viewModel.clearProfileSaved() },
+        onLogout = onLogout,
         bottomBar = bottomBar
     )
 }
@@ -53,6 +57,7 @@ private fun ProfileScreenContent(
     onAvatarClick: () -> Unit,
     onSave: (String, Int, Boolean) -> Unit,
     onDismissSaved: () -> Unit,
+    onLogout: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
     var fullName by remember { mutableStateOf(uiState.userName ?: "") }
@@ -213,6 +218,24 @@ private fun ProfileScreenContent(
                 }
             }
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = onLogout,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF5252)),
+            border = BorderStroke(1.dp, Color(0xFFFF5252).copy(alpha = 0.4f))
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Logout,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Log out", fontWeight = FontWeight.Bold)
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
     }

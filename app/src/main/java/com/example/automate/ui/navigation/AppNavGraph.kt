@@ -1,3 +1,4 @@
+
 package com.example.automate.ui.navigation
 
 import androidx.compose.material.icons.Icons
@@ -18,7 +19,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.automate.data.repository.FirebaseAuthRepository
-import com.example.automate.data.repository.FakeWarningLightRepository
+import com.example.automate.data.repository.FirebaseWarningLightRepository
 import com.example.automate.data.repository.FirebaseAiChatRepository
 import com.example.automate.data.repository.FirebaseVehicleLicenceAnalysisRepository
 import com.example.automate.data.repository.FirestoreVehicleLicenceRepository
@@ -36,7 +37,7 @@ import androidx.lifecycle.ViewModelProvider
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     val authRepository = remember { FirebaseAuthRepository() }
-    val warningLightRepository = remember { FakeWarningLightRepository() }
+    val warningLightRepository = remember { FirebaseWarningLightRepository() }
     val aiChatRepository = remember { FirebaseAiChatRepository() }
     
     val authViewModel: AuthViewModel = viewModel(
@@ -167,17 +168,8 @@ fun AppNavGraph(navController: NavHostController) {
                 onVehicleClick = { vehicleId ->
                     navController.navigate("vehicle_details/$vehicleId")
                 },
-                onSettingsClick = {
-                    navController.navigate(Screen.Settings.route)
-                },
                 onNeedHelpClick = {
                     navController.navigate(Screen.AiAssistant.route)
-                },
-                onLogout = {
-                    authViewModel.logout()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
                 },
                 bottomBar = mainBottomBar
             )
@@ -193,6 +185,12 @@ fun AppNavGraph(navController: NavHostController) {
         composable(Screen.Profile.route) {
             ProfileScreen(
                 viewModel = authViewModel,
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 bottomBar = mainBottomBar
             )
         }
@@ -202,6 +200,20 @@ fun AppNavGraph(navController: NavHostController) {
                 viewModel = authViewModel,
                 onBackClick = { navController.popBackStack() },
                 onSaveSuccess = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.EditVehicle.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            AddVehicleScreen(
+                viewModel = authViewModel,
+                editingVehicleId = vehicleId,
+                onBackClick = { navController.popBackStack() },
+                onSaveSuccess = { navController.popBackStack() },
+                onDeleted = { navController.popBackStack() }
             )
         }
 
@@ -218,7 +230,8 @@ fun AppNavGraph(navController: NavHostController) {
                 onLicencesClick = { id -> navController.navigate("licences/$id") },
                 onNotificationsClick = { id -> navController.navigate("notifications/$id") },
                 onHistoryClick = { id -> navController.navigate("history/$id") },
-                onAiScannerClick = { navController.navigate(Screen.AiAssistant.route) }
+                onAiScannerClick = { navController.navigate(Screen.AiAssistant.route) },
+                onEditClick = { id -> navController.navigate("edit_vehicle/$id") }
             )
         }
 

@@ -7,18 +7,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,9 +35,7 @@ fun HomeScreen(
     viewModel: AuthViewModel,
     onAddVehicleClick: () -> Unit,
     onVehicleClick: (String) -> Unit,
-    onSettingsClick: () -> Unit,
     onNeedHelpClick: () -> Unit,
-    onLogout: () -> Unit,
     bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -66,9 +58,7 @@ fun HomeScreen(
         },
         onAddVehicleClick = onAddVehicleClick,
         onVehicleClick = onVehicleClick,
-        onSettingsClick = onSettingsClick,
         onNeedHelpClick = onNeedHelpClick,
-        onLogout = onLogout,
         bottomBar = bottomBar
     )
 }
@@ -82,50 +72,16 @@ fun HomeScreenContent(
     vehicles: List<VehicleUiModel> = emptyList(),
     onAddVehicleClick: () -> Unit,
     onVehicleClick: (String) -> Unit,
-    onSettingsClick: () -> Unit = {},
     onNeedHelpClick: () -> Unit = {},
-    onLogout: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-
     Scaffold(
         containerColor = Color(0xFF000C1F), // Dark navy background
         bottomBar = bottomBar,
         topBar = {
             TopAppBar(
                 title = { Text("Automate", color = Color.White, fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF000C1F)),
-                actions = {
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Menu",
-                            tint = Color.White
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Settings") },
-                            leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                            onClick = {
-                                menuExpanded = false
-                                onSettingsClick()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Log out") },
-                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
-                            onClick = {
-                                menuExpanded = false
-                                onLogout()
-                            }
-                        )
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF000C1F))
             )
         }
     ) { paddingValues ->

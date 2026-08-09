@@ -15,6 +15,8 @@ data class AuthUiState(
     val isSavingVehicle: Boolean = false,
     val vehicleSaved: Boolean = false,
     val vehicleError: String? = null,
+    val vehicleDeleted: Boolean = false,
+    val isLoadingSpecs: Boolean = false,
     val isSavingProfile: Boolean = false,
     val profileSaved: Boolean = false,
     val profileError: String? = null

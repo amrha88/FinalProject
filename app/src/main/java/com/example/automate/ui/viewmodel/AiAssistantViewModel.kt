@@ -1,5 +1,6 @@
 package com.example.automate.ui.viewmodel
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +24,7 @@ class AiAssistantViewModel(private val repository: WarningLightRepository) : Vie
         _uiState.update { AiAssistantUiState.Initial }
     }
 
-    fun startAnalysis() {
+    fun startAnalysis(bitmap: Bitmap) {
         val currentState = _uiState.value
         if (currentState is AiAssistantUiState.ImageSelected || currentState is AiAssistantUiState.Success) {
             val uri = when (currentState) {
@@ -35,7 +36,7 @@ class AiAssistantViewModel(private val repository: WarningLightRepository) : Vie
             _uiState.update { AiAssistantUiState.Analyzing(uri) }
 
             viewModelScope.launch {
-                repository.analyzeWarningLight(uri).fold(
+                repository.analyzeWarningLight(bitmap).fold(
                     onSuccess = { result ->
                         _uiState.update { AiAssistantUiState.Success(uri, result) }
                     },

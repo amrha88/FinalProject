@@ -1,5 +1,6 @@
 package com.example.automate.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,11 +35,14 @@ import com.example.automate.ui.viewmodel.AuthViewModel
 @Composable
 fun AddVehicleScreen(
     viewModel: AuthViewModel,
+    editingVehicleId: String? = null,
     onBackClick: () -> Unit,
-    onSaveSuccess: () -> Unit
+    onSaveSuccess: () -> Unit,
+    onDeleted: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var carPhoto by remember { mutableStateOf<String?>(null) }
+    val editingVehicle = editingVehicleId?.let { id -> uiState.vehicles.find { it.id == id } }
+    var carPhoto by remember { mutableStateOf(editingVehicle?.photoBase64) }
 
     LaunchedEffect(uiState.vehicleSaved) {
         if (uiState.vehicleSaved) {
@@ -47,18 +51,37 @@ fun AddVehicleScreen(
         }
     }
 
+    LaunchedEffect(uiState.vehicleDeleted) {
+        if (uiState.vehicleDeleted) {
+            viewModel.clearVehicleDeleted()
+            onDeleted()
+        }
+    }
+
     val pickCarPhoto = rememberProfileImagePicker(onImagePicked = { carPhoto = it })
 
     AddVehicleScreenContent(
         isSaving = uiState.isSavingVehicle,
         serverError = uiState.vehicleError,
+        isEditing = editingVehicle != null,
+        initialManufacturer = editingVehicle?.manufacturer ?: "",
+        initialModel = editingVehicle?.model ?: "",
+        initialYear = editingVehicle?.year ?: "",
+        initialPlate = editingVehicle?.plate ?: "",
         onBackClick = onBackClick,
         onPickPhotoClick = pickCarPhoto,
         carPhotoBase64 = carPhoto,
         onSave = { manufacturer, model, year, plate ->
             viewModel.clearVehicleError()
-            viewModel.addVehicle(manufacturer, model, year, plate, carPhoto)
-        }
+            if (editingVehicle != null) {
+                viewModel.updateVehicle(editingVehicle.id, manufacturer, model, year, plate, carPhoto)
+            } else {
+                viewModel.addVehicle(manufacturer, model, year, plate, carPhoto)
+            }
+        },
+        onDeleteClick = if (editingVehicle != null) {
+            { viewModel.deleteVehicle(editingVehicle.id) }
+        } else null
     )
 }
 
@@ -66,16 +89,23 @@ fun AddVehicleScreen(
 fun AddVehicleScreenContent(
     isSaving: Boolean = false,
     serverError: String? = null,
+    isEditing: Boolean = false,
+    initialManufacturer: String = "",
+    initialModel: String = "",
+    initialYear: String = "",
+    initialPlate: String = "",
     onBackClick: () -> Unit,
     onPickPhotoClick: (() -> Unit)? = null,
     carPhotoBase64: String? = null,
-    onSave: (String, String, String, String) -> Unit
+    onSave: (String, String, String, String) -> Unit,
+    onDeleteClick: (() -> Unit)? = null
 ) {
-    var manufacturer by remember { mutableStateOf("") }
-    var model by remember { mutableStateOf("") }
-    var year by remember { mutableStateOf("") }
-    var plate by remember { mutableStateOf("") }
+    var manufacturer by remember { mutableStateOf(initialManufacturer) }
+    var model by remember { mutableStateOf(initialModel) }
+    var year by remember { mutableStateOf(initialYear) }
+    var plate by remember { mutableStateOf(initialPlate) }
     var validationError by remember { mutableStateOf<String?>(null) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     val displayedError = validationError ?: serverError
     val hasPreview = manufacturer.isNotBlank() || model.isNotBlank()
@@ -122,13 +152,13 @@ fun AddVehicleScreenContent(
 
             Column {
                 Text(
-                    text = "Add new vehicle",
+                    text = if (isEditing) "Edit vehicle" else "Add new vehicle",
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Tell us about your car",
+                    text = if (isEditing) "Update your car's details" else "Tell us about your car",
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 13.sp
                 )
@@ -341,7 +371,7 @@ fun AddVehicleScreenContent(
         }
 
         PrimaryButton(
-            text = "Save",
+            text = if (isEditing) "Save changes" else "Save",
             enabled = !isSaving,
             onClick = {
                 if (manufacturer.isBlank() || model.isBlank() || year.isBlank() || plate.isBlank()) {
@@ -352,7 +382,41 @@ fun AddVehicleScreenContent(
             }
         )
 
+        if (onDeleteClick != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = { showDeleteConfirm = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF5252)),
+                border = BorderStroke(1.dp, Color(0xFFFF5252).copy(alpha = 0.4f))
+            ) {
+                Text(text = "Delete vehicle", fontWeight = FontWeight.Bold)
+            }
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    if (showDeleteConfirm && onDeleteClick != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete vehicle?") },
+            text = { Text("This can't be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirm = false
+                    onDeleteClick()
+                }) {
+                    Text("Delete", color = Color(0xFFFF5252))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

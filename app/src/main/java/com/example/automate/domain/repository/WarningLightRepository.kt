@@ -1,8 +1,8 @@
 package com.example.automate.domain.repository
 
-import android.net.Uri
+import android.graphics.Bitmap
 import com.example.automate.domain.model.WarningLightResult
 
 interface WarningLightRepository {
-    suspend fun analyzeWarningLight(imageUri: Uri): Result<WarningLightResult>
+    suspend fun analyzeWarningLight(bitmap: Bitmap): Result<WarningLightResult>
 }

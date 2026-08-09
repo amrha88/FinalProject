@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object Profile : Screen("profile")
     object AddVehicle : Screen("add_vehicle")
+    object EditVehicle : Screen("edit_vehicle/{vehicleId}")
     object VehicleDetails : Screen("vehicle_details/{vehicleId}")
     object Chatbot : Screen("chatbot/{vehicleId}")
     object Licences : Screen("licences/{vehicleId}")

@@ -31,6 +31,7 @@ import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.VehicleLicence
+import com.example.automate.ui.components.AiDisclaimerNote
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -194,11 +195,8 @@ fun VehicleLicenceContent(
             } else if (uiState.editableLicence != null) {
                 // Editing / Reviewing state
                 item {
-                    Text(
-                        "Review all details before saving. AI extraction may contain errors.",
-                        color = Color.Yellow,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
+                    AiDisclaimerNote(
+                        text = "Review all details before saving. AI extraction can make mistakes.",
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     

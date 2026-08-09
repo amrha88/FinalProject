@@ -29,12 +29,15 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.automate.domain.model.WarningLightResult
 import com.example.automate.domain.model.WarningSeverity
+import com.example.automate.ui.components.AiDisclaimerNote
 import com.example.automate.ui.components.AssistantBanner
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AiAssistantUiState
 import com.example.automate.ui.viewmodel.AiAssistantViewModel
 import com.example.automate.util.FileUtils
+import com.example.automate.util.ImageProcessingUtils
+import kotlinx.coroutines.launch
 
 @Composable
 fun AiAssistantScreen(
@@ -45,6 +48,7 @@ fun AiAssistantScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var tempUri by remember { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -86,7 +90,17 @@ fun AiAssistantScreen(
         onChooseGallery = { galleryLauncher.launch("image/*") },
         onRetake = { viewModel.onRemoveImage() },
         onRemove = { viewModel.onRemoveImage() },
-        onAnalyze = { viewModel.startAnalysis() },
+        onAnalyze = {
+            val selectedUri = (uiState as? AiAssistantUiState.ImageSelected)?.uri
+            if (selectedUri != null) {
+                scope.launch {
+                    val bitmap = ImageProcessingUtils.processImage(context, selectedUri)
+                    if (bitmap != null) {
+                        viewModel.startAnalysis(bitmap)
+                    }
+                }
+            }
+        },
         onAskAi = { result -> onNavigateToChat(result) },
         onOpenChatClick = onOpenChatClick,
         bottomBar = bottomBar
@@ -320,12 +334,7 @@ fun ResultCard(result: WarningLightResult, onAskAi: (WarningLightResult) -> Unit
             )
             
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = result.disclaimer,
-                color = Color.Gray,
-                fontSize = 12.sp,
-                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-            )
+            AiDisclaimerNote(text = result.disclaimer)
             Spacer(modifier = Modifier.height(24.dp))
             PrimaryButton(text = "Ask the AI about this warning", onClick = { onAskAi(result) })
         }

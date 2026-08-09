@@ -7,5 +7,6 @@ data class Vehicle(
     val year: String,
     val plate: String,
     val isDark: Boolean = false,
-    val photoBase64: String? = null
+    val photoBase64: String? = null,
+    val specs: VehicleSpecs? = null
 )

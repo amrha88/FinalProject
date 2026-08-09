@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.ui.components.AiDisclaimerNote
 import com.example.automate.ui.model.ChatMessageUiModel
 import com.example.automate.ui.model.ChatSender
 import com.example.automate.ui.model.MessageStatus
@@ -176,14 +177,9 @@ fun ChatbotContent(
                 )
             }
             
-            Text(
-                text = "AI guidance may be inaccurate. For serious warnings, contact a qualified mechanic.",
-                color = Color.Gray,
-                fontSize = 10.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                textAlign = TextAlign.Center
+            AiDisclaimerNote(
+                text = "AI guidance can make mistakes. For serious warnings, contact a qualified mechanic.",
+                modifier = Modifier.padding(8.dp)
             )
         }
     }
