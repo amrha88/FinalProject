@@ -1,4 +1,3 @@
-
 package com.example.automate.ui.navigation
 
 import androidx.compose.material.icons.Icons
@@ -18,22 +17,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.automate.data.repository.FirebaseAuthRepository
-import com.example.automate.data.repository.FirebaseWarningLightRepository
-import com.example.automate.data.repository.FirebaseAiChatRepository
-import com.example.automate.data.repository.FirebaseVehicleLicenceAnalysisRepository
-import com.example.automate.data.repository.FirestoreVehicleLicenceRepository
-import com.example.automate.data.repository.FirebaseVehicleDocumentAnalysisRepository
-import com.example.automate.data.repository.FirestoreVehicleDocumentRepository
+import com.example.automate.data.repository.*
 import com.example.automate.ui.components.BottomNavBar
 import com.example.automate.ui.components.BottomNavItem
 import com.example.automate.ui.screens.*
-import com.example.automate.ui.viewmodel.AiAssistantViewModel
-import com.example.automate.ui.viewmodel.AiChatViewModel
-import com.example.automate.ui.viewmodel.AuthViewModel
-import com.example.automate.ui.viewmodel.VehicleLicenceViewModel
-import com.example.automate.ui.viewmodel.VehicleDocumentsViewModel
-import com.example.automate.ui.viewmodel.VehicleUiModel
+import com.example.automate.ui.viewmodel.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
@@ -42,6 +30,12 @@ fun AppNavGraph(navController: NavHostController) {
     val authRepository = remember { FirebaseAuthRepository() }
     val warningLightRepository = remember { FirebaseWarningLightRepository() }
     val aiChatRepository = remember { FirebaseAiChatRepository() }
+    val vehicleLicenceAnalysisRepository = remember { FirebaseVehicleLicenceAnalysisRepository() }
+    val vehicleLicenceRepository = remember { FirestoreVehicleLicenceRepository() }
+    val vehicleDocumentAnalysisRepository = remember { FirebaseVehicleDocumentAnalysisRepository() }
+    val vehicleDocumentRepository = remember { FirestoreVehicleDocumentRepository() }
+    val vehicleHistoryAnalysisRepository = remember { FirebaseVehicleHistoryAnalysisRepository() }
+    val vehicleHistoryRepository = remember { FirestoreVehicleHistoryRepository() }
     
     val authViewModel: AuthViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -67,8 +61,6 @@ fun AppNavGraph(navController: NavHostController) {
         }
     )
 
-    val vehicleLicenceAnalysisRepository = remember { FirebaseVehicleLicenceAnalysisRepository() }
-    val vehicleLicenceRepository = remember { FirestoreVehicleLicenceRepository() }
     val vehicleLicenceViewModel: VehicleLicenceViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -80,14 +72,24 @@ fun AppNavGraph(navController: NavHostController) {
         }
     )
 
-    val vehicleDocumentAnalysisRepository = remember { FirebaseVehicleDocumentAnalysisRepository() }
-    val vehicleDocumentRepository = remember { FirestoreVehicleDocumentRepository() }
     val vehicleDocumentsViewModel: VehicleDocumentsViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return VehicleDocumentsViewModel(
                     vehicleDocumentAnalysisRepository,
-                    vehicleDocumentRepository
+                    vehicleDocumentRepository,
+                    vehicleHistoryRepository
+                ) as T
+            }
+        }
+    )
+
+    val vehicleHistoryViewModel: VehicleHistoryViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return VehicleHistoryViewModel(
+                    vehicleHistoryRepository,
+                    vehicleHistoryAnalysisRepository
                 ) as T
             }
         }
@@ -374,7 +376,22 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
         ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
-            VehicleHistoryScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
+            val vehicle = authUiState.vehicles.find { it.id == vehicleId }?.let {
+                com.example.automate.domain.model.Vehicle(
+                    id = it.id,
+                    manufacturer = it.manufacturer,
+                    model = it.model,
+                    year = it.year,
+                    plate = it.plate,
+                    isDark = it.isDark
+                )
+            }
+            VehicleHistoryScreen(
+                vehicleId = vehicleId,
+                vehicle = vehicle,
+                viewModel = vehicleHistoryViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

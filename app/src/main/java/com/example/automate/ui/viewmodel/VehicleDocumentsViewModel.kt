@@ -3,11 +3,10 @@ package com.example.automate.ui.viewmodel
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.automate.domain.model.Vehicle
-import com.example.automate.domain.model.VehicleDocument
-import com.example.automate.domain.model.VehicleDocumentType
+import com.example.automate.domain.model.*
 import com.example.automate.domain.repository.VehicleDocumentAnalysisRepository
 import com.example.automate.domain.repository.VehicleDocumentRepository
+import com.example.automate.domain.repository.VehicleHistoryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class VehicleDocumentsViewModel(
     private val analysisRepository: VehicleDocumentAnalysisRepository,
-    private val documentRepository: VehicleDocumentRepository
+    private val documentRepository: VehicleDocumentRepository,
+    private val historyRepository: VehicleHistoryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VehicleDocumentsUiState())
@@ -137,14 +137,40 @@ class VehicleDocumentsViewModel(
             }
 
             result.fold(
-                onSuccess = {
+                onSuccess = { documentId ->
                     _uiState.update { it.copy(isSaving = false, saveSuccess = true, selectedImageUri = null, extraction = null, editableDocument = null, isEditingExisting = false, replacingDocumentId = null) }
                     loadDocuments(vehicleId)
+                    
+                    // Link to history if relevant
+                    if (confirmedDoc.documentType == VehicleDocumentType.MAINTENANCE || 
+                        confirmedDoc.documentType == VehicleDocumentType.REPAIR_INVOICE) {
+                        createHistoryEventFromDocument(vehicleId, documentId, confirmedDoc)
+                    }
                 },
                 onFailure = {
                     _uiState.update { it.copy(isSaving = false, errorMessage = "The document could not be saved.") }
                 }
             )
+        }
+    }
+
+    private fun createHistoryEventFromDocument(vehicleId: String, documentId: String, doc: VehicleDocument) {
+        viewModelScope.launch {
+            val event = VehicleHistoryEvent(
+                vehicleId = vehicleId,
+                type = if (doc.documentType == VehicleDocumentType.REPAIR_INVOICE) VehicleHistoryEventType.REPAIR else VehicleHistoryEventType.MAINTENANCE,
+                title = doc.documentTitle ?: "Service Record",
+                description = doc.summary,
+                eventDate = doc.documentDate,
+                mileage = doc.mileage,
+                garageName = doc.garageOrProvider,
+                servicesPerformed = doc.serviceItems,
+                nextServiceDate = doc.nextServiceDate,
+                nextServiceMileage = doc.nextServiceMileage,
+                sourceDocumentId = documentId,
+                confirmedByUser = true
+            )
+            historyRepository.saveHistoryEvent(vehicleId, event)
         }
     }
 
