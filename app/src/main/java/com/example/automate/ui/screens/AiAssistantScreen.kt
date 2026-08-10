@@ -6,8 +6,10 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +35,9 @@ import com.example.automate.domain.model.WarningLightResult
 import com.example.automate.domain.model.WarningSeverity
 import com.example.automate.ui.components.AiDisclaimerNote
 import com.example.automate.ui.components.AssistantBanner
+import com.example.automate.ui.components.AutomateRobot
 import com.example.automate.ui.components.PrimaryButton
+import com.example.automate.ui.components.RobotDisplayMode
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AiAssistantUiState
 import com.example.automate.ui.viewmodel.AiAssistantViewModel
@@ -128,7 +133,21 @@ fun AiAssistantContent(
         bottomBar = bottomBar,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("AI Car Assistant", fontWeight = FontWeight.Bold) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.05f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AutomateRobot(mode = RobotDisplayMode.CHAT_AVATAR, size = 26.dp)
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("AI Car Assistant", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                },
                 navigationIcon = {
                     if (onBackClick != null) {
                         IconButton(onClick = onBackClick) {

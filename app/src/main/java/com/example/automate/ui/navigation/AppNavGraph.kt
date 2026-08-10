@@ -144,7 +144,8 @@ fun AppNavGraph(navController: NavHostController) {
     ) {
         composable(Screen.Splash.route) {
             SplashScreen(onNavigateToLogin = {
-                navController.navigate(Screen.Login.route) {
+                val startRoute = if (authRepository.isUserLoggedIn()) Screen.Home.route else Screen.Login.route
+                navController.navigate(startRoute) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
             })

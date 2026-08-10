@@ -25,6 +25,13 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
+    init {
+        if (repository.isUserLoggedIn()) {
+            loadUserProfile()
+            loadVehicles()
+        }
+    }
+
     fun onLogin(email: String, password: String) {
         if (_uiState.value.isLoading) return
 
