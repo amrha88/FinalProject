@@ -138,19 +138,30 @@ fun HomeScreenContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(vehicles) { vehicle ->
-                        VehicleCard(
-                            manufacturer = vehicle.manufacturer,
-                            model = vehicle.model,
-                            year = vehicle.year,
-                            plate = vehicle.plate,
-                            isDark = vehicle.isDark,
-                            photoBase64 = vehicle.photoBase64,
-                            onClick = { onVehicleClick(vehicle.id) }
-                        )
+                    items(vehicles.chunked(2)) { rowVehicles ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            rowVehicles.forEach { vehicle ->
+                                VehicleCard(
+                                    manufacturer = vehicle.manufacturer,
+                                    model = vehicle.model,
+                                    year = vehicle.year,
+                                    plate = vehicle.plate,
+                                    isDark = vehicle.isDark,
+                                    photoBase64 = vehicle.photoBase64,
+                                    onClick = { onVehicleClick(vehicle.id) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            if (rowVehicles.size < 2) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
                     }
                 }
             }

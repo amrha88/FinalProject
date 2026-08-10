@@ -68,15 +68,16 @@ fun AddVehicleScreen(
         initialModel = editingVehicle?.model ?: "",
         initialYear = editingVehicle?.year ?: "",
         initialPlate = editingVehicle?.plate ?: "",
+        initialTransmission = editingVehicle?.transmission ?: "",
         onBackClick = onBackClick,
         onPickPhotoClick = pickCarPhoto,
         carPhotoBase64 = carPhoto,
-        onSave = { manufacturer, model, year, plate ->
+        onSave = { manufacturer, model, year, plate, transmission ->
             viewModel.clearVehicleError()
             if (editingVehicle != null) {
-                viewModel.updateVehicle(editingVehicle.id, manufacturer, model, year, plate, carPhoto)
+                viewModel.updateVehicle(editingVehicle.id, manufacturer, model, year, plate, transmission, carPhoto)
             } else {
-                viewModel.addVehicle(manufacturer, model, year, plate, carPhoto)
+                viewModel.addVehicle(manufacturer, model, year, plate, transmission, carPhoto)
             }
         },
         onDeleteClick = if (editingVehicle != null) {
@@ -94,16 +95,18 @@ fun AddVehicleScreenContent(
     initialModel: String = "",
     initialYear: String = "",
     initialPlate: String = "",
+    initialTransmission: String = "",
     onBackClick: () -> Unit,
     onPickPhotoClick: (() -> Unit)? = null,
     carPhotoBase64: String? = null,
-    onSave: (String, String, String, String) -> Unit,
+    onSave: (String, String, String, String, String) -> Unit,
     onDeleteClick: (() -> Unit)? = null
 ) {
     var manufacturer by remember { mutableStateOf(initialManufacturer) }
     var model by remember { mutableStateOf(initialModel) }
     var year by remember { mutableStateOf(initialYear) }
     var plate by remember { mutableStateOf(initialPlate) }
+    var transmission by remember { mutableStateOf(initialTransmission) }
     var validationError by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -352,6 +355,41 @@ fun AddVehicleScreenContent(
                     modifier = Modifier.weight(0.6f)
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Transmission",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 13.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                listOf("Manual", "Automatic").forEach { option ->
+                    val selected = transmission == option
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (selected) Color(0xFF007BFF) else Color.White.copy(alpha = 0.06f))
+                            .clickable {
+                                transmission = option
+                                validationError = null
+                            }
+                            .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = option,
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -374,11 +412,50 @@ fun AddVehicleScreenContent(
             text = if (isEditing) "Save changes" else "Save",
             enabled = !isSaving,
             onClick = {
-                if (manufacturer.isBlank() || model.isBlank() || year.isBlank() || plate.isBlank()) {
-                    validationError = "All fields are required"
-                } else {
-                    onSave(manufacturer, model, year, plate)
+                fun trySave() {
+                    if (manufacturer.isBlank() || model.isBlank() || year.isBlank() || plate.isBlank() || transmission.isBlank()) {
+                        validationError = "All fields are required"
+                        return
+                    }
+
+                    val canonicalManufacturer = CarCatalog.manufacturers
+                        .firstOrNull { it.equals(manufacturer.trim(), ignoreCase = true) }
+                    if (canonicalManufacturer == null) {
+                        validationError = "Please choose a manufacturer from the list"
+                        return
+                    }
+
+                    val trimmedModel = model.trim()
+                    val knownModel = CarCatalog.modelsFor(canonicalManufacturer)
+                        .firstOrNull { it.equals(trimmedModel, ignoreCase = true) }
+                    val resolvedModel = knownModel ?: trimmedModel
+
+                    val trimmedYear = year.trim()
+                    val yearInt = trimmedYear.toIntOrNull()
+                    if (yearInt == null || trimmedYear.length != 4) {
+                        validationError = "Please enter a valid year"
+                        return
+                    }
+
+                    if (knownModel != null) {
+                        val validYears = CarCatalog.yearsFor(canonicalManufacturer, knownModel)
+                        if (trimmedYear !in validYears) {
+                            validationError =
+                                "$knownModel was made from ${validYears.last()} to ${validYears.first()}"
+                            return
+                        }
+                    } else {
+                        val oldestYear = CarCatalog.years.last().toInt()
+                        val newestYear = CarCatalog.years.first().toInt()
+                        if (yearInt !in oldestYear..newestYear) {
+                            validationError = "Please enter a year between $oldestYear and $newestYear"
+                            return
+                        }
+                    }
+
+                    onSave(canonicalManufacturer, resolvedModel, trimmedYear, plate, transmission)
                 }
+                trySave()
             }
         )
 
@@ -425,6 +502,6 @@ fun AddVehicleScreenContent(
 fun AddVehicleScreenPreview() {
     AddVehicleScreenContent(
         onBackClick = {},
-        onSave = { _, _, _, _ -> }
+        onSave = { _, _, _, _, _ -> }
     )
 }

@@ -17,7 +17,17 @@ data class AuthUiState(
     val vehicleError: String? = null,
     val vehicleDeleted: Boolean = false,
     val isLoadingSpecs: Boolean = false,
+    val specsLoadFailed: Boolean = false,
     val isSavingProfile: Boolean = false,
     val profileSaved: Boolean = false,
-    val profileError: String? = null
+    val profileError: String? = null,
+    val isChangingPassword: Boolean = false,
+    val passwordChanged: Boolean = false,
+    val changePasswordError: String? = null,
+    val isChangingEmail: Boolean = false,
+    val emailChangeRequested: Boolean = false,
+    val changeEmailError: String? = null,
+    val isDeletingAccount: Boolean = false,
+    val accountDeleted: Boolean = false,
+    val deleteAccountError: String? = null
 )

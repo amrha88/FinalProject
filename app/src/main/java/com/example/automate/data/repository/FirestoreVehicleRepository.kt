@@ -1,5 +1,6 @@
 package com.example.automate.data.repository
 
+import com.example.automate.domain.model.EngineVariant
 import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.VehicleSpecs
 import com.example.automate.domain.repository.VehicleRepository
@@ -25,13 +26,17 @@ class FirestoreVehicleRepository(
                 @Suppress("UNCHECKED_CAST")
                 val specsMap = doc.get("specs") as? Map<String, Any?>
                 val specs = specsMap?.let {
+                    @Suppress("UNCHECKED_CAST")
+                    val variantMaps = it["variants"] as? List<Map<String, Any?>> ?: emptyList()
                     VehicleSpecs(
                         fuelConsumptionL100km = (it["fuelConsumptionL100km"] as? Number)?.toDouble(),
                         fuelType = it["fuelType"] as? String,
                         engineDisplacementL = (it["engineDisplacementL"] as? Number)?.toDouble(),
                         horsepower = (it["horsepower"] as? Number)?.toInt(),
                         transmission = it["transmission"] as? String,
-                        fuelTankCapacityL = (it["fuelTankCapacityL"] as? Number)?.toDouble()
+                        fuelTankCapacityL = (it["fuelTankCapacityL"] as? Number)?.toDouble(),
+                        variants = variantMaps.map { variant -> variant.toEngineVariant() },
+                        selectedVariantName = it["selectedVariantName"] as? String
                     )
                 }
                 Vehicle(
@@ -40,6 +45,7 @@ class FirestoreVehicleRepository(
                     model = doc.getString("model") ?: return@mapNotNull null,
                     year = doc.getString("year") ?: return@mapNotNull null,
                     plate = doc.getString("plate") ?: return@mapNotNull null,
+                    transmission = doc.getString("transmission"),
                     photoBase64 = doc.getString("photoBase64"),
                     specs = specs
                 )
@@ -58,6 +64,7 @@ class FirestoreVehicleRepository(
                     "model" to vehicle.model,
                     "year" to vehicle.year,
                     "plate" to vehicle.plate,
+                    "transmission" to vehicle.transmission,
                     "photoBase64" to vehicle.photoBase64,
                     "createdAt" to FieldValue.serverTimestamp()
                 )
@@ -76,6 +83,7 @@ class FirestoreVehicleRepository(
                     "model" to vehicle.model,
                     "year" to vehicle.year,
                     "plate" to vehicle.plate,
+                    "transmission" to vehicle.transmission,
                     "photoBase64" to vehicle.photoBase64
                 ),
                 SetOptions.merge()
@@ -105,7 +113,9 @@ class FirestoreVehicleRepository(
                         "engineDisplacementL" to specs.engineDisplacementL,
                         "horsepower" to specs.horsepower,
                         "transmission" to specs.transmission,
-                        "fuelTankCapacityL" to specs.fuelTankCapacityL
+                        "fuelTankCapacityL" to specs.fuelTankCapacityL,
+                        "variants" to specs.variants.map { variant -> variant.toMap() },
+                        "selectedVariantName" to specs.selectedVariantName
                     )
                 ),
                 SetOptions.merge()
@@ -116,3 +126,23 @@ class FirestoreVehicleRepository(
         }
     }
 }
+
+private fun Map<String, Any?>.toEngineVariant(): EngineVariant = EngineVariant(
+    name = this["name"] as? String,
+    fuelConsumptionL100km = (this["fuelConsumptionL100km"] as? Number)?.toDouble(),
+    fuelType = this["fuelType"] as? String,
+    engineDisplacementL = (this["engineDisplacementL"] as? Number)?.toDouble(),
+    horsepower = (this["horsepower"] as? Number)?.toInt(),
+    transmission = this["transmission"] as? String,
+    fuelTankCapacityL = (this["fuelTankCapacityL"] as? Number)?.toDouble()
+)
+
+private fun EngineVariant.toMap(): Map<String, Any?> = mapOf(
+    "name" to name,
+    "fuelConsumptionL100km" to fuelConsumptionL100km,
+    "fuelType" to fuelType,
+    "engineDisplacementL" to engineDisplacementL,
+    "horsepower" to horsepower,
+    "transmission" to transmission,
+    "fuelTankCapacityL" to fuelTankCapacityL
+)

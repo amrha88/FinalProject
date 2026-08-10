@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +48,11 @@ fun ProfileScreen(
             viewModel.updateProfile(fullName, age, hasLicense)
         },
         onDismissSaved = { viewModel.clearProfileSaved() },
+        onChangeEmail = { currentPassword, newEmail -> viewModel.changeEmail(currentPassword, newEmail) },
+        onDismissChangeEmail = {
+            viewModel.clearChangeEmailError()
+            viewModel.clearEmailChangeRequested()
+        },
         onLogout = onLogout,
         bottomBar = bottomBar
     )
@@ -57,6 +64,8 @@ private fun ProfileScreenContent(
     onAvatarClick: () -> Unit,
     onSave: (String, Int, Boolean) -> Unit,
     onDismissSaved: () -> Unit,
+    onChangeEmail: (String, String) -> Unit = { _, _ -> },
+    onDismissChangeEmail: () -> Unit = {},
     onLogout: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
@@ -64,6 +73,7 @@ private fun ProfileScreenContent(
     var age by remember { mutableStateOf(uiState.userAge?.takeIf { it > 0 }?.toString() ?: "") }
     var hasLicense by remember { mutableStateOf(uiState.userHasLicense) }
     var validationError by remember { mutableStateOf<String?>(null) }
+    var showChangeEmail by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.profileSaved) {
         if (uiState.profileSaved) {
@@ -148,7 +158,17 @@ private fun ProfileScreenContent(
             label = "Email address"
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Change email",
+            color = Color(0xFF4FA8FF),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.clickable { showChangeEmail = true }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Do you have a driving license?",
@@ -240,6 +260,83 @@ private fun ProfileScreenContent(
         Spacer(modifier = Modifier.height(24.dp))
     }
     }
+
+    if (showChangeEmail) {
+        ChangeEmailDialog(
+            isSaving = uiState.isChangingEmail,
+            error = uiState.changeEmailError,
+            requested = uiState.emailChangeRequested,
+            onDismiss = {
+                showChangeEmail = false
+                onDismissChangeEmail()
+            },
+            onConfirm = { currentPassword, newEmail -> onChangeEmail(currentPassword, newEmail) }
+        )
+    }
+}
+
+@Composable
+private fun ChangeEmailDialog(
+    isSaving: Boolean,
+    error: String?,
+    requested: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String) -> Unit
+) {
+    var currentPassword by remember { mutableStateOf("") }
+    var newEmail by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Change email") },
+        text = {
+            Column {
+                if (requested) {
+                    Text(
+                        text = "We've sent a confirmation link to $newEmail. Your email will update once you click it.",
+                        color = Color(0xFF4CAF50),
+                        fontSize = 13.sp
+                    )
+                } else {
+                    OutlinedTextField(
+                        value = newEmail,
+                        onValueChange = { newEmail = it },
+                        label = { Text("New email address") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = currentPassword,
+                        onValueChange = { currentPassword = it },
+                        label = { Text("Current password") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (error != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = error, color = Color(0xFFFF5252), fontSize = 13.sp)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (!requested) {
+                TextButton(
+                    enabled = !isSaving,
+                    onClick = { onConfirm(currentPassword, newEmail) }
+                ) {
+                    Text(if (isSaving) "Sending..." else "Send verification")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(if (requested) "Done" else "Cancel") }
+        }
+    )
 }
 
 @Composable

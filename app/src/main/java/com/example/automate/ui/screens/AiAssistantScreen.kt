@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Warning
@@ -44,6 +45,7 @@ fun AiAssistantScreen(
     viewModel: AiAssistantViewModel,
     onNavigateToChat: (WarningLightResult) -> Unit,
     onOpenChatClick: () -> Unit = {},
+    onBackClick: (() -> Unit)? = null,
     bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -103,6 +105,7 @@ fun AiAssistantScreen(
         },
         onAskAi = { result -> onNavigateToChat(result) },
         onOpenChatClick = onOpenChatClick,
+        onBackClick = onBackClick,
         bottomBar = bottomBar
     )
 }
@@ -118,6 +121,7 @@ fun AiAssistantContent(
     onAnalyze: () -> Unit,
     onAskAi: (WarningLightResult) -> Unit,
     onOpenChatClick: () -> Unit = {},
+    onBackClick: (() -> Unit)? = null,
     bottomBar: @Composable () -> Unit = {}
 ) {
     Scaffold(
@@ -125,6 +129,16 @@ fun AiAssistantContent(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("AI Car Assistant", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    if (onBackClick != null) {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF000C1F),
                     titleContentColor = Color.White,

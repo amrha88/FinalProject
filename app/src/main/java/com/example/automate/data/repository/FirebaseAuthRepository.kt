@@ -2,6 +2,7 @@ package com.example.automate.data.repository
 
 import com.example.automate.domain.model.UserProfile
 import com.example.automate.domain.repository.AuthRepository
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.FieldValue
@@ -113,6 +114,56 @@ class FirebaseAuthRepository(
             firestore.collection("users").document(user.uid)
                 .set(updates, com.google.firebase.firestore.SetOptions.merge())
                 .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(mapExceptionToThrowable(e))
+        }
+    }
+
+    override suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser
+                ?: throw IllegalStateException("No signed-in user.")
+            val email = user.email
+                ?: throw IllegalStateException("This account has no email on file.")
+            user.reauthenticate(EmailAuthProvider.getCredential(email, currentPassword)).await()
+            user.updatePassword(newPassword).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(mapExceptionToThrowable(e))
+        }
+    }
+
+    override suspend fun changeEmail(currentPassword: String, newEmail: String): Result<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser
+                ?: throw IllegalStateException("No signed-in user.")
+            val email = user.email
+                ?: throw IllegalStateException("This account has no email on file.")
+            user.reauthenticate(EmailAuthProvider.getCredential(email, currentPassword)).await()
+            user.verifyBeforeUpdateEmail(newEmail).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(mapExceptionToThrowable(e))
+        }
+    }
+
+    override suspend fun deleteAccount(currentPassword: String): Result<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser
+                ?: throw IllegalStateException("No signed-in user.")
+            val email = user.email
+                ?: throw IllegalStateException("This account has no email on file.")
+            user.reauthenticate(EmailAuthProvider.getCredential(email, currentPassword)).await()
+
+            val userDoc = firestore.collection("users").document(user.uid)
+            val vehicles = userDoc.collection("vehicles").get().await()
+            for (vehicleDoc in vehicles.documents) {
+                vehicleDoc.reference.delete().await()
+            }
+            userDoc.delete().await()
+
+            user.delete().await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(mapExceptionToThrowable(e))

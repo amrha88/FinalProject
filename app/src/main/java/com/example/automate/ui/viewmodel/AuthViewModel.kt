@@ -130,6 +130,112 @@ class AuthViewModel(
         _uiState.update { it.copy(profileError = null) }
     }
 
+    fun changePassword(currentPassword: String, newPassword: String) {
+        if (_uiState.value.isChangingPassword) return
+
+        if (currentPassword.isBlank()) {
+            _uiState.update { it.copy(changePasswordError = "Please enter your current password.") }
+            return
+        }
+        if (newPassword.length < 6) {
+            _uiState.update { it.copy(changePasswordError = "New password must be at least 6 characters.") }
+            return
+        }
+
+        _uiState.update { it.copy(isChangingPassword = true, changePasswordError = null) }
+        viewModelScope.launch {
+            repository.changePassword(currentPassword, newPassword).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isChangingPassword = false, passwordChanged = true) }
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            isChangingPassword = false,
+                            changePasswordError = throwable.message ?: "Failed to change password."
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun clearPasswordChanged() {
+        _uiState.update { it.copy(passwordChanged = false) }
+    }
+
+    fun clearChangePasswordError() {
+        _uiState.update { it.copy(changePasswordError = null) }
+    }
+
+    fun changeEmail(currentPassword: String, newEmail: String) {
+        if (_uiState.value.isChangingEmail) return
+
+        if (currentPassword.isBlank()) {
+            _uiState.update { it.copy(changeEmailError = "Please enter your current password.") }
+            return
+        }
+        if (!isValidEmail(newEmail)) {
+            _uiState.update { it.copy(changeEmailError = "Please enter a valid email address.") }
+            return
+        }
+
+        _uiState.update { it.copy(isChangingEmail = true, changeEmailError = null) }
+        viewModelScope.launch {
+            repository.changeEmail(currentPassword, newEmail).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isChangingEmail = false, emailChangeRequested = true) }
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            isChangingEmail = false,
+                            changeEmailError = throwable.message ?: "Failed to change email."
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun clearEmailChangeRequested() {
+        _uiState.update { it.copy(emailChangeRequested = false) }
+    }
+
+    fun clearChangeEmailError() {
+        _uiState.update { it.copy(changeEmailError = null) }
+    }
+
+    fun deleteAccount(currentPassword: String) {
+        if (_uiState.value.isDeletingAccount) return
+
+        if (currentPassword.isBlank()) {
+            _uiState.update { it.copy(deleteAccountError = "Please enter your current password.") }
+            return
+        }
+
+        _uiState.update { it.copy(isDeletingAccount = true, deleteAccountError = null) }
+        viewModelScope.launch {
+            repository.deleteAccount(currentPassword).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isDeletingAccount = false, accountDeleted = true) }
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            isDeletingAccount = false,
+                            deleteAccountError = throwable.message ?: "Failed to delete account."
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun clearDeleteAccountError() {
+        _uiState.update { it.copy(deleteAccountError = null) }
+    }
+
     private fun loadVehicles() {
         viewModelScope.launch {
             vehicleRepository.getVehicles().onSuccess { vehicles ->
@@ -197,6 +303,7 @@ class AuthViewModel(
         model: String,
         year: String,
         plate: String,
+        transmission: String? = null,
         photoBase64: String? = null
     ) {
         if (_uiState.value.isSavingVehicle) return
@@ -207,6 +314,7 @@ class AuthViewModel(
             model = model,
             year = year,
             plate = plate,
+            transmission = transmission,
             photoBase64 = photoBase64
         )
         _uiState.update { it.copy(isSavingVehicle = true, vehicleError = null) }
@@ -239,6 +347,7 @@ class AuthViewModel(
         model: String,
         year: String,
         plate: String,
+        transmission: String? = null,
         photoBase64: String? = null
     ) {
         if (_uiState.value.isSavingVehicle) return
@@ -249,6 +358,7 @@ class AuthViewModel(
             model = model,
             year = year,
             plate = plate,
+            transmission = transmission,
             photoBase64 = photoBase64
         )
         _uiState.update { it.copy(isSavingVehicle = true, vehicleError = null) }
@@ -301,7 +411,7 @@ class AuthViewModel(
         val vehicle = _uiState.value.vehicles.find { it.id == vehicleId } ?: return
         if (vehicle.specs != null || _uiState.value.isLoadingSpecs) return
 
-        _uiState.update { it.copy(isLoadingSpecs = true) }
+        _uiState.update { it.copy(isLoadingSpecs = true, specsLoadFailed = false) }
         viewModelScope.launch {
             vehicleSpecsRepository.getSpecs(vehicle).fold(
                 onSuccess = { specs ->
@@ -314,9 +424,22 @@ class AuthViewModel(
                     vehicleRepository.saveSpecs(vehicleId, specs)
                 },
                 onFailure = {
-                    _uiState.update { it.copy(isLoadingSpecs = false) }
+                    _uiState.update { it.copy(isLoadingSpecs = false, specsLoadFailed = true) }
                 }
             )
+        }
+    }
+
+    fun selectEngineVariant(vehicleId: String, variant: com.example.automate.domain.model.EngineVariant) {
+        val vehicle = _uiState.value.vehicles.find { it.id == vehicleId } ?: return
+        val currentSpecs = vehicle.specs ?: return
+        val updatedSpecs = currentSpecs.withSelectedVariant(variant)
+
+        _uiState.update { state ->
+            state.copy(vehicles = state.vehicles.map { if (it.id == vehicleId) it.copy(specs = updatedSpecs) else it })
+        }
+        viewModelScope.launch {
+            vehicleRepository.saveSpecs(vehicleId, updatedSpecs)
         }
     }
 

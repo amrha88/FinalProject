@@ -1,5 +1,6 @@
 package com.example.automate.data.repository
 
+import com.example.automate.domain.model.EngineVariant
 import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.VehicleSpecs
 import com.example.automate.domain.repository.VehicleSpecsRepository
@@ -10,8 +11,12 @@ import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.Schema
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
+
+@Serializable
+private data class VariantsResponse(val variants: List<EngineVariant> = emptyList())
 
 class FirebaseVehicleSpecsRepository : VehicleSpecsRepository {
     private val ai = Firebase.ai(backend = GenerativeBackend.googleAI())
@@ -19,14 +24,20 @@ class FirebaseVehicleSpecsRepository : VehicleSpecsRepository {
 
     override suspend fun getSpecs(vehicle: Vehicle): Result<VehicleSpecs> {
         return try {
-            val responseSchema = Schema.obj(
+            val variantSchema = Schema.obj(
                 properties = mapOf(
+                    "name" to Schema.string(),
                     "fuelConsumptionL100km" to Schema.double(nullable = true),
                     "fuelType" to Schema.string(nullable = true),
                     "engineDisplacementL" to Schema.double(nullable = true),
                     "horsepower" to Schema.integer(nullable = true),
                     "transmission" to Schema.string(nullable = true),
                     "fuelTankCapacityL" to Schema.double(nullable = true)
+                )
+            )
+            val responseSchema = Schema.obj(
+                properties = mapOf(
+                    "variants" to Schema.array(variantSchema)
                 )
             )
 
@@ -40,7 +51,9 @@ class FirebaseVehicleSpecsRepository : VehicleSpecsRepository {
                     text("""
                         You provide typical, representative specifications for a car model.
                         Rules:
-                        - Give best-estimate typical values for the base/common trim of this manufacturer, model and year.
+                        - List every distinct engine/trim variant that was actually sold for this manufacturer, model and year (e.g. different engine displacements, fuel types, or power outputs). Usually 1-4 variants.
+                        - Give each variant a short recognizable name (e.g. "1.8 TSI 180hp", "2.0 TDI 184hp").
+                        - If the vehicle's transmission is given below and a variant only came with a different transmission, exclude it.
                         - fuelConsumptionL100km is the combined average fuel consumption in liters per 100km.
                         - Use null for any field you are not reasonably confident about.
                         - Do not fabricate precise figures; provide realistic, representative estimates.
@@ -54,15 +67,21 @@ class FirebaseVehicleSpecsRepository : VehicleSpecsRepository {
                     Manufacturer: ${vehicle.manufacturer}
                     Model: ${vehicle.model}
                     Year: ${vehicle.year}
+                    ${vehicle.transmission?.let { "Transmission: $it" }.orEmpty()}
                 """.trimIndent())
             }
 
             val response = generativeModel.generateContent(prompt)
             val responseText = response.text ?: throw Exception("Empty AI response")
-            val specs = json.decodeFromString<VehicleSpecs>(responseText)
+            val variantsResponse = json.decodeFromString<VariantsResponse>(responseText)
+            val variants = variantsResponse.variants
+            val defaultVariant = variants.firstOrNull() ?: EngineVariant()
+
+            val specs = VehicleSpecs(variants = variants).withSelectedVariant(defaultVariant)
 
             Result.success(specs)
         } catch (e: Exception) {
+            android.util.Log.e("VehicleSpecsDebug", "getSpecs failed for ${vehicle.manufacturer} ${vehicle.model}: ${e::class.simpleName}: ${e.message}", e)
             Result.failure(e)
         }
     }

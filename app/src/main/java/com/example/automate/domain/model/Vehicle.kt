@@ -6,6 +6,7 @@ data class Vehicle(
     val model: String,
     val year: String,
     val plate: String,
+    val transmission: String? = null,
     val isDark: Boolean = false,
     val photoBase64: String? = null,
     val specs: VehicleSpecs? = null

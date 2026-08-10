@@ -1,8 +1,11 @@
 package com.example.automate.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.domain.model.EngineVariant
 import com.example.automate.domain.model.VehicleSpecs
 import com.example.automate.ui.components.AiDisclaimerNote
 import com.example.automate.ui.components.VehicleCard
@@ -43,7 +47,8 @@ fun VehicleDetailsScreen(
     onHistoryClick: (String) -> Unit,
     onDocumentsClick: (String) -> Unit,
     onAiScannerClick: () -> Unit,
-    onEditClick: (String) -> Unit
+    onEditClick: (String) -> Unit,
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val vehicle = uiState.vehicles.find { it.id == vehicleId }
@@ -71,6 +76,7 @@ fun VehicleDetailsScreen(
         vehiclePhoto = vehiclePhoto,
         specs = vehicle?.specs,
         isLoadingSpecs = uiState.isLoadingSpecs,
+        specsLoadFailed = uiState.specsLoadFailed,
         onBackClick = onBackClick,
         onChatbotClick = { onChatbotClick(vehicleId) },
         onLicencesClick = { onLicencesClick(vehicleId) },
@@ -79,7 +85,9 @@ fun VehicleDetailsScreen(
         onDocumentsClick = { onDocumentsClick(vehicleId) },
         onAiScannerClick = onAiScannerClick,
         onEditClick = { onEditClick(vehicleId) },
-        onDeleteConfirmed = { viewModel.deleteVehicle(vehicleId) }
+        onDeleteConfirmed = { viewModel.deleteVehicle(vehicleId) },
+        onVariantSelected = { variant -> viewModel.selectEngineVariant(vehicleId, variant) },
+        bottomBar = bottomBar
     )
 }
 
@@ -92,6 +100,7 @@ fun VehicleDetailsContent(
     vehiclePhoto: String? = null,
     specs: VehicleSpecs? = null,
     isLoadingSpecs: Boolean = false,
+    specsLoadFailed: Boolean = false,
     onBackClick: () -> Unit,
     onChatbotClick: () -> Unit,
     onLicencesClick: () -> Unit,
@@ -100,13 +109,16 @@ fun VehicleDetailsContent(
     onDocumentsClick: () -> Unit,
     onAiScannerClick: () -> Unit,
     onEditClick: () -> Unit,
-    onDeleteConfirmed: () -> Unit
+    onDeleteConfirmed: () -> Unit,
+    onVariantSelected: (EngineVariant) -> Unit = {},
+    bottomBar: @Composable () -> Unit = {}
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color(0xFF000C1F), // Dark navy background
+        bottomBar = bottomBar,
         topBar = {
             TopAppBar(
                 title = { 
@@ -191,7 +203,8 @@ fun VehicleDetailsContent(
                     plate = vehiclePlate,
                     isDark = false, // White card as per HomeScreen
                     photoBase64 = vehiclePhoto,
-                    onClick = { /* No action needed here */ }
+                    onClick = { /* No action needed here */ },
+                    compact = true
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -206,7 +219,29 @@ fun VehicleDetailsContent(
                         CircularProgressIndicator(color = Color(0xFF007BFF), modifier = Modifier.size(32.dp))
                     }
                 } else if (specs != null) {
-                    VehicleInfoCard(specs)
+                    VehicleInfoCard(specs, onVariantSelected = onVariantSelected)
+                    Spacer(modifier = Modifier.height(24.dp))
+                } else if (specsLoadFailed) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .padding(20.dp)
+                    ) {
+                        Text(
+                            text = "Vehicle info",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "No vehicle info available right now. Try again later.",
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 13.sp
+                        )
+                    }
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
@@ -219,44 +254,66 @@ fun VehicleDetailsContent(
                 )
 
                 // Service Cards
+                val serviceCards: List<@Composable () -> Unit> = listOf(
+                    {
+                        VehicleFeatureCard(
+                            title = "AI Warning Scanner",
+                            subtitle = "Scan dashboard warning lights",
+                            icon = Icons.Default.CameraAlt,
+                            isHighlighted = true,
+                            onClick = onAiScannerClick
+                        )
+                    },
+                    {
+                        VehicleFeatureCard(
+                            title = "Documents",
+                            subtitle = "Upload and manage vehicle documents",
+                            icon = Icons.Default.Description,
+                            highlightLabel = "AI powered",
+                            onClick = onDocumentsClick
+                        )
+                    },
+                    {
+                        VehicleFeatureCard(
+                            title = "AI Assistant",
+                            subtitle = "Ask about your vehicle",
+                            icon = Icons.AutoMirrored.Filled.Chat,
+                            showAlert = true, // Preserve alert logic if needed
+                            onClick = onChatbotClick
+                        )
+                    },
+                    {
+                        VehicleFeatureCard(
+                            title = "Notifications",
+                            subtitle = "Maintenance and licence reminders",
+                            icon = Icons.Default.Notifications,
+                            onClick = onNotificationsClick
+                        )
+                    },
+                    {
+                        VehicleFeatureCard(
+                            title = "Vehicle history",
+                            subtitle = "View maintenance and service history",
+                            icon = Icons.Default.History,
+                            onClick = onHistoryClick
+                        )
+                    }
+                )
+
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    VehicleFeatureCard(
-                        title = "AI Warning Scanner",
-                        subtitle = "Scan dashboard warning lights",
-                        icon = Icons.Default.CameraAlt,
-                        isHighlighted = true,
-                        onClick = onAiScannerClick
-                    )
-
-                    VehicleFeatureCard(
-                        title = "Documents",
-                        subtitle = "Upload and manage vehicle documents",
-                        icon = Icons.Default.Description,
-                        highlightLabel = "AI powered",
-                        onClick = onDocumentsClick
-                    )
-
-                    VehicleFeatureCard(
-                        title = "AI Assistant",
-                        subtitle = "Ask about your vehicle",
-                        icon = Icons.AutoMirrored.Filled.Chat,
-                        showAlert = true, // Preserve alert logic if needed
-                        onClick = onChatbotClick
-                    )
-
-                    VehicleFeatureCard(
-                        title = "Notifications",
-                        subtitle = "Maintenance and licence reminders",
-                        icon = Icons.Default.Notifications,
-                        onClick = onNotificationsClick
-                    )
-
-                    VehicleFeatureCard(
-                        title = "Vehicle history",
-                        subtitle = "View maintenance and service history",
-                        icon = Icons.Default.History,
-                        onClick = onHistoryClick
-                    )
+                    serviceCards.chunked(2).forEach { rowCards ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            rowCards.forEach { card ->
+                                Box(modifier = Modifier.weight(1f)) { card() }
+                            }
+                            if (rowCards.size < 2) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -285,7 +342,7 @@ fun VehicleDetailsContent(
 }
 
 @Composable
-fun VehicleInfoCard(specs: VehicleSpecs) {
+fun VehicleInfoCard(specs: VehicleSpecs, onVariantSelected: (EngineVariant) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -299,6 +356,41 @@ fun VehicleInfoCard(specs: VehicleSpecs) {
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
+
+        if (specs.variants.size > 1) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "This model came with more than one engine. Pick yours for accurate figures:",
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 12.sp
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                specs.variants.forEach { variant ->
+                    val selected = variant.name == specs.selectedVariantName
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (selected) Color(0xFF007BFF) else Color.White.copy(alpha = 0.08f))
+                            .clickable { onVariantSelected(variant) }
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = variant.name ?: "Variant",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         val stats = listOfNotNull(

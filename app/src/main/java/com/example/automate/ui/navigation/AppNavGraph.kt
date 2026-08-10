@@ -193,7 +193,14 @@ fun AppNavGraph(navController: NavHostController) {
 
         composable(Screen.Settings.route) {
             SettingsScreen(
+                viewModel = authViewModel,
                 onProfileClick = { navController.navigate(Screen.Profile.route) },
+                onAccountDeleted = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 bottomBar = mainBottomBar
             )
         }
@@ -247,8 +254,9 @@ fun AppNavGraph(navController: NavHostController) {
                 onNotificationsClick = { id -> navController.navigate("notifications/$id") },
                 onHistoryClick = { id -> navController.navigate("history/$id") },
                 onDocumentsClick = { id -> navController.navigate("vehicle_documents/$id") },
-                onAiScannerClick = { navController.navigate(Screen.AiAssistant.route) },
-                onEditClick = { id -> navController.navigate("edit_vehicle/$id") }
+                onAiScannerClick = { navController.navigate("ai_scanner/$vehicleId") },
+                onEditClick = { id -> navController.navigate("edit_vehicle/$id") },
+                bottomBar = mainBottomBar
             )
         }
 
@@ -287,6 +295,19 @@ fun AppNavGraph(navController: NavHostController) {
                 onNavigateToChat = { openChat() },
                 onOpenChatClick = openChat,
                 bottomBar = mainBottomBar
+            )
+        }
+
+        composable(
+            route = Screen.AiScanner.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            AiAssistantScreen(
+                viewModel = aiAssistantViewModel,
+                onNavigateToChat = { navController.navigate("chatbot/$vehicleId") },
+                onOpenChatClick = { navController.navigate("chatbot/$vehicleId") },
+                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -340,7 +361,12 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
         ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
-            NotificationsScreen(vehicleId = vehicleId, onBackClick = { navController.popBackStack() })
+            NotificationsScreen(
+                vehicleId = vehicleId,
+                viewModel = vehicleLicenceViewModel,
+                onBackClick = { navController.popBackStack() },
+                onAddLicenceClick = { navController.navigate("licences/$vehicleId") }
+            )
         }
 
         composable(

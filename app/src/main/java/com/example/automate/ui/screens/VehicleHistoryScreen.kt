@@ -20,6 +20,7 @@ fun VehicleHistoryScreen(vehicleId: String, onBackClick: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF000C1F))
+            .statusBarsPadding()
             .padding(24.dp)
     ) {
         IconButton(onClick = onBackClick) {
