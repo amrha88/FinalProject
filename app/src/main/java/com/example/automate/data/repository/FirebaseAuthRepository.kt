@@ -34,8 +34,6 @@ class FirebaseAuthRepository(
                 )
                 .await()
 
-            user.sendEmailVerification().await()
-
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(mapExceptionToThrowable(e))

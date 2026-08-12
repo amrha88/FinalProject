@@ -39,6 +39,7 @@ fun LoginScreen(
     viewModel: AuthViewModel,
     onSuccess: (String) -> Unit,
     onNavigateToSignUp: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -57,7 +58,7 @@ fun LoginScreen(
         onEmailChange = { email = it; viewModel.clearError() },
         password = password,
         onPasswordChange = { password = it; viewModel.clearError() },
-        onForgotPassword = { viewModel.onForgotPassword(email) },
+        onForgotPassword = onNavigateToForgotPassword,
         onLogin = { viewModel.onLogin(email, password) },
         onNavigateToSignUp = onNavigateToSignUp,
         onBackClick = onBackClick

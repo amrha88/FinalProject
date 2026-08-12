@@ -366,27 +366,31 @@ fun AddVehicleScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                listOf("Manual", "Automatic").forEach { option ->
-                    val selected = transmission == option
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (selected) Color(0xFF007BFF) else Color.White.copy(alpha = 0.06f))
-                            .clickable {
-                                transmission = option
-                                validationError = null
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                listOf("Manual", "Automatic", "Electric", "Hybrid").chunked(2).forEach { rowOptions ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        rowOptions.forEach { option ->
+                            val selected = transmission == option
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (selected) Color(0xFF007BFF) else Color.White.copy(alpha = 0.06f))
+                                    .clickable {
+                                        transmission = option
+                                        validationError = null
+                                    }
+                                    .padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = option,
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                                )
                             }
-                            .padding(vertical = 12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = option,
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-                        )
+                        }
                     }
                 }
             }

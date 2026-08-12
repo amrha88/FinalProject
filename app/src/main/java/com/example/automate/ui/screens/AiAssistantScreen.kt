@@ -148,6 +148,48 @@ fun AiAssistantContent(
         },
         containerColor = Color(0xFF000C1F)
     ) { paddingValues ->
+        if (uiState is AiAssistantUiState.Initial) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AiAssistantHeader(onOpenChatClick = onOpenChatClick)
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    OutlinedButton(
+                        onClick = onTakePhoto,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White)
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Take photo")
+                    }
+                    OutlinedButton(
+                        onClick = onChooseGallery,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White)
+                    ) {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Choose from gallery")
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+            }
+            return@Scaffold
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -157,78 +199,13 @@ fun AiAssistantContent(
         ) {
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Scan a dashboard warning light",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Park safely, turn off the vehicle if necessary, and photograph the illuminated warning symbol.",
-                    color = Color.LightGray,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFB71C1C))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Do not use the camera while driving.",
-                            color = Color(0xFFE57373),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                AssistantBanner(
-                    title = "Chat with the AI Assistant",
-                    subtitle = "Skip the photo and ask a question about your car directly.",
-                    onClick = onOpenChatClick
-                )
+                AiAssistantHeader(onOpenChatClick = onOpenChatClick)
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
             when (uiState) {
-                is AiAssistantUiState.Initial -> {
-                    item {
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            OutlinedButton(
-                                onClick = onTakePhoto,
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                                border = BorderStroke(1.dp, Color.White)
-                            ) {
-                                Icon(Icons.Default.CameraAlt, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Take photo")
-                            }
-                            OutlinedButton(
-                                onClick = onChooseGallery,
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                                border = BorderStroke(1.dp, Color.White)
-                            ) {
-                                Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Choose from gallery")
-                            }
-                        }
-                    }
-                }
-                is AiAssistantUiState.ImageSelected, 
+                is AiAssistantUiState.Initial -> Unit
+                is AiAssistantUiState.ImageSelected,
                 is AiAssistantUiState.Analyzing, 
                 is AiAssistantUiState.Success,
                 is AiAssistantUiState.Error -> {
@@ -294,6 +271,49 @@ fun AiAssistantContent(
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
+}
+
+@Composable
+private fun AiAssistantHeader(onOpenChatClick: () -> Unit) {
+    Text(
+        text = "Scan a dashboard warning light",
+        color = Color.White,
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(
+        text = "Park safely, turn off the vehicle if necessary, and photograph the illuminated warning symbol.",
+        color = Color.LightGray,
+        fontSize = 14.sp,
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(20.dp))
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFB71C1C))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Do not use the camera while driving.",
+                color = Color(0xFFE57373),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(28.dp))
+    AssistantBanner(
+        title = "Chat with the AI Assistant",
+        subtitle = "Skip the photo and ask a question about your car directly.",
+        onClick = onOpenChatClick
+    )
 }
 
 @Composable

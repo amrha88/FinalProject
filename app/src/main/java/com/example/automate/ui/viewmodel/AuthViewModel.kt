@@ -461,23 +461,34 @@ class AuthViewModel(
     }
 
     fun onForgotPassword(email: String) {
+        if (_uiState.value.isSendingPasswordReset) return
+
         if (email.isBlank() || !isValidEmail(email)) {
-            _uiState.update { it.copy(error = "Please enter a valid email to reset password.") }
+            _uiState.update { it.copy(passwordResetError = "Please enter a valid email address.") }
             return
         }
 
-        _uiState.update { it.copy(isLoading = true, error = null) }
+        _uiState.update { it.copy(isSendingPasswordReset = true, passwordResetError = null) }
 
         viewModelScope.launch {
             repository.sendPasswordReset(email).fold(
                 onSuccess = {
-                    _uiState.update { it.copy(isLoading = false, error = "Password reset email sent.") }
+                    _uiState.update { it.copy(isSendingPasswordReset = false, passwordResetSent = true) }
                 },
                 onFailure = { throwable ->
-                    _uiState.update { it.copy(isLoading = false, error = throwable.message) }
+                    _uiState.update {
+                        it.copy(
+                            isSendingPasswordReset = false,
+                            passwordResetError = throwable.message ?: "Failed to send reset email."
+                        )
+                    }
                 }
             )
         }
+    }
+
+    fun clearPasswordResetState() {
+        _uiState.update { it.copy(passwordResetSent = false, passwordResetError = null) }
     }
 
     fun clearError() {
