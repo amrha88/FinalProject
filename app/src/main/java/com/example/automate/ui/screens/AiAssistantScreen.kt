@@ -3,6 +3,7 @@ package com.example.automate.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -33,11 +34,7 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.automate.domain.model.WarningLightResult
 import com.example.automate.domain.model.WarningSeverity
-import com.example.automate.ui.components.AiDisclaimerNote
-import com.example.automate.ui.components.AssistantBanner
-import com.example.automate.ui.components.AutomateRobot
-import com.example.automate.ui.components.PrimaryButton
-import com.example.automate.ui.components.RobotDisplayMode
+import com.example.automate.ui.components.*
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AiAssistantUiState
 import com.example.automate.ui.viewmodel.AiAssistantViewModel
@@ -47,6 +44,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AiAssistantScreen(
+    vehicleId: String,
     viewModel: AiAssistantViewModel,
     onNavigateToChat: (WarningLightResult) -> Unit,
     onOpenChatClick: () -> Unit = {},
@@ -57,6 +55,18 @@ fun AiAssistantScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var tempUri by remember { mutableStateOf<Uri?>(null) }
+    var showSaveDialog by remember { mutableStateOf(false) }
+
+    val handleBack: () -> Unit = {
+        if (uiState.hasUnsavedResult) {
+            showSaveDialog = true
+        } else {
+            viewModel.resetState()
+            onBackClick?.invoke()
+        }
+    }
+
+    BackHandler(enabled = true, onBack = handleBack)
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -98,7 +108,7 @@ fun AiAssistantScreen(
         onRetake = { viewModel.onRemoveImage() },
         onRemove = { viewModel.onRemoveImage() },
         onAnalyze = {
-            val selectedUri = (uiState as? AiAssistantUiState.ImageSelected)?.uri
+            val selectedUri = uiState.selectedUri
             if (selectedUri != null) {
                 scope.launch {
                     val bitmap = ImageProcessingUtils.processImage(context, selectedUri)
@@ -110,9 +120,43 @@ fun AiAssistantScreen(
         },
         onAskAi = { result -> onNavigateToChat(result) },
         onOpenChatClick = onOpenChatClick,
-        onBackClick = onBackClick,
+        onBackClick = handleBack,
+        onNewImage = { viewModel.resetState() },
         bottomBar = bottomBar
     )
+
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text("Save to vehicle history?") },
+            text = { Text("Do you want to save this warning event to this vehicle's history?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSaveDialog = false
+                    viewModel.saveToHistory(vehicleId) {
+                        viewModel.resetState()
+                        onBackClick?.invoke()
+                    }
+                }) {
+                    Text("Save", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = {
+                        showSaveDialog = false
+                        viewModel.resetState()
+                        onBackClick?.invoke()
+                    }) {
+                        Text("Don't save")
+                    }
+                    TextButton(onClick = { showSaveDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,6 +171,7 @@ fun AiAssistantContent(
     onAskAi: (WarningLightResult) -> Unit,
     onOpenChatClick: () -> Unit = {},
     onBackClick: (() -> Unit)? = null,
+    onNewImage: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
     Scaffold(
@@ -175,51 +220,53 @@ fun AiAssistantContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Scan a dashboard warning light",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Park safely, turn off the vehicle if necessary, and photograph the illuminated warning symbol.",
-                    color = Color.LightGray,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                if (uiState.selectedUri == null) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Scan a dashboard warning light",
+                        color = Color.White,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Park safely, turn off the vehicle if necessary, and photograph the illuminated warning symbol.",
+                        color = Color.LightGray,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f)),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFB71C1C))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Do not use the camera while driving.",
-                            color = Color(0xFFE57373),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFB71C1C))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Do not use the camera while driving.",
+                                color = Color(0xFFE57373),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.height(24.dp))
+                    AssistantBanner(
+                        title = "Chat with the AI Assistant",
+                        subtitle = "Skip the photo and ask a question about your car directly.",
+                        onClick = onOpenChatClick
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
-                Spacer(modifier = Modifier.height(24.dp))
-                AssistantBanner(
-                    title = "Chat with the AI Assistant",
-                    subtitle = "Skip the photo and ask a question about your car directly.",
-                    onClick = onOpenChatClick
-                )
-                Spacer(modifier = Modifier.height(32.dp))
             }
 
-            when (uiState) {
-                is AiAssistantUiState.Initial -> {
+            when {
+                uiState.selectedUri == null -> {
                     item {
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                             OutlinedButton(
@@ -247,34 +294,36 @@ fun AiAssistantContent(
                         }
                     }
                 }
-                is AiAssistantUiState.ImageSelected, 
-                is AiAssistantUiState.Analyzing, 
-                is AiAssistantUiState.Success,
-                is AiAssistantUiState.Error -> {
-                    val uri = when (uiState) {
-                        is AiAssistantUiState.ImageSelected -> uiState.uri
-                        is AiAssistantUiState.Analyzing -> uiState.uri
-                        is AiAssistantUiState.Success -> uiState.uri
-                        else -> null
-                    }
-
+                else -> {
                     item {
-                        if (uri != null) {
-                            Card(
-                                modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f),
-                                shape = RoundedCornerShape(16.dp)
+                        Card(
+                            modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            AsyncImage(
+                                model = uiState.selectedUri,
+                                contentDescription = "Selected warning light",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        
+                        if (uiState.analysisResult != null) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            OutlinedButton(
+                                onClick = onNewImage,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
                             ) {
-                                AsyncImage(
-                                    model = uri,
-                                    contentDescription = "Selected warning light",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
+                                Text("New image")
                             }
-                            Spacer(modifier = Modifier.height(24.dp))
                         }
 
-                        if (uiState is AiAssistantUiState.ImageSelected) {
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        if (uiState.analysisResult == null && !uiState.isAnalyzing && uiState.errorMessage == null) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -290,7 +339,7 @@ fun AiAssistantContent(
                             PrimaryButton(text = "Analyze warning light", onClick = onAnalyze)
                         }
 
-                        if (uiState is AiAssistantUiState.Analyzing) {
+                        if (uiState.isAnalyzing) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                                 CircularProgressIndicator(color = Color(0xFF007BFF))
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -298,12 +347,12 @@ fun AiAssistantContent(
                             }
                         }
 
-                        if (uiState is AiAssistantUiState.Success) {
-                            ResultCard(result = uiState.result, onAskAi = onAskAi)
+                        if (uiState.analysisResult != null) {
+                            ResultCard(result = uiState.analysisResult, onAskAi = onAskAi)
                         }
 
-                        if (uiState is AiAssistantUiState.Error) {
-                            Text(uiState.message, color = Color.Red, textAlign = TextAlign.Center)
+                        if (uiState.errorMessage != null) {
+                            Text(uiState.errorMessage, color = Color.Red, textAlign = TextAlign.Center)
                             Spacer(modifier = Modifier.height(16.dp))
                             PrimaryButton(text = "Try Again", onClick = onRemove)
                         }
@@ -403,7 +452,7 @@ fun SeverityBadge(severity: WarningSeverity) {
 fun AiAssistantPreview() {
     AutomateTheme {
         AiAssistantContent(
-            uiState = AiAssistantUiState.Initial,
+            uiState = AiAssistantUiState(),
             onTakePhoto = {},
             onChooseGallery = {},
             onRetake = {},
@@ -429,7 +478,7 @@ fun AiAssistantResultPreview() {
     )
     AutomateTheme {
         AiAssistantContent(
-            uiState = AiAssistantUiState.Success(Uri.EMPTY, mockResult),
+            uiState = AiAssistantUiState(selectedUri = Uri.EMPTY, analysisResult = mockResult),
             onTakePhoto = {},
             onChooseGallery = {},
             onRetake = {},

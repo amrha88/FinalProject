@@ -37,7 +37,7 @@ fun AddVehicleScreen(
     viewModel: AuthViewModel,
     editingVehicleId: String? = null,
     onBackClick: () -> Unit,
-    onSaveSuccess: () -> Unit,
+    onSaveSuccess: (String) -> Unit,
     onDeleted: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -46,8 +46,9 @@ fun AddVehicleScreen(
 
     LaunchedEffect(uiState.vehicleSaved) {
         if (uiState.vehicleSaved) {
+            val vehicleId = uiState.vehicles.lastOrNull()?.id ?: ""
             viewModel.clearVehicleSaved()
-            onSaveSuccess()
+            onSaveSuccess(vehicleId)
         }
     }
 
@@ -501,7 +502,12 @@ fun AddVehicleScreenContent(
 @Composable
 fun AddVehicleScreenPreview() {
     AddVehicleScreenContent(
+        isEditing = false,
         onBackClick = {},
-        onSave = { _, _, _, _, _ -> }
+        onSave = { _, _, _, _, _ -> },
+        onDeleteClick = {},
+        carPhotoBase64 = null,
+        serverError = null,
+        isSaving = false
     )
 }

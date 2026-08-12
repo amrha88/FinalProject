@@ -14,7 +14,7 @@ sealed class Screen(val route: String) {
     object Licences : Screen("licences/{vehicleId}")
     object Notifications : Screen("notifications/{vehicleId}")
     object History : Screen("history/{vehicleId}")
-    object AiAssistant : Screen("ai_assistant")
-    object AiScanner : Screen("ai_scanner/{vehicleId}")
+    object AiAssistant : Screen("ai_assistant/{vehicleId}")
     object VehicleDocuments : Screen("vehicle_documents/{vehicleId}")
+    object VehicleSetup : Screen("vehicle_setup/{vehicleId}")
 }

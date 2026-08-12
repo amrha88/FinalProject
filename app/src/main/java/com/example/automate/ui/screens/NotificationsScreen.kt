@@ -1,199 +1,186 @@
 package com.example.automate.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.automate.domain.model.VehicleLicence
-import com.example.automate.ui.components.PrimaryButton
+import com.example.automate.domain.model.DatePrecision
+import com.example.automate.domain.model.ReminderType
+import com.example.automate.domain.model.VehicleReminder
 import com.example.automate.ui.theme.AutomateTheme
-import com.example.automate.ui.viewmodel.VehicleLicenceViewModel
-import java.util.Calendar
+import com.example.automate.ui.viewmodel.NotificationsUiState
+import com.example.automate.ui.viewmodel.NotificationsViewModel
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun NotificationsScreen(
     vehicleId: String,
-    viewModel: VehicleLicenceViewModel,
-    onBackClick: () -> Unit,
-    onAddLicenceClick: () -> Unit
+    viewModel: NotificationsViewModel,
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(vehicleId) {
-        viewModel.loadLicence(vehicleId)
+        viewModel.loadReminders(vehicleId)
     }
 
     NotificationsContent(
-        licence = uiState.savedLicence,
-        onBackClick = onBackClick,
-        onAddLicenceClick = onAddLicenceClick
+        uiState = uiState,
+        onBackClick = onBackClick
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsContent(
-    licence: VehicleLicence?,
-    onBackClick: () -> Unit,
-    onAddLicenceClick: () -> Unit
+    uiState: NotificationsUiState,
+    onBackClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF000C1F))
-            .statusBarsPadding()
-            .padding(24.dp)
-    ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Notifications", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF000C1F),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Notifications",
-            color = Color.White,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = "Maintenance and licence reminders",
-            color = Color.White.copy(alpha = 0.6f),
-            fontSize = 13.sp
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        if (licence?.licenceExpiryDate.isNullOrBlank() && licence?.inspectionExpiryDate.isNullOrBlank()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .padding(20.dp)
-            ) {
-                Text(
-                    text = "No reminders yet",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Add this vehicle's licence to get expiry reminders for registration and inspection.",
-                    color = Color.White.copy(alpha = 0.6f),
-                    fontSize = 13.sp
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                PrimaryButton(text = "Add licence details", onClick = onAddLicenceClick)
+        },
+        containerColor = Color(0xFF000C1F)
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFF007BFF))
+                }
+            } else if (uiState.reminders.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("No upcoming notifications", color = Color.Gray)
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                    items(uiState.reminders) { reminder ->
+                        ReminderCard(reminder = reminder)
+                    }
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+                }
             }
-        } else {
-            ReminderCard(title = "Licence expiry", dateString = licence?.licenceExpiryDate)
-            Spacer(modifier = Modifier.height(12.dp))
-            ReminderCard(title = "Inspection expiry", dateString = licence?.inspectionExpiryDate)
         }
     }
 }
 
-private data class ReminderStatus(
-    val label: String,
-    val color: Color,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
-)
-
-private fun daysUntil(dateString: String): Int? {
-    val parts = dateString.trim().split("-")
-    if (parts.size != 3) return null
-    val year = parts[0].toIntOrNull() ?: return null
-    val month = parts[1].toIntOrNull() ?: return null
-    val day = parts[2].toIntOrNull() ?: return null
-
-    val target = Calendar.getInstance().apply {
-        clear()
-        set(year, month - 1, day)
-    }
-    val today = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-    }
-    val diffMillis = target.timeInMillis - today.timeInMillis
-    return (diffMillis / (24 * 60 * 60 * 1000)).toInt()
-}
-
-private fun statusFor(days: Int?): ReminderStatus = when {
-    days == null -> ReminderStatus("Date not recognized", Color.Gray, Icons.Default.Schedule)
-    days < 0 -> ReminderStatus("Expired ${-days} day${if (-days == 1) "" else "s"} ago", Color(0xFFFF5252), Icons.Default.Error)
-    days == 0 -> ReminderStatus("Expires today", Color(0xFFFF5252), Icons.Default.Error)
-    days <= 30 -> ReminderStatus("Expires in $days day${if (days == 1) "" else "s"}", Color(0xFFFFA726), Icons.Default.Schedule)
-    else -> ReminderStatus("Valid for $days more days", Color(0xFF4CAF50), Icons.Default.CheckCircle)
+enum class NotificationPriority(val label: String, val color: Color, val icon: ImageVector) {
+    UPCOMING("Upcoming", Color(0xFF007BFF), Icons.Default.Timer),
+    SOON("Soon", Color(0xFFFFB300), Icons.Default.Timer),
+    DUE("Due Today", Color(0xFFF44336), Icons.Default.Warning),
+    OVERDUE("Overdue", Color(0xFFB71C1C), Icons.Default.Warning)
 }
 
 @Composable
-private fun ReminderCard(title: String, dateString: String?) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .padding(20.dp)
+fun ReminderCard(reminder: VehicleReminder) {
+    val daysLeft = reminder.dueDate?.let { daysUntil(it) }
+    val priority = statusFor(daysLeft)
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Text(text = title, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(12.dp))
-
-        if (dateString.isNullOrBlank()) {
-            Text(text = "Not on file", color = Color.White.copy(alpha = 0.5f), fontSize = 13.sp)
-        } else {
-            val days = daysUntil(dateString)
-            val status = statusFor(days)
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(status.color.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = status.icon,
-                        contentDescription = null,
-                        tint = status.color,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(text = status.label, color = status.color, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Text(text = dateString, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                color = priority.color.copy(alpha = 0.1f),
+                shape = CircleShape,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(priority.icon, contentDescription = null, tint = priority.color, modifier = Modifier.size(24.dp))
                 }
             }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = reminder.title, fontWeight = FontWeight.Bold, color = Color(0xFF0B1730), fontSize = 16.sp)
+                Text(
+                    text = when {
+                        reminder.datePrecision == DatePrecision.MONTH_ONLY -> "Expected in ${reminder.dueDate?.substring(0, 7) ?: ""}"
+                        daysLeft == null -> "Pending"
+                        daysLeft < 0 -> "Expired ${-daysLeft} days ago"
+                        daysLeft == 0 -> "Due Today"
+                        daysLeft == 1 -> "Tomorrow"
+                        else -> "$daysLeft days remaining"
+                    },
+                    color = priority.color,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
+    }
+}
+
+private fun daysUntil(dateString: String): Int? {
+    return try {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT)
+        val targetDate = sdf.parse(dateString) ?: return null
+        val now = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+        
+        val diff = targetDate.time - now.time
+        TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS).toInt()
+    } catch (e: Exception) {
+        null
+    }
+}
+
+private fun statusFor(daysLeft: Int?): NotificationPriority {
+    return when {
+        daysLeft == null -> NotificationPriority.UPCOMING
+        daysLeft < 0 -> NotificationPriority.OVERDUE
+        daysLeft == 0 -> NotificationPriority.DUE
+        daysLeft <= 14 -> NotificationPriority.SOON
+        else -> NotificationPriority.UPCOMING
     }
 }
 
@@ -202,13 +189,13 @@ private fun ReminderCard(title: String, dateString: String?) {
 fun NotificationsScreenPreview() {
     AutomateTheme {
         NotificationsContent(
-            licence = VehicleLicence(
-                licencePlate = "AB-123-CD",
-                licenceExpiryDate = "2026-09-01",
-                inspectionExpiryDate = "2026-08-20"
+            uiState = NotificationsUiState(
+                reminders = listOf(
+                    VehicleReminder(type = ReminderType.VEHICLE_LICENCE, title = "Vehicle Licence", dueDate = "2026-12-20"),
+                    VehicleReminder(type = ReminderType.INSURANCE, title = "Insurance", dueDate = "2024-03-10")
+                )
             ),
-            onBackClick = {},
-            onAddLicenceClick = {}
+            onBackClick = {}
         )
     }
 }
