@@ -29,5 +29,8 @@ data class AuthUiState(
     val changeEmailError: String? = null,
     val isDeletingAccount: Boolean = false,
     val accountDeleted: Boolean = false,
-    val deleteAccountError: String? = null
+    val deleteAccountError: String? = null,
+    val isSendingPasswordReset: Boolean = false,
+    val passwordResetSent: Boolean = false,
+    val passwordResetError: String? = null
 )

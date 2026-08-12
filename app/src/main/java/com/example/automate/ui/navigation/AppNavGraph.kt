@@ -84,6 +84,8 @@ fun AppNavGraph(navController: NavHostController) {
         }
     )
 
+
+
     val vehicleHistoryViewModel: VehicleHistoryViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -175,7 +177,18 @@ fun AppNavGraph(navController: NavHostController) {
                 onNavigateToSignUp = {
                     navController.navigate(Screen.SignUp.route)
                 },
+                onNavigateToForgotPassword = {
+                    navController.navigate(Screen.ForgotPassword.route)
+                },
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.ForgotPassword.route) {
+            ForgotPasswordScreen(
+                viewModel = authViewModel,
+                onBackClick = { navController.popBackStack() },
+                onBackToSignIn = { navController.popBackStack() }
             )
         }
 

@@ -212,6 +212,48 @@ fun AiAssistantContent(
         },
         containerColor = Color(0xFF000C1F)
     ) { paddingValues ->
+        if (uiState.selectedUri == null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AiAssistantHeader(onOpenChatClick = onOpenChatClick)
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    OutlinedButton(
+                        onClick = onTakePhoto,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White)
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Take photo")
+                    }
+                    OutlinedButton(
+                        onClick = onChooseGallery,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White)
+                    ) {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Choose from gallery")
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+            }
+            return@Scaffold
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -220,148 +262,114 @@ fun AiAssistantContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                if (uiState.selectedUri == null) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "Scan a dashboard warning light",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                Spacer(modifier = Modifier.height(24.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    AsyncImage(
+                        model = uiState.selectedUri,
+                        contentDescription = "Selected warning light",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "Park safely, turn off the vehicle if necessary, and photograph the illuminated warning symbol.",
-                        color = Color.LightGray,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
+                }
+
+                if (uiState.analysisResult != null) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f)),
-                        shape = RoundedCornerShape(8.dp)
+                    OutlinedButton(
+                        onClick = onNewImage,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
                     ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFB71C1C))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Do not use the camera while driving.",
-                                color = Color(0xFFE57373),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    AssistantBanner(
-                        title = "Chat with the AI Assistant",
-                        subtitle = "Skip the photo and ask a question about your car directly.",
-                        onClick = onOpenChatClick
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
-            }
-
-            when {
-                uiState.selectedUri == null -> {
-                    item {
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            OutlinedButton(
-                                onClick = onTakePhoto,
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                                border = BorderStroke(1.dp, Color.White)
-                            ) {
-                                Icon(Icons.Default.CameraAlt, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Take photo")
-                            }
-                            OutlinedButton(
-                                onClick = onChooseGallery,
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                                border = BorderStroke(1.dp, Color.White)
-                            ) {
-                                Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Choose from gallery")
-                            }
-                        }
+                        Text("New image")
                     }
                 }
-                else -> {
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            AsyncImage(
-                                model = uiState.selectedUri,
-                                contentDescription = "Selected warning light",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                        
-                        if (uiState.analysisResult != null) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedButton(
-                                onClick = onNewImage,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
-                            ) {
-                                Text("New image")
-                            }
-                        }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                        if (uiState.analysisResult == null && !uiState.isAnalyzing && uiState.errorMessage == null) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                TextButton(onClick = onRetake, modifier = Modifier.weight(1f)) {
-                                    Text("Retake", color = Color.White)
-                                }
-                                TextButton(onClick = onRemove, modifier = Modifier.weight(1f)) {
-                                    Text("Remove", color = Color.Red)
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            PrimaryButton(text = "Analyze warning light", onClick = onAnalyze)
+                if (uiState.analysisResult == null && !uiState.isAnalyzing && uiState.errorMessage == null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        TextButton(onClick = onRetake, modifier = Modifier.weight(1f)) {
+                            Text("Retake", color = Color.White)
                         }
-
-                        if (uiState.isAnalyzing) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                                CircularProgressIndicator(color = Color(0xFF007BFF))
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text("Analyzing warning light...", color = Color.White)
-                            }
-                        }
-
-                        if (uiState.analysisResult != null) {
-                            ResultCard(result = uiState.analysisResult, onAskAi = onAskAi)
-                        }
-
-                        if (uiState.errorMessage != null) {
-                            Text(uiState.errorMessage, color = Color.Red, textAlign = TextAlign.Center)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            PrimaryButton(text = "Try Again", onClick = onRemove)
+                        TextButton(onClick = onRemove, modifier = Modifier.weight(1f)) {
+                            Text("Remove", color = Color.Red)
                         }
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PrimaryButton(text = "Analyze warning light", onClick = onAnalyze)
+                }
+
+                if (uiState.isAnalyzing) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(color = Color(0xFF007BFF))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Analyzing warning light...", color = Color.White)
+                    }
+                }
+
+                if (uiState.analysisResult != null) {
+                    ResultCard(result = uiState.analysisResult, onAskAi = onAskAi)
+                }
+
+                if (uiState.errorMessage != null) {
+                    Text(uiState.errorMessage, color = Color.Red, textAlign = TextAlign.Center)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PrimaryButton(text = "Try Again", onClick = onRemove)
                 }
             }
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
+}
+
+@Composable
+private fun AiAssistantHeader(onOpenChatClick: () -> Unit) {
+    Text(
+        text = "Scan a dashboard warning light",
+        color = Color.White,
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(
+        text = "Park safely, turn off the vehicle if necessary, and photograph the illuminated warning symbol.",
+        color = Color.LightGray,
+        fontSize = 14.sp,
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(20.dp))
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFB71C1C))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Do not use the camera while driving.",
+                color = Color(0xFFE57373),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(28.dp))
+    AssistantBanner(
+        title = "Chat with the AI Assistant",
+        subtitle = "Skip the photo and ask a question about your car directly.",
+        onClick = onOpenChatClick
+    )
 }
 
 @Composable
@@ -400,21 +408,21 @@ fun ResultCard(result: WarningLightResult, onAskAi: (WarningLightResult) -> Unit
             Text("Recommendation", fontWeight = FontWeight.Bold, color = Color.Black)
             Text(result.recommendation, color = Color.DarkGray)
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             val canDriveText = when (result.canContinueDriving) {
                 true -> "You may continue driving with caution."
                 false -> "Stop driving immediately and seek assistance."
                 else -> "Status unknown. Exercise extreme caution."
             }
             val driveColor = if (result.canContinueDriving == true) Color(0xFF2E7D32) else Color(0xFFC62828)
-            
+
             Text(
                 text = canDriveText,
                 color = driveColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             AiDisclaimerNote(text = result.disclaimer)
             Spacer(modifier = Modifier.height(24.dp))
@@ -432,7 +440,7 @@ fun SeverityBadge(severity: WarningSeverity) {
         WarningSeverity.CRITICAL -> Color(0xFFB71C1C) to Color.White
         WarningSeverity.UNKNOWN -> Color.LightGray to Color.DarkGray
     }
-    
+
     Surface(
         color = backgroundColor,
         shape = RoundedCornerShape(12.dp)
