@@ -387,8 +387,11 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
         ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            // We could fetch latest mileage from history, but for now we'll pass null
+            // or pass the mileage if we added it to the vehicle state.
             NotificationsScreen(
                 vehicleId = vehicleId,
+                currentMileage = null,
                 viewModel = notificationsViewModel,
                 onBackClick = { navController.popBackStack() }
             )

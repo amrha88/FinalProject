@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun NotificationsScreen(
     vehicleId: String,
+    currentMileage: Int? = null,
     viewModel: NotificationsViewModel,
     onBackClick: () -> Unit
 ) {
@@ -44,6 +45,7 @@ fun NotificationsScreen(
 
     NotificationsContent(
         uiState = uiState,
+        currentMileage = currentMileage,
         onBackClick = onBackClick
     )
 }
@@ -52,6 +54,7 @@ fun NotificationsScreen(
 @Composable
 fun NotificationsContent(
     uiState: NotificationsUiState,
+    currentMileage: Int? = null,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -94,7 +97,7 @@ fun NotificationsContent(
                 ) {
                     item { Spacer(modifier = Modifier.height(8.dp)) }
                     items(uiState.reminders) { reminder ->
-                        ReminderCard(reminder = reminder)
+                        ReminderCard(reminder = reminder, currentMileage = currentMileage)
                     }
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
@@ -111,9 +114,11 @@ enum class NotificationPriority(val label: String, val color: Color, val icon: I
 }
 
 @Composable
-fun ReminderCard(reminder: VehicleReminder) {
+fun ReminderCard(reminder: VehicleReminder, currentMileage: Int? = null) {
     val daysLeft = reminder.dueDate?.let { daysUntil(it) }
-    val priority = statusFor(daysLeft)
+    val mileageLeft = if (reminder.dueMileage != null && currentMileage != null) reminder.dueMileage - currentMileage else null
+    
+    val priority = statusFor(daysLeft, mileageLeft)
     
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -138,15 +143,32 @@ fun ReminderCard(reminder: VehicleReminder) {
             
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = reminder.title, fontWeight = FontWeight.Bold, color = Color(0xFF0B1730), fontSize = 16.sp)
+                
+                val statusText = buildString {
+                    if (daysLeft != null) {
+                        append(when {
+                            reminder.datePrecision == DatePrecision.MONTH_ONLY -> "Expected in ${reminder.dueDate.substring(0, 7)}"
+                            daysLeft < 0 -> "Expired ${-daysLeft} days ago"
+                            daysLeft == 0 -> "Due Today"
+                            daysLeft == 1 -> "Tomorrow"
+                            else -> "$daysLeft days remaining"
+                        })
+                    }
+                    
+                    if (mileageLeft != null) {
+                        if (isNotEmpty()) append(" • ")
+                        append(when {
+                            mileageLeft < 0 -> "Overdue by ${-mileageLeft} km"
+                            mileageLeft == 0 -> "Due now"
+                            else -> "$mileageLeft km remaining"
+                        })
+                    }
+                    
+                    if (isEmpty()) append("Pending")
+                }
+
                 Text(
-                    text = when {
-                        reminder.datePrecision == DatePrecision.MONTH_ONLY -> "Expected in ${reminder.dueDate?.substring(0, 7) ?: ""}"
-                        daysLeft == null -> "Pending"
-                        daysLeft < 0 -> "Expired ${-daysLeft} days ago"
-                        daysLeft == 0 -> "Due Today"
-                        daysLeft == 1 -> "Tomorrow"
-                        else -> "$daysLeft days remaining"
-                    },
+                    text = statusText,
                     color = priority.color,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
@@ -174,12 +196,15 @@ private fun daysUntil(dateString: String): Int? {
     }
 }
 
-private fun statusFor(daysLeft: Int?): NotificationPriority {
+private fun statusFor(daysLeft: Int?, mileageLeft: Int?): NotificationPriority {
+    val isOverdue = (daysLeft != null && daysLeft < 0) || (mileageLeft != null && mileageLeft < 0)
+    val isDue = (daysLeft != null && daysLeft == 0) || (mileageLeft != null && mileageLeft == 0)
+    val isSoon = (daysLeft != null && daysLeft <= 14) || (mileageLeft != null && mileageLeft <= 500)
+    
     return when {
-        daysLeft == null -> NotificationPriority.UPCOMING
-        daysLeft < 0 -> NotificationPriority.OVERDUE
-        daysLeft == 0 -> NotificationPriority.DUE
-        daysLeft <= 14 -> NotificationPriority.SOON
+        isOverdue -> NotificationPriority.OVERDUE
+        isDue -> NotificationPriority.DUE
+        isSoon -> NotificationPriority.SOON
         else -> NotificationPriority.UPCOMING
     }
 }

@@ -132,52 +132,36 @@ class VehicleDocumentsViewModel(
         viewModelScope.launch {
             val confirmedDoc = document.copy(confirmedByUser = true)
             
+            // Build linked entities
+            val historyEvent = reminderEngine.buildHistoryEventFromDocument(vehicleId, confirmedDoc)
+            val reminders = reminderEngine.buildRemindersFromDocument(vehicleId, confirmedDoc)
+
             val result = when {
+                replacingId != null -> documentRepository.replaceDocument(
+                    vehicleId = vehicleId,
+                    oldDocumentId = replacingId,
+                    newDocument = confirmedDoc,
+                    historyEvent = historyEvent,
+                    reminders = reminders
+                )
                 isEditing -> documentRepository.updateDocument(vehicleId, confirmedDoc).map { confirmedDoc.id }
-                replacingId != null -> documentRepository.replaceDocument(vehicleId, replacingId, confirmedDoc)
-                else -> documentRepository.saveDocument(vehicleId, confirmedDoc)
+                else -> documentRepository.saveConfirmedDocumentAtomic(
+                    vehicleId = vehicleId,
+                    document = confirmedDoc,
+                    historyEvent = historyEvent,
+                    reminders = reminders
+                )
             }
 
             result.fold(
                 onSuccess = { documentId ->
                     _uiState.update { it.copy(isSaving = false, saveSuccess = true, selectedImageUri = null, extraction = null, editableDocument = null, isEditingExisting = false, replacingDocumentId = null) }
                     loadDocuments(vehicleId)
-                    
-                    // Sync with Reminder Engine
-                    viewModelScope.launch {
-                        reminderEngine.syncRemindersFromDocument(vehicleId, confirmedDoc.copy(id = documentId))
-                    }
-
-                    // Link to history if relevant
-                    if (confirmedDoc.documentType == VehicleDocumentType.MAINTENANCE || 
-                        confirmedDoc.documentType == VehicleDocumentType.REPAIR_INVOICE) {
-                        createHistoryEventFromDocument(vehicleId, documentId, confirmedDoc)
-                    }
                 },
-                onFailure = {
+                onFailure = { throwable ->
                     _uiState.update { it.copy(isSaving = false, errorMessage = "The document could not be saved.") }
                 }
             )
-        }
-    }
-
-    private fun createHistoryEventFromDocument(vehicleId: String, documentId: String, doc: VehicleDocument) {
-        viewModelScope.launch {
-            val event = VehicleHistoryEvent(
-                vehicleId = vehicleId,
-                type = if (doc.documentType == VehicleDocumentType.REPAIR_INVOICE) VehicleHistoryEventType.REPAIR else VehicleHistoryEventType.MAINTENANCE,
-                title = doc.documentTitle ?: "Service Record",
-                description = doc.summary,
-                eventDate = doc.documentDate,
-                mileage = doc.mileage,
-                garageName = doc.garageOrProvider,
-                servicesPerformed = doc.serviceItems,
-                nextServiceDate = doc.nextServiceDate,
-                nextServiceMileage = doc.nextServiceMileage,
-                sourceDocumentId = documentId,
-                confirmedByUser = true
-            )
-            historyRepository.saveHistoryEvent(vehicleId, event)
         }
     }
 

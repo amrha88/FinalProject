@@ -1,92 +1,73 @@
 package com.example.automate.ui.screens
 
-import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.automate.ui.components.AutomateRobot
-import com.example.automate.ui.components.RobotDisplayMode
+import com.example.automate.R
 import com.example.automate.ui.theme.AutomateTheme
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(onNavigateToLogin: () -> Unit) {
-    var startAnimation by remember { mutableStateOf(false) }
-
-    val alphaAnim by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
-        label = "alpha"
-    )
-
-    val scaleAnim by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.94f,
-        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-        label = "scale"
-    )
-
-    val offsetYAnim by animateDpAsState(
-        targetValue = if (startAnimation) 0.dp else 20.dp,
-        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-        label = "offsetY"
-    )
-
-    LaunchedEffect(key1 = true) {
-        startAnimation = true
-        delay(2500L)
+    LaunchedEffect(Unit) {
+        delay(1800)
         onNavigateToLogin()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF000C1F)), // Dark navy
-        contentAlignment = Alignment.Center
+            .background(Color(0xFF0E1A24))
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .alpha(alphaAnim)
-                    .offset(y = offsetYAnim),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "AUTOMATE",
-                    color = Color.White,
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 4.sp
-                )
-                Text(
-                    text = "Your intelligent vehicle assistant",
-                    color = Color.White.copy(alpha = 0.6f),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal
-                )
-            }
+            Spacer(modifier = Modifier.height(72.dp))
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Text(
+                text = "AUTOMATE",
+                color = Color.White,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 3.sp
+            )
 
-            Box(
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Your intelligent vehicle assistant",
+                color = Color(0xFF9AA5B1),
+                fontSize = 15.sp
+            )
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.image),
+                contentDescription = "Automate AI Assistant",
                 modifier = Modifier
-                    .alpha(alphaAnim)
-                    .scale(scaleAnim)
-            ) {
-                AutomateRobot(mode = RobotDisplayMode.SPLASH)
-            }
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
