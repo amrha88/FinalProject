@@ -22,6 +22,8 @@ class VehicleDocumentsViewModel(
     private val _uiState = MutableStateFlow(VehicleDocumentsUiState())
     val uiState: StateFlow<VehicleDocumentsUiState> = _uiState.asStateFlow()
 
+    private val reminderEngine = com.example.automate.domain.engine.ReminderEngine(com.example.automate.data.repository.FirestoreReminderRepository())
+
     fun loadDocuments(vehicleId: String) {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
@@ -141,6 +143,11 @@ class VehicleDocumentsViewModel(
                     _uiState.update { it.copy(isSaving = false, saveSuccess = true, selectedImageUri = null, extraction = null, editableDocument = null, isEditingExisting = false, replacingDocumentId = null) }
                     loadDocuments(vehicleId)
                     
+                    // Sync with Reminder Engine
+                    viewModelScope.launch {
+                        reminderEngine.syncRemindersFromDocument(vehicleId, confirmedDoc.copy(id = documentId))
+                    }
+
                     // Link to history if relevant
                     if (confirmedDoc.documentType == VehicleDocumentType.MAINTENANCE || 
                         confirmedDoc.documentType == VehicleDocumentType.REPAIR_INVOICE) {

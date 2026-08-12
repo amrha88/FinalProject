@@ -25,6 +25,15 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
+    private val reminderEngine = com.example.automate.domain.engine.ReminderEngine(com.example.automate.data.repository.FirestoreReminderRepository())
+
+    init {
+        if (repository.isUserLoggedIn()) {
+            loadUserProfile()
+            loadVehicles()
+        }
+    }
+
     fun onLogin(email: String, password: String) {
         if (_uiState.value.isLoading) return
 
@@ -489,6 +498,29 @@ class AuthViewModel(
 
     fun clearPasswordResetState() {
         _uiState.update { it.copy(passwordResetSent = false, passwordResetError = null) }
+    }
+
+    fun saveInitialSetup(vehicleId: String, inspectionDate: String?, inspectionPrecision: com.example.automate.domain.model.DatePrecision, licenceDate: String?, licencePrecision: com.example.automate.domain.model.DatePrecision) {
+        viewModelScope.launch {
+            if (inspectionDate != null) {
+                reminderEngine.syncRemindersFromManual(
+                    vehicleId = vehicleId,
+                    type = com.example.automate.domain.model.ReminderType.VEHICLE_INSPECTION,
+                    title = "Vehicle Inspection",
+                    dueDate = inspectionDate,
+                    precision = inspectionPrecision
+                )
+            }
+            if (licenceDate != null) {
+                reminderEngine.syncRemindersFromManual(
+                    vehicleId = vehicleId,
+                    type = com.example.automate.domain.model.ReminderType.VEHICLE_LICENCE,
+                    title = "Vehicle Licence",
+                    dueDate = licenceDate,
+                    precision = licencePrecision
+                )
+            }
+        }
     }
 
     fun clearError() {

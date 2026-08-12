@@ -3,11 +3,14 @@ package com.example.automate.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -30,9 +34,7 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.automate.domain.model.WarningLightResult
 import com.example.automate.domain.model.WarningSeverity
-import com.example.automate.ui.components.AiDisclaimerNote
-import com.example.automate.ui.components.AssistantBanner
-import com.example.automate.ui.components.PrimaryButton
+import com.example.automate.ui.components.*
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AiAssistantUiState
 import com.example.automate.ui.viewmodel.AiAssistantViewModel
@@ -42,6 +44,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AiAssistantScreen(
+    vehicleId: String,
     viewModel: AiAssistantViewModel,
     onNavigateToChat: (WarningLightResult) -> Unit,
     onOpenChatClick: () -> Unit = {},
@@ -52,6 +55,18 @@ fun AiAssistantScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var tempUri by remember { mutableStateOf<Uri?>(null) }
+    var showSaveDialog by remember { mutableStateOf(false) }
+
+    val handleBack: () -> Unit = {
+        if (uiState.hasUnsavedResult) {
+            showSaveDialog = true
+        } else {
+            viewModel.resetState()
+            onBackClick?.invoke()
+        }
+    }
+
+    BackHandler(enabled = true, onBack = handleBack)
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -93,7 +108,7 @@ fun AiAssistantScreen(
         onRetake = { viewModel.onRemoveImage() },
         onRemove = { viewModel.onRemoveImage() },
         onAnalyze = {
-            val selectedUri = (uiState as? AiAssistantUiState.ImageSelected)?.uri
+            val selectedUri = uiState.selectedUri
             if (selectedUri != null) {
                 scope.launch {
                     val bitmap = ImageProcessingUtils.processImage(context, selectedUri)
@@ -105,9 +120,43 @@ fun AiAssistantScreen(
         },
         onAskAi = { result -> onNavigateToChat(result) },
         onOpenChatClick = onOpenChatClick,
-        onBackClick = onBackClick,
+        onBackClick = handleBack,
+        onNewImage = { viewModel.resetState() },
         bottomBar = bottomBar
     )
+
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text("Save to vehicle history?") },
+            text = { Text("Do you want to save this warning event to this vehicle's history?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSaveDialog = false
+                    viewModel.saveToHistory(vehicleId) {
+                        viewModel.resetState()
+                        onBackClick?.invoke()
+                    }
+                }) {
+                    Text("Save", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = {
+                        showSaveDialog = false
+                        viewModel.resetState()
+                        onBackClick?.invoke()
+                    }) {
+                        Text("Don't save")
+                    }
+                    TextButton(onClick = { showSaveDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,13 +171,28 @@ fun AiAssistantContent(
     onAskAi: (WarningLightResult) -> Unit,
     onOpenChatClick: () -> Unit = {},
     onBackClick: (() -> Unit)? = null,
+    onNewImage: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
     Scaffold(
         bottomBar = bottomBar,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("AI Car Assistant", fontWeight = FontWeight.Bold) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.05f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AutomateRobot(mode = RobotDisplayMode.CHAT_AVATAR, size = 26.dp)
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("AI Car Assistant", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                },
                 navigationIcon = {
                     if (onBackClick != null) {
                         IconButton(onClick = onBackClick) {
@@ -148,7 +212,7 @@ fun AiAssistantContent(
         },
         containerColor = Color(0xFF000C1F)
     ) { paddingValues ->
-        if (uiState is AiAssistantUiState.Initial) {
+        if (uiState.selectedUri == null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -199,73 +263,65 @@ fun AiAssistantContent(
         ) {
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                AiAssistantHeader(onOpenChatClick = onOpenChatClick)
-                Spacer(modifier = Modifier.height(32.dp))
-            }
+                Card(
+                    modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    AsyncImage(
+                        model = uiState.selectedUri,
+                        contentDescription = "Selected warning light",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
-            when (uiState) {
-                is AiAssistantUiState.Initial -> Unit
-                is AiAssistantUiState.ImageSelected,
-                is AiAssistantUiState.Analyzing, 
-                is AiAssistantUiState.Success,
-                is AiAssistantUiState.Error -> {
-                    val uri = when (uiState) {
-                        is AiAssistantUiState.ImageSelected -> uiState.uri
-                        is AiAssistantUiState.Analyzing -> uiState.uri
-                        is AiAssistantUiState.Success -> uiState.uri
-                        else -> null
+                if (uiState.analysisResult != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedButton(
+                        onClick = onNewImage,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
+                    ) {
+                        Text("New image")
                     }
+                }
 
-                    item {
-                        if (uri != null) {
-                            Card(
-                                modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                AsyncImage(
-                                    model = uri,
-                                    contentDescription = "Selected warning light",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (uiState.analysisResult == null && !uiState.isAnalyzing && uiState.errorMessage == null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        TextButton(onClick = onRetake, modifier = Modifier.weight(1f)) {
+                            Text("Retake", color = Color.White)
                         }
-
-                        if (uiState is AiAssistantUiState.ImageSelected) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                TextButton(onClick = onRetake, modifier = Modifier.weight(1f)) {
-                                    Text("Retake", color = Color.White)
-                                }
-                                TextButton(onClick = onRemove, modifier = Modifier.weight(1f)) {
-                                    Text("Remove", color = Color.Red)
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            PrimaryButton(text = "Analyze warning light", onClick = onAnalyze)
-                        }
-
-                        if (uiState is AiAssistantUiState.Analyzing) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                                CircularProgressIndicator(color = Color(0xFF007BFF))
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text("Analyzing warning light...", color = Color.White)
-                            }
-                        }
-
-                        if (uiState is AiAssistantUiState.Success) {
-                            ResultCard(result = uiState.result, onAskAi = onAskAi)
-                        }
-
-                        if (uiState is AiAssistantUiState.Error) {
-                            Text(uiState.message, color = Color.Red, textAlign = TextAlign.Center)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            PrimaryButton(text = "Try Again", onClick = onRemove)
+                        TextButton(onClick = onRemove, modifier = Modifier.weight(1f)) {
+                            Text("Remove", color = Color.Red)
                         }
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PrimaryButton(text = "Analyze warning light", onClick = onAnalyze)
+                }
+
+                if (uiState.isAnalyzing) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(color = Color(0xFF007BFF))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Analyzing warning light...", color = Color.White)
+                    }
+                }
+
+                if (uiState.analysisResult != null) {
+                    ResultCard(result = uiState.analysisResult, onAskAi = onAskAi)
+                }
+
+                if (uiState.errorMessage != null) {
+                    Text(uiState.errorMessage, color = Color.Red, textAlign = TextAlign.Center)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PrimaryButton(text = "Try Again", onClick = onRemove)
                 }
             }
             item { Spacer(modifier = Modifier.height(32.dp)) }
@@ -352,21 +408,21 @@ fun ResultCard(result: WarningLightResult, onAskAi: (WarningLightResult) -> Unit
             Text("Recommendation", fontWeight = FontWeight.Bold, color = Color.Black)
             Text(result.recommendation, color = Color.DarkGray)
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             val canDriveText = when (result.canContinueDriving) {
                 true -> "You may continue driving with caution."
                 false -> "Stop driving immediately and seek assistance."
                 else -> "Status unknown. Exercise extreme caution."
             }
             val driveColor = if (result.canContinueDriving == true) Color(0xFF2E7D32) else Color(0xFFC62828)
-            
+
             Text(
                 text = canDriveText,
                 color = driveColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             AiDisclaimerNote(text = result.disclaimer)
             Spacer(modifier = Modifier.height(24.dp))
@@ -384,7 +440,7 @@ fun SeverityBadge(severity: WarningSeverity) {
         WarningSeverity.CRITICAL -> Color(0xFFB71C1C) to Color.White
         WarningSeverity.UNKNOWN -> Color.LightGray to Color.DarkGray
     }
-    
+
     Surface(
         color = backgroundColor,
         shape = RoundedCornerShape(12.dp)
@@ -404,7 +460,7 @@ fun SeverityBadge(severity: WarningSeverity) {
 fun AiAssistantPreview() {
     AutomateTheme {
         AiAssistantContent(
-            uiState = AiAssistantUiState.Initial,
+            uiState = AiAssistantUiState(),
             onTakePhoto = {},
             onChooseGallery = {},
             onRetake = {},
@@ -430,7 +486,7 @@ fun AiAssistantResultPreview() {
     )
     AutomateTheme {
         AiAssistantContent(
-            uiState = AiAssistantUiState.Success(Uri.EMPTY, mockResult),
+            uiState = AiAssistantUiState(selectedUri = Uri.EMPTY, analysisResult = mockResult),
             onTakePhoto = {},
             onChooseGallery = {},
             onRetake = {},

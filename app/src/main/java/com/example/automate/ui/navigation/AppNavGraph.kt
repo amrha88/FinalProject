@@ -48,7 +48,7 @@ fun AppNavGraph(navController: NavHostController) {
     val aiAssistantViewModel: AiAssistantViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return AiAssistantViewModel(warningLightRepository) as T
+                return AiAssistantViewModel(warningLightRepository, vehicleHistoryRepository) as T
             }
         }
     )
@@ -97,6 +97,16 @@ fun AppNavGraph(navController: NavHostController) {
         }
     )
 
+    val notificationsViewModel: NotificationsViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return NotificationsViewModel(
+                    reminderRepository = FirestoreReminderRepository()
+                ) as T
+            }
+        }
+    )
+
     val authUiState by authViewModel.uiState.collectAsState()
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -121,8 +131,11 @@ fun AppNavGraph(navController: NavHostController) {
                 BottomNavItem(
                     icon = Icons.AutoMirrored.Filled.Chat,
                     label = "AI Assistant",
-                    selected = currentRoute == Screen.AiAssistant.route,
-                    onClick = { navigateToTab(Screen.AiAssistant.route) }
+                    selected = currentRoute?.startsWith("ai_assistant") == true,
+                    onClick = { 
+                        val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
+                        navigateToTab("ai_assistant/$firstVehicleId") 
+                    }
                 ),
                 BottomNavItem(
                     icon = Icons.Default.Person,
@@ -146,7 +159,8 @@ fun AppNavGraph(navController: NavHostController) {
     ) {
         composable(Screen.Splash.route) {
             SplashScreen(onNavigateToLogin = {
-                navController.navigate(Screen.Login.route) {
+                val startRoute = if (authRepository.isUserLoggedIn()) Screen.Home.route else Screen.Login.route
+                navController.navigate(startRoute) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
             })
@@ -200,7 +214,8 @@ fun AppNavGraph(navController: NavHostController) {
                     navController.navigate("vehicle_details/$vehicleId")
                 },
                 onNeedHelpClick = {
-                    navController.navigate(Screen.AiAssistant.route)
+                    val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
+                    navController.navigate("ai_assistant/$firstVehicleId")
                 },
                 bottomBar = mainBottomBar
             )
@@ -233,11 +248,30 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
+        composable(
+            route = Screen.VehicleSetup.route,
+            arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            VehicleSetupQuestionsScreen(
+                onComplete = { inspectionDate, inspectionPrecision, licenceDate, licencePrecision ->
+                    authViewModel.saveInitialSetup(vehicleId, inspectionDate, inspectionPrecision, licenceDate, licencePrecision)
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.AddVehicle.route) {
             AddVehicleScreen(
                 viewModel = authViewModel,
                 onBackClick = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() }
+                onSaveSuccess = { vehicleId ->
+                    navController.navigate("vehicle_setup/$vehicleId") {
+                        popUpTo(Screen.AddVehicle.route) { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -269,7 +303,7 @@ fun AppNavGraph(navController: NavHostController) {
                 onNotificationsClick = { id -> navController.navigate("notifications/$id") },
                 onHistoryClick = { id -> navController.navigate("history/$id") },
                 onDocumentsClick = { id -> navController.navigate("vehicle_documents/$id") },
-                onAiScannerClick = { navController.navigate("ai_scanner/$vehicleId") },
+                onAiScannerClick = { navController.navigate("ai_assistant/$vehicleId") },
                 onEditClick = { id -> navController.navigate("edit_vehicle/$id") },
                 bottomBar = mainBottomBar
             )
@@ -298,31 +332,21 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
-        composable(Screen.AiAssistant.route) {
-            val openChat = {
-                // Chatbot route requires a vehicleId; fall back to the user's first vehicle
-                // since the assistant isn't scoped to one specific vehicle here.
-                val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
-                navController.navigate("chatbot/$firstVehicleId")
-            }
-            AiAssistantScreen(
-                viewModel = aiAssistantViewModel,
-                onNavigateToChat = { openChat() },
-                onOpenChatClick = openChat,
-                bottomBar = mainBottomBar
-            )
-        }
-
         composable(
-            route = Screen.AiScanner.route,
+            route = Screen.AiAssistant.route,
             arguments = listOf(navArgument("vehicleId") { type = NavType.StringType })
         ) { backStackEntry ->
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
+            val openChat = {
+                navController.navigate("chatbot/$vehicleId")
+            }
             AiAssistantScreen(
+                vehicleId = vehicleId,
                 viewModel = aiAssistantViewModel,
-                onNavigateToChat = { navController.navigate("chatbot/$vehicleId") },
-                onOpenChatClick = { navController.navigate("chatbot/$vehicleId") },
-                onBackClick = { navController.popBackStack() }
+                onNavigateToChat = { openChat() },
+                onOpenChatClick = openChat,
+                onBackClick = { navController.popBackStack() },
+                bottomBar = mainBottomBar
             )
         }
 
@@ -378,9 +402,8 @@ fun AppNavGraph(navController: NavHostController) {
             val vehicleId = backStackEntry.arguments?.getString("vehicleId") ?: ""
             NotificationsScreen(
                 vehicleId = vehicleId,
-                viewModel = vehicleLicenceViewModel,
-                onBackClick = { navController.popBackStack() },
-                onAddLicenceClick = { navController.navigate("licences/$vehicleId") }
+                viewModel = notificationsViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 
