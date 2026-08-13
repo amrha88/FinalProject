@@ -4,6 +4,7 @@
     <!-- Splash -->
     <string name="splash_brand">AUTOMATE</string>
     <string name="splash_tagline">עוזר הרכב החכם שלך</string>
+    <string name="cd_automate_splash">מסך פתיחה של Automate</string>
 
     <!-- Common -->
     <string name="action_save">שמור</string>
@@ -87,6 +88,9 @@
     <string name="reminder_due_today">מועד היעד היום</string>
     <string name="reminder_tomorrow">מחר</string>
     <string name="reminder_days_remaining">נותרו %1$d ימים</string>
+    <string name="reminder_overdue_by_km">באיחור של %1$d ק״מ</string>
+    <string name="reminder_due_now">למועד כעת</string>
+    <string name="reminder_km_remaining">נותרו %1$d ק״מ</string>
 
     <!-- Add / Edit Vehicle -->
     <string name="add_vehicle_edit_title">עריכת רכב</string>

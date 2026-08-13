@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun NotificationsScreen(
     vehicleId: String,
+    currentMileage: Int? = null,
     viewModel: NotificationsViewModel,
     onBackClick: () -> Unit
 ) {
@@ -46,6 +48,7 @@ fun NotificationsScreen(
 
     NotificationsContent(
         uiState = uiState,
+        currentMileage = currentMileage,
         onBackClick = onBackClick
     )
 }
@@ -54,6 +57,7 @@ fun NotificationsScreen(
 @Composable
 fun NotificationsContent(
     uiState: NotificationsUiState,
+    currentMileage: Int? = null,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -96,7 +100,7 @@ fun NotificationsContent(
                 ) {
                     item { Spacer(modifier = Modifier.height(8.dp)) }
                     items(uiState.reminders) { reminder ->
-                        ReminderCard(reminder = reminder)
+                        ReminderCard(reminder = reminder, currentMileage = currentMileage)
                     }
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
@@ -113,10 +117,13 @@ enum class NotificationPriority(val label: String, val color: Color, val icon: I
 }
 
 @Composable
-fun ReminderCard(reminder: VehicleReminder) {
+fun ReminderCard(reminder: VehicleReminder, currentMileage: Int? = null) {
+    val context = LocalContext.current
     val daysLeft = reminder.dueDate?.let { daysUntil(it) }
-    val priority = statusFor(daysLeft)
-    
+    val mileageLeft = if (reminder.dueMileage != null && currentMileage != null) reminder.dueMileage - currentMileage else null
+
+    val priority = statusFor(daysLeft, mileageLeft)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -135,20 +142,42 @@ fun ReminderCard(reminder: VehicleReminder) {
                     Icon(priority.icon, contentDescription = null, tint = priority.color, modifier = Modifier.size(24.dp))
                 }
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = reminder.title, fontWeight = FontWeight.Bold, color = Color(0xFF0B1730), fontSize = 16.sp)
+
+                val statusText = buildString {
+                    if (daysLeft != null) {
+                        append(
+                            when {
+                                reminder.datePrecision == DatePrecision.MONTH_ONLY ->
+                                    context.getString(R.string.reminder_expected_in, reminder.dueDate.substring(0, 7))
+                                daysLeft < 0 -> context.getString(R.string.reminder_expired_days_ago, -daysLeft)
+                                daysLeft == 0 -> context.getString(R.string.reminder_due_today)
+                                daysLeft == 1 -> context.getString(R.string.reminder_tomorrow)
+                                else -> context.getString(R.string.reminder_days_remaining, daysLeft)
+                            }
+                        )
+                    }
+
+                    if (mileageLeft != null) {
+                        if (isNotEmpty()) append(" • ")
+                        append(
+                            when {
+                                mileageLeft < 0 -> context.getString(R.string.reminder_overdue_by_km, -mileageLeft)
+                                mileageLeft == 0 -> context.getString(R.string.reminder_due_now)
+                                else -> context.getString(R.string.reminder_km_remaining, mileageLeft)
+                            }
+                        )
+                    }
+
+                    if (isEmpty()) append(context.getString(R.string.reminder_pending))
+                }
+
                 Text(
-                    text = when {
-                        reminder.datePrecision == DatePrecision.MONTH_ONLY -> stringResource(R.string.reminder_expected_in, reminder.dueDate?.substring(0, 7) ?: "")
-                        daysLeft == null -> stringResource(R.string.reminder_pending)
-                        daysLeft < 0 -> stringResource(R.string.reminder_expired_days_ago, -daysLeft)
-                        daysLeft == 0 -> stringResource(R.string.reminder_due_today)
-                        daysLeft == 1 -> stringResource(R.string.reminder_tomorrow)
-                        else -> stringResource(R.string.reminder_days_remaining, daysLeft)
-                    },
+                    text = statusText,
                     color = priority.color,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
@@ -168,7 +197,7 @@ private fun daysUntil(dateString: String): Int? {
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }.time
-        
+
         val diff = targetDate.time - now.time
         TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS).toInt()
     } catch (e: Exception) {
@@ -176,12 +205,15 @@ private fun daysUntil(dateString: String): Int? {
     }
 }
 
-private fun statusFor(daysLeft: Int?): NotificationPriority {
+private fun statusFor(daysLeft: Int?, mileageLeft: Int?): NotificationPriority {
+    val isOverdue = (daysLeft != null && daysLeft < 0) || (mileageLeft != null && mileageLeft < 0)
+    val isDue = (daysLeft != null && daysLeft == 0) || (mileageLeft != null && mileageLeft == 0)
+    val isSoon = (daysLeft != null && daysLeft <= 14) || (mileageLeft != null && mileageLeft <= 500)
+
     return when {
-        daysLeft == null -> NotificationPriority.UPCOMING
-        daysLeft < 0 -> NotificationPriority.OVERDUE
-        daysLeft == 0 -> NotificationPriority.DUE
-        daysLeft <= 14 -> NotificationPriority.SOON
+        isOverdue -> NotificationPriority.OVERDUE
+        isDue -> NotificationPriority.DUE
+        isSoon -> NotificationPriority.SOON
         else -> NotificationPriority.UPCOMING
     }
 }

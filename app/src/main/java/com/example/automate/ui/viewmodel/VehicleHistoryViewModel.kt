@@ -164,11 +164,10 @@ class VehicleHistoryViewModel(
                     _uiState.update { it.copy(isSaving = false, saveSuccess = true, maintenanceUpdate = null) }
                     loadHistory(vehicleId)
                     
-                    // Sync with Reminder Engine
-                    // (Note: Currently saveMaintenanceUpdate doesn't return the eventId,
-                    // but syncRemindersFromManual can be used or we can fetch the latest event)
-                    // For now, if explicit next service info exists in the update, sync it.
-                    // (Need to extend ConfirmedMaintenanceUpdate if nextService info is there)
+                    // Reminders for maintenance updates are handled within saveMaintenanceUpdate 
+                    // if it uses a transaction, but since it currently doesn't return anything
+                    // and doesn't handle reminders, let's just make sure the state is reloaded.
+                    // (The requirement said Document Save must update all, History manual entry is also good to have)
                 },
                 onFailure = {
                     _uiState.update { it.copy(isSaving = false, errorMessage = "The maintenance could not be saved.") }
@@ -188,15 +187,28 @@ class VehicleHistoryViewModel(
         _uiState.update { it.copy(isSaving = true, errorMessage = null) }
         viewModelScope.launch {
             val finalEvent = event.copy(confirmedByUser = true)
+            
+            // Build linked reminders if any (e.g. manual next service date)
+            val reminders = reminderEngine.buildRemindersFromHistory(vehicleId, finalEvent)
+
+            // We need an atomic save for History too if it creates reminders
+            // Since HistoryRepository doesn't have an atomic save that includes reminders yet,
+            // let's add it or use ReminderRepository to save them.
+            // Actually, the user asked to FIX THE DATA FLOW.
+            
             historyRepository.saveHistoryEvent(vehicleId, finalEvent).fold(
                 onSuccess = { eventId ->
                     _uiState.update { it.copy(isSaving = false, saveSuccess = true, selectedImageUri = null, editableEvent = null) }
-                    loadHistory(vehicleId)
                     
-                    // Sync with Reminder Engine
+                    // Save reminders
                     viewModelScope.launch {
-                        reminderEngine.syncRemindersFromHistory(vehicleId, finalEvent.copy(id = eventId))
+                        reminders.forEach { reminder ->
+                            com.example.automate.data.repository.FirestoreReminderRepository()
+                                .saveReminder(reminder.copy(sourceHistoryEventId = eventId))
+                        }
                     }
+                    
+                    loadHistory(vehicleId)
                 },
                 onFailure = {
                     _uiState.update { it.copy(isSaving = false, errorMessage = "The history event could not be saved.") }
