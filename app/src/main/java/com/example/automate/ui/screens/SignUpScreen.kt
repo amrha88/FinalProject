@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -52,6 +54,13 @@ fun SignUpScreen(
         }
     }
 
+    val errorFullName = stringResource(R.string.signup_error_full_name)
+    val errorAge = stringResource(R.string.signup_error_age)
+    val errorEmail = stringResource(R.string.signup_error_email)
+    val errorEmailMismatch = stringResource(R.string.signup_error_email_mismatch)
+    val errorPasswordLength = stringResource(R.string.signup_error_password_length)
+    val errorLicense = stringResource(R.string.signup_error_license)
+
     SignUpScreenContent(
         uiState = uiState,
         formError = formError,
@@ -75,7 +84,13 @@ fun SignUpScreen(
                 email = email,
                 confirmEmail = confirmEmail,
                 password = password,
-                hasLicense = hasLicense
+                hasLicense = hasLicense,
+                errorFullName = errorFullName,
+                errorAge = errorAge,
+                errorEmail = errorEmail,
+                errorEmailMismatch = errorEmailMismatch,
+                errorPasswordLength = errorPasswordLength,
+                errorLicense = errorLicense
             )
             if (validationError != null) {
                 formError = validationError
@@ -98,15 +113,21 @@ private fun validateSignUpForm(
     email: String,
     confirmEmail: String,
     password: String,
-    hasLicense: Boolean?
+    hasLicense: Boolean?,
+    errorFullName: String,
+    errorAge: String,
+    errorEmail: String,
+    errorEmailMismatch: String,
+    errorPasswordLength: String,
+    errorLicense: String
 ): String? {
-    if (fullName.isBlank()) return "Please enter your full name."
+    if (fullName.isBlank()) return errorFullName
     val ageValue = age.toIntOrNull()
-    if (ageValue == null || ageValue !in 1..120) return "Please enter a valid age."
-    if (email.isBlank()) return "Please enter your email address."
-    if (email != confirmEmail) return "Email addresses do not match."
-    if (password.length < 6) return "Password must be at least 6 characters."
-    if (hasLicense == null) return "Please select whether you have a license."
+    if (ageValue == null || ageValue !in 1..120) return errorAge
+    if (email.isBlank()) return errorEmail
+    if (email != confirmEmail) return errorEmailMismatch
+    if (password.length < 6) return errorPasswordLength
+    if (hasLicense == null) return errorLicense
     return null
 }
 
@@ -143,7 +164,7 @@ private fun SignUpScreenContent(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.action_back),
                     tint = Color.White
                 )
             }
@@ -152,7 +173,7 @@ private fun SignUpScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Create account",
+            text = stringResource(R.string.signup_title),
             color = Color.White,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
@@ -164,7 +185,7 @@ private fun SignUpScreenContent(
         AppTextField(
             value = fullName,
             onValueChange = onFullNameChange,
-            label = "Full name"
+            label = stringResource(R.string.label_full_name)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -172,7 +193,7 @@ private fun SignUpScreenContent(
         AppTextField(
             value = age,
             onValueChange = { if (it.length <= 3) onAgeChange(it.filter(Char::isDigit)) },
-            label = "Age",
+            label = stringResource(R.string.label_age),
             keyboardType = KeyboardType.Number
         )
 
@@ -181,7 +202,7 @@ private fun SignUpScreenContent(
         AppTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = "Email address",
+            label = stringResource(R.string.label_email),
             keyboardType = KeyboardType.Email
         )
 
@@ -190,7 +211,7 @@ private fun SignUpScreenContent(
         AppTextField(
             value = confirmEmail,
             onValueChange = onConfirmEmailChange,
-            label = "Confirm email address",
+            label = stringResource(R.string.label_confirm_email),
             keyboardType = KeyboardType.Email
         )
 
@@ -199,14 +220,14 @@ private fun SignUpScreenContent(
         AppTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = "Password",
+            label = stringResource(R.string.label_password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardType = KeyboardType.Password,
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        contentDescription = stringResource(if (passwordVisible) R.string.cd_hide_password else R.string.cd_show_password),
                         tint = Color.Gray
                     )
                 }
@@ -216,7 +237,7 @@ private fun SignUpScreenContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Do you have a driving license?",
+            text = stringResource(R.string.signup_has_license_question),
             color = Color.White,
             fontSize = 16.sp,
             modifier = Modifier.align(Alignment.Start)
@@ -229,13 +250,13 @@ private fun SignUpScreenContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LicenseOption(
-                text = "Yes",
+                text = stringResource(R.string.action_yes),
                 selected = hasLicense == true,
                 onClick = { onHasLicenseChange(true) },
                 modifier = Modifier.weight(1f)
             )
             LicenseOption(
-                text = "No",
+                text = stringResource(R.string.action_no),
                 selected = hasLicense == false,
                 onClick = { onHasLicenseChange(false) },
                 modifier = Modifier.weight(1f)
@@ -261,7 +282,7 @@ private fun SignUpScreenContent(
         }
 
         PrimaryButton(
-            text = "Sign up",
+            text = stringResource(R.string.signup_submit),
             onClick = onSubmit,
             enabled = !uiState.isLoading
         )

@@ -24,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.domain.model.EngineVariant
 import com.example.automate.domain.model.VehicleSpecs
 import com.example.automate.ui.components.AiDisclaimerNote
@@ -53,7 +55,7 @@ fun VehicleDetailsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val vehicle = uiState.vehicles.find { it.id == vehicleId }
 
-    val vehicleName = vehicle?.let { "${it.manufacturer} ${it.model}" } ?: "Vehicle"
+    val vehicleName = vehicle?.let { "${it.manufacturer} ${it.model}" } ?: stringResource(R.string.vehicle_default_name)
     val vehicleYear = vehicle?.year ?: ""
     val vehiclePlate = vehicle?.plate ?: ""
     val vehiclePhoto = vehicle?.photoBase64
@@ -121,9 +123,9 @@ fun VehicleDetailsContent(
         bottomBar = bottomBar,
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
-                        text = "Vehicle details",
+                        text = stringResource(R.string.vehicle_details_title),
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
@@ -140,7 +142,7 @@ fun VehicleDetailsContent(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.action_back),
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
@@ -151,7 +153,7 @@ fun VehicleDetailsContent(
                         IconButton(onClick = { menuExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Menu",
+                                contentDescription = stringResource(R.string.cd_menu),
                                 tint = Color.White
                             )
                         }
@@ -160,7 +162,7 @@ fun VehicleDetailsContent(
                             onDismissRequest = { menuExpanded = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Edit vehicle") },
+                                text = { Text(stringResource(R.string.add_vehicle_edit_title)) },
                                 leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
                                 onClick = {
                                     menuExpanded = false
@@ -168,7 +170,7 @@ fun VehicleDetailsContent(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Delete vehicle") },
+                                text = { Text(stringResource(R.string.delete_vehicle_action)) },
                                 leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) },
                                 onClick = {
                                     menuExpanded = false
@@ -230,14 +232,14 @@ fun VehicleDetailsContent(
                             .padding(20.dp)
                     ) {
                         Text(
-                            text = "Vehicle info",
+                            text = stringResource(R.string.vehicle_info_title),
                             color = Color.White,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "No vehicle info available right now. Try again later.",
+                            text = stringResource(R.string.vehicle_info_unavailable),
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 13.sp
                         )
@@ -246,7 +248,7 @@ fun VehicleDetailsContent(
                 }
 
                 Text(
-                    text = "Vehicle services",
+                    text = stringResource(R.string.vehicle_services_title),
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -257,8 +259,8 @@ fun VehicleDetailsContent(
                 val serviceCards: List<@Composable () -> Unit> = listOf(
                     {
                         VehicleFeatureCard(
-                            title = "AI Warning Scanner",
-                            subtitle = "Scan dashboard warning lights",
+                            title = stringResource(R.string.feature_ai_scanner_title),
+                            subtitle = stringResource(R.string.feature_ai_scanner_subtitle),
                             icon = Icons.Default.CameraAlt,
                             isHighlighted = true,
                             onClick = onAiScannerClick
@@ -266,17 +268,17 @@ fun VehicleDetailsContent(
                     },
                     {
                         VehicleFeatureCard(
-                            title = "Documents",
-                            subtitle = "Upload and manage vehicle documents",
+                            title = stringResource(R.string.feature_documents_title),
+                            subtitle = stringResource(R.string.feature_documents_subtitle),
                             icon = Icons.Default.Description,
-                            highlightLabel = "AI powered",
+                            highlightLabel = stringResource(R.string.feature_ai_powered_label),
                             onClick = onDocumentsClick
                         )
                     },
                     {
                         VehicleFeatureCard(
-                            title = "AI Assistant",
-                            subtitle = "Ask about your vehicle",
+                            title = stringResource(R.string.feature_ai_assistant_title),
+                            subtitle = stringResource(R.string.feature_ai_assistant_subtitle),
                             icon = Icons.AutoMirrored.Filled.Chat,
                             showAlert = true, // Preserve alert logic if needed
                             onClick = onChatbotClick
@@ -284,16 +286,16 @@ fun VehicleDetailsContent(
                     },
                     {
                         VehicleFeatureCard(
-                            title = "Notifications",
-                            subtitle = "Maintenance and licence reminders",
+                            title = stringResource(R.string.notifications_title),
+                            subtitle = stringResource(R.string.feature_notifications_subtitle),
                             icon = Icons.Default.Notifications,
                             onClick = onNotificationsClick
                         )
                     },
                     {
                         VehicleFeatureCard(
-                            title = "Vehicle history",
-                            subtitle = "View maintenance and service history",
+                            title = stringResource(R.string.feature_history_title),
+                            subtitle = stringResource(R.string.feature_history_subtitle),
                             icon = Icons.Default.History,
                             onClick = onHistoryClick
                         )
@@ -322,19 +324,19 @@ fun VehicleDetailsContent(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete vehicle?") },
-            text = { Text("This can't be undone.") },
+            title = { Text(stringResource(R.string.delete_vehicle_confirm_title)) },
+            text = { Text(stringResource(R.string.action_cannot_be_undone)) },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteConfirm = false
                     onDeleteConfirmed()
                 }) {
-                    Text("Delete", color = Color(0xFFFF5252))
+                    Text(stringResource(R.string.action_delete), color = Color(0xFFFF5252))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -351,7 +353,7 @@ fun VehicleInfoCard(specs: VehicleSpecs, onVariantSelected: (EngineVariant) -> U
             .padding(20.dp)
     ) {
         Text(
-            text = "Vehicle info",
+            text = stringResource(R.string.vehicle_info_title),
             color = Color.White,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
@@ -360,7 +362,7 @@ fun VehicleInfoCard(specs: VehicleSpecs, onVariantSelected: (EngineVariant) -> U
         if (specs.variants.size > 1) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "This model came with more than one engine. Pick yours for accurate figures:",
+                text = stringResource(R.string.variant_multi_engine_hint),
                 color = Color.White.copy(alpha = 0.6f),
                 fontSize = 12.sp
             )
@@ -381,7 +383,7 @@ fun VehicleInfoCard(specs: VehicleSpecs, onVariantSelected: (EngineVariant) -> U
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = variant.name ?: "Variant",
+                            text = variant.name ?: stringResource(R.string.variant_default_name),
                             color = Color.White,
                             fontSize = 12.sp,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
@@ -394,17 +396,17 @@ fun VehicleInfoCard(specs: VehicleSpecs, onVariantSelected: (EngineVariant) -> U
         Spacer(modifier = Modifier.height(16.dp))
 
         val stats = listOfNotNull(
-            specs.fuelConsumptionL100km?.let { "Fuel consumption" to "%.1f L/100km".format(it) },
-            specs.fuelType?.let { "Fuel type" to it },
-            specs.engineDisplacementL?.let { "Engine" to "%.1fL".format(it) },
-            specs.horsepower?.let { "Horsepower" to "$it hp" },
-            specs.transmission?.let { "Transmission" to it },
-            specs.fuelTankCapacityL?.let { "Fuel tank" to "%.0fL".format(it) }
+            specs.fuelConsumptionL100km?.let { stringResource(R.string.spec_fuel_consumption) to "%.1f L/100km".format(it) },
+            specs.fuelType?.let { stringResource(R.string.spec_fuel_type) to it },
+            specs.engineDisplacementL?.let { stringResource(R.string.spec_engine) to "%.1fL".format(it) },
+            specs.horsepower?.let { stringResource(R.string.spec_horsepower) to stringResource(R.string.spec_horsepower_value, it) },
+            specs.transmission?.let { stringResource(R.string.label_transmission) to it },
+            specs.fuelTankCapacityL?.let { stringResource(R.string.spec_fuel_tank) to "%.0fL".format(it) }
         )
 
         if (stats.isEmpty()) {
             Text(
-                text = "Vehicle info isn't available for this model yet.",
+                text = stringResource(R.string.vehicle_info_empty),
                 color = Color.White.copy(alpha = 0.6f),
                 fontSize = 13.sp
             )
@@ -429,7 +431,7 @@ fun VehicleInfoCard(specs: VehicleSpecs, onVariantSelected: (EngineVariant) -> U
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            AiDisclaimerNote(text = "AI-estimated specs. It can make mistakes; actual figures vary by trim.")
+            AiDisclaimerNote(text = stringResource(R.string.ai_specs_disclaimer))
         }
     }
 }

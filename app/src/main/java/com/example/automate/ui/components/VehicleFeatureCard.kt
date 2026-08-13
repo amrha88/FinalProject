@@ -14,10 +14,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 
 @Composable
 fun VehicleFeatureCard(
@@ -116,7 +118,7 @@ fun VehicleFeatureCard(
             if (showAlert) {
                 Icon(
                     imageVector = Icons.Default.Error,
-                    contentDescription = "Alert",
+                    contentDescription = stringResource(R.string.cd_alert),
                     tint = Color(0xFFFF5252),
                     modifier = Modifier
                         .align(Alignment.TopEnd)

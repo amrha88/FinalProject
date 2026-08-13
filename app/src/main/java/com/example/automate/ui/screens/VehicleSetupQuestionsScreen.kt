@@ -8,10 +8,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.domain.model.DatePrecision
 import com.example.automate.ui.components.PrimaryButton
 import java.text.SimpleDateFormat
@@ -42,8 +44,8 @@ fun VehicleSetupQuestionsScreen(
         ) {
             if (inspectionStep) {
                 SetupQuestion(
-                    title = "Vehicle Inspection",
-                    question = "Do you know when your vehicle's next inspection/test is due?",
+                    title = stringResource(R.string.setup_inspection_title),
+                    question = stringResource(R.string.setup_inspection_question),
                     onDateSelected = { date, precision ->
                         inspectionDate = date
                         inspectionPrecision = precision
@@ -52,8 +54,8 @@ fun VehicleSetupQuestionsScreen(
                 )
             } else {
                 SetupQuestion(
-                    title = "Vehicle Licence",
-                    question = "Do you know when the vehicle licence expires?",
+                    title = stringResource(R.string.doc_type_vehicle_licence),
+                    question = stringResource(R.string.setup_licence_question),
                     onDateSelected = { date, precision ->
                         licenceDate = date
                         licencePrecision = precision
@@ -78,11 +80,11 @@ private fun SetupQuestion(
     Text(text = question, color = Color.Gray, textAlign = TextAlign.Center, fontSize = 16.sp)
     Spacer(modifier = Modifier.height(32.dp))
 
-    PrimaryButton(text = "Exact date", onClick = { showDatePicker = true })
+    PrimaryButton(text = stringResource(R.string.action_exact_date), onClick = { showDatePicker = true })
     Spacer(modifier = Modifier.height(12.dp))
-    
+
     OutlinedButton(
-        onClick = { 
+        onClick = {
             // Mocking month selection for now
             val calendar = Calendar.getInstance()
             val date = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(calendar.time)
@@ -91,12 +93,12 @@ private fun SetupQuestion(
         modifier = Modifier.fillMaxWidth().height(56.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Text("I only know the month", color = Color.White)
+        Text(stringResource(R.string.action_month_only), color = Color.White)
     }
     Spacer(modifier = Modifier.height(12.dp))
-    
+
     TextButton(onClick = { onDateSelected(null, DatePrecision.UNKNOWN) }) {
-        Text("I don't know", color = Color.Gray)
+        Text(stringResource(R.string.action_dont_know), color = Color.Gray)
     }
 
     if (showDatePicker) {

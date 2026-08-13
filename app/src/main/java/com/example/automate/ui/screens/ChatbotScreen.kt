@@ -24,12 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.components.AiDisclaimerNote
 import com.example.automate.ui.components.AutomateRobot
 import com.example.automate.ui.components.RobotDisplayMode
@@ -62,10 +64,10 @@ fun ChatbotScreen(
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Vehicle not found", color = Color.White, fontSize = 18.sp)
+                Text(stringResource(R.string.vehicle_not_found), color = Color.White, fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onBackClick) {
-                    Text("Go Back")
+                    Text(stringResource(R.string.action_go_back))
                 }
             }
         }
@@ -133,7 +135,7 @@ fun ChatbotContent(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "AI Assistant",
+                                text = stringResource(R.string.chat_ai_assistant_title),
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
@@ -150,7 +152,7 @@ fun ChatbotContent(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.action_back),
                             tint = Color.White
                         )
                     }
@@ -205,7 +207,7 @@ fun ChatbotContent(
             }
             
             AiDisclaimerNote(
-                text = "AI guidance can make mistakes. For serious warnings, contact a qualified mechanic.",
+                text = stringResource(R.string.chat_ai_disclaimer),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
@@ -215,10 +217,10 @@ fun ChatbotContent(
 @Composable
 fun ChatEmptyState(onSuggestionClick: (String) -> Unit) {
     val suggestions = listOf(
-        "Warning light",
-        "Maintenance",
-        "My documents",
-        "Vehicle history"
+        stringResource(R.string.chat_suggestion_warning_light),
+        stringResource(R.string.chat_suggestion_maintenance),
+        stringResource(R.string.chat_suggestion_documents),
+        stringResource(R.string.chat_suggestion_history)
     )
 
     Column(
@@ -233,17 +235,17 @@ fun ChatEmptyState(onSuggestionClick: (String) -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         
         Text(
-            text = "How can I help with your vehicle?",
+            text = stringResource(R.string.chat_empty_title),
             color = Color.White,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
-            text = "Ask me about warning lights, maintenance, documents, or your vehicle history.",
+            text = stringResource(R.string.chat_empty_subtitle),
             color = Color.White.copy(alpha = 0.5f),
             fontSize = 14.sp,
             textAlign = TextAlign.Center
@@ -329,7 +331,7 @@ fun ChatBubble(message: ChatMessageUiModel) {
             
             if (message.status == MessageStatus.FAILED) {
                 Text(
-                    text = "Failed to send",
+                    text = stringResource(R.string.chat_message_failed),
                     color = Color(0xFFFF5252),
                     fontSize = 11.sp,
                     modifier = Modifier.padding(top = 4.dp, end = 4.dp)
@@ -364,7 +366,7 @@ fun TypingIndicator() {
             shape = RoundedCornerShape(18.dp, 18.dp, 18.dp, 4.dp)
         ) {
             Text(
-                text = "AI is typing...",
+                text = stringResource(R.string.chat_ai_typing),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                 color = Color.White.copy(alpha = 0.4f),
                 fontSize = 13.sp,
@@ -396,7 +398,7 @@ fun ChatInputArea(
                 value = input,
                 onValueChange = onInputChange,
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Type your message...", color = Color.White.copy(alpha = 0.3f)) },
+                placeholder = { Text(stringResource(R.string.chat_input_placeholder), color = Color.White.copy(alpha = 0.3f)) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.White.copy(alpha = 0.05f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
@@ -431,7 +433,7 @@ fun ChatInputArea(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Send",
+                    contentDescription = stringResource(R.string.cd_send),
                     tint = if (input.isNotBlank() && !isSending) Color.White else Color.White.copy(alpha = 0.2f),
                     modifier = Modifier.size(20.dp)
                 )
@@ -457,10 +459,10 @@ fun ErrorMessageBar(
         ) {
             Text(message, modifier = Modifier.weight(1f), fontSize = 13.sp)
             TextButton(onClick = onRetry) {
-                Text("Retry", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.action_retry), color = Color.White, fontWeight = FontWeight.Bold)
             }
             TextButton(onClick = onDismiss) {
-                Icon(Icons.Default.Close, contentDescription = "Dismiss", modifier = Modifier.size(18.dp), tint = Color.White.copy(alpha = 0.7f))
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_dismiss), modifier = Modifier.size(18.dp), tint = Color.White.copy(alpha = 0.7f))
             }
         }
     }

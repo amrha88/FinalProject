@@ -18,14 +18,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 
 private val DisclaimerColor = Color(0xFFFFA000)
 
 @Composable
 fun AiDisclaimerNote(
-    text: String = "AI-generated result. It can make mistakes — please verify before relying on it.",
+    text: String = stringResource(R.string.ai_disclaimer_default),
     modifier: Modifier = Modifier
 ) {
     Row(

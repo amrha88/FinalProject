@@ -13,12 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -68,7 +70,7 @@ private fun ForgotPasswordContent(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.action_back),
                     tint = Color.White
                 )
             }
@@ -77,7 +79,7 @@ private fun ForgotPasswordContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Reset your password",
+            text = stringResource(R.string.forgot_password_title),
             color = Color.White,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
@@ -87,7 +89,7 @@ private fun ForgotPasswordContent(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Enter the email address linked to your account and we'll send you a link to reset your password.",
+            text = stringResource(R.string.forgot_password_subtitle),
             color = Color.Gray,
             fontSize = 14.sp,
             textAlign = TextAlign.Center
@@ -98,7 +100,7 @@ private fun ForgotPasswordContent(
         AppTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = "Email address",
+            label = stringResource(R.string.label_email),
             keyboardType = KeyboardType.Email
         )
 
@@ -120,7 +122,7 @@ private fun ForgotPasswordContent(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Reset email sent to $email. Check your inbox.",
+                    text = stringResource(R.string.forgot_password_sent, email),
                     color = Color(0xFF4CAF50),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
@@ -145,7 +147,7 @@ private fun ForgotPasswordContent(
         }
 
         PrimaryButton(
-            text = if (uiState.passwordResetSent) "Resend email" else "Send reset email",
+            text = stringResource(if (uiState.passwordResetSent) R.string.forgot_password_resend else R.string.forgot_password_send),
             onClick = onSendClick,
             enabled = email.isNotBlank() && !uiState.isSendingPasswordReset
         )
@@ -158,12 +160,12 @@ private fun ForgotPasswordContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Remembered your password? ",
+                text = stringResource(R.string.forgot_password_remembered),
                 color = Color.Gray,
                 fontSize = 14.sp
             )
             Text(
-                text = "Sign in",
+                text = stringResource(R.string.forgot_password_sign_in_link),
                 color = Color(0xFF007BFF),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,

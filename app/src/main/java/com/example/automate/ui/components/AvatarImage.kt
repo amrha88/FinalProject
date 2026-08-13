@@ -17,10 +17,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 
 @Composable
 fun AvatarImage(
@@ -54,7 +56,7 @@ fun AvatarImage(
         if (bitmap != null) {
             Image(
                 bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Profile photo",
+                contentDescription = stringResource(R.string.cd_profile_photo),
                 modifier = Modifier
                     .size(size)
                     .clip(CircleShape),

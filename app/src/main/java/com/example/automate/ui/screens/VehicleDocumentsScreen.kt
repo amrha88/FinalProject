@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
+import com.example.automate.R
 import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.VehicleDocument
 import com.example.automate.domain.model.VehicleDocumentExtraction
@@ -46,7 +48,16 @@ import com.example.automate.ui.viewmodel.VehicleDocumentsViewModel
 import com.example.automate.util.FileUtils
 import com.example.automate.util.ImageProcessingUtils
 import kotlinx.coroutines.launch
-import java.util.Locale
+
+@Composable
+internal fun documentTypeLabel(type: VehicleDocumentType): String = when (type) {
+    VehicleDocumentType.VEHICLE_LICENCE -> stringResource(R.string.doc_type_vehicle_licence)
+    VehicleDocumentType.MAINTENANCE -> stringResource(R.string.doc_type_maintenance)
+    VehicleDocumentType.INSPECTION -> stringResource(R.string.doc_type_inspection)
+    VehicleDocumentType.INSURANCE -> stringResource(R.string.doc_type_insurance)
+    VehicleDocumentType.REPAIR_INVOICE -> stringResource(R.string.doc_type_repair_invoice)
+    VehicleDocumentType.OTHER -> stringResource(R.string.doc_type_other)
+}
 
 @Composable
 fun VehicleDocumentsScreen(
@@ -83,9 +94,9 @@ fun VehicleDocumentsScreen(
     if (vehicle == null) {
         Box(modifier = Modifier.fillMaxSize().background(Color(0xFF000C1F)), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Vehicle not found", color = Color.White)
+                Text(stringResource(R.string.vehicle_not_found), color = Color.White)
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onBackClick) { Text("Go Back") }
+                Button(onClick = onBackClick) { Text(stringResource(R.string.action_go_back)) }
             }
         }
         return
@@ -150,20 +161,20 @@ fun VehicleDocumentsScreen(
     if (documentToDelete != null) {
         AlertDialog(
             onDismissRequest = { documentToDelete = null },
-            title = { Text("Delete this document?") },
-            text = { Text("This will remove the document information from this vehicle.") },
+            title = { Text(stringResource(R.string.delete_document_dialog_title2)) },
+            text = { Text(stringResource(R.string.delete_document_body1)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteDocument(vehicleId, documentToDelete!!.id)
                     documentToDelete = null
                     selectedDocumentForView = null
                 }) {
-                    Text("Delete", color = Color.Red)
+                    Text(stringResource(R.string.action_delete), color = Color.Red)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { documentToDelete = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -203,13 +214,13 @@ fun VehicleDocumentsContent(
             CenterAlignedTopAppBar(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Documents", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(stringResource(R.string.documents_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text("$vehicleTitle • $vehiclePlate", fontSize = 12.sp, color = Color.LightGray)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -228,7 +239,7 @@ fun VehicleDocumentsContent(
                     contentColor = Color.White,
                     shape = CircleShape
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Document")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_add_document))
                 }
             }
         }
@@ -245,14 +256,14 @@ fun VehicleDocumentsContent(
             if (uiState.editableDocument != null) {
                 item {
                     Text(
-                        text = if (uiState.isEditingExisting) "Edit Document" else "Review AI Extraction",
+                        text = stringResource(if (uiState.isEditingExisting) R.string.documents_edit_title else R.string.documents_review_title),
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     Text(
-                        "Review the information before saving. AI extraction may contain errors.",
+                        stringResource(R.string.documents_review_warning),
                         color = Color.Yellow,
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
@@ -269,13 +280,13 @@ fun VehicleDocumentsContent(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     PrimaryButton(
-                        text = if (uiState.isSaving) "Saving..." else "Save Document",
+                        text = stringResource(if (uiState.isSaving) R.string.action_saving else R.string.action_save_document),
                         onClick = onSave,
                         enabled = !uiState.isSaving
                     )
-                    
+
                     TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
-                        Text("Cancel", color = Color.White)
+                        Text(stringResource(R.string.action_cancel), color = Color.White)
                     }
                 }
             } else if (uiState.selectedImageUri != null) {
@@ -286,26 +297,26 @@ fun VehicleDocumentsContent(
                     ) {
                         AsyncImage(
                             model = uiState.selectedImageUri,
-                            contentDescription = "Selected document",
+                            contentDescription = stringResource(R.string.cd_selected_document),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     if (uiState.isAnalyzing) {
                         CircularProgressIndicator(color = Color(0xFF007BFF))
-                        Text("Analyzing vehicle document...", color = Color.White, modifier = Modifier.padding(top = 16.dp))
+                        Text(stringResource(R.string.documents_analyzing), color = Color.White, modifier = Modifier.padding(top = 16.dp))
                     } else {
-                        PrimaryButton(text = "Analyze document", onClick = onAnalyze)
-                        
+                        PrimaryButton(text = stringResource(R.string.action_analyze_document), onClick = onAnalyze)
+
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             TextButton(onClick = onTakePhoto, modifier = Modifier.weight(1f)) {
-                                Text("Replace", color = Color.White)
+                                Text(stringResource(R.string.action_replace), color = Color.White)
                             }
                             TextButton(onClick = onRemoveImage, modifier = Modifier.weight(1f)) {
-                                Text("Remove", color = Color.Red)
+                                Text(stringResource(R.string.action_remove), color = Color.Red)
                             }
                         }
                     }
@@ -321,7 +332,7 @@ fun VehicleDocumentsContent(
                             FilterChip(
                                 selected = selectedFilter == null,
                                 onClick = { selectedFilter = null },
-                                label = { Text("All") }
+                                label = { Text(stringResource(R.string.document_type_all)) }
                             )
                         }
                         VehicleDocumentType.entries.forEach { type ->
@@ -329,10 +340,7 @@ fun VehicleDocumentsContent(
                                 FilterChip(
                                     selected = selectedFilter == type,
                                     onClick = { selectedFilter = type },
-                                    label = { 
-                                        Text(type.name.replace("_", " ").lowercase(Locale.ROOT)
-                                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }) 
-                                    }
+                                    label = { Text(documentTypeLabel(type)) }
                                 )
                             }
                         }
@@ -347,17 +355,17 @@ fun VehicleDocumentsContent(
                         ) {
                             Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("No documents added yet", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.documents_empty_title), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                             Text(
-                                "Upload vehicle documents and let AI organize the important information.",
+                                stringResource(R.string.documents_empty_subtitle),
                                 color = Color.Gray,
                                 fontSize = 14.sp,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)
                             )
                             Spacer(modifier = Modifier.height(32.dp))
-                            
-                            PrimaryButton(text = "Take photo", onClick = onTakePhoto)
+
+                            PrimaryButton(text = stringResource(R.string.action_take_photo), onClick = onTakePhoto)
                             Spacer(modifier = Modifier.height(16.dp))
                             OutlinedButton(
                                 onClick = onChooseGallery,
@@ -365,14 +373,14 @@ fun VehicleDocumentsContent(
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                             ) {
-                                Text("Upload document")
+                                Text(stringResource(R.string.action_upload_document))
                             }
                         }
                     }
                 } else {
                     item {
                         Text(
-                            text = "Current documents",
+                            text = stringResource(R.string.documents_current_title),
                             color = Color.White,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
@@ -406,10 +414,9 @@ fun DocumentCard(
     onReplace: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val typeLabel = document.documentType.name.replace("_", " ").lowercase(Locale.ROOT)
-        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-    val date = document.documentDate ?: "No date"
-    val summary = document.summary ?: "No summary"
+    val typeLabel = documentTypeLabel(document.documentType)
+    val date = document.documentDate ?: stringResource(R.string.document_no_date)
+    val summary = document.summary ?: stringResource(R.string.document_no_summary)
     var menuExpanded by remember { mutableStateOf(false) }
     
     Card(
@@ -456,7 +463,7 @@ fun DocumentCard(
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
-                                "ACTIVE", 
+                                stringResource(R.string.document_status_active),
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                 color = Color(0xFF2E7D32),
                                 fontSize = 9.sp,
@@ -471,27 +478,27 @@ fun DocumentCard(
             
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Menu", tint = Color.Gray)
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.cd_menu), tint = Color.Gray)
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     DropdownMenuItem(
-                        text = { Text("View details") },
+                        text = { Text(stringResource(R.string.menu_view_details)) },
                         leadingIcon = { Icon(Icons.Default.Visibility, contentDescription = null) },
                         onClick = { menuExpanded = false; onClick() }
                     )
                     DropdownMenuItem(
-                        text = { Text("Update / Replace") },
+                        text = { Text(stringResource(R.string.menu_update_replace)) },
                         leadingIcon = { Icon(Icons.Default.Update, contentDescription = null) },
                         onClick = { menuExpanded = false; onReplace() }
                     )
                     DropdownMenuItem(
-                        text = { Text("Edit information") },
+                        text = { Text(stringResource(R.string.menu_edit_information)) },
                         leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
                         onClick = { menuExpanded = false; onEdit() }
                     )
                     HorizontalDivider()
                     DropdownMenuItem(
-                        text = { Text("Delete", color = Color.Red) },
+                        text = { Text(stringResource(R.string.action_delete), color = Color.Red) },
                         leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red) },
                         onClick = { menuExpanded = false; onDelete() }
                     )
@@ -520,7 +527,7 @@ fun DocumentReviewForm(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Please verify extracted fields:", color = Color.Red, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.documents_verify_fields), color = Color.Red, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                     Text(
                         uncertainFields.joinToString(", "),
@@ -539,15 +546,12 @@ fun DocumentReviewForm(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
             ) {
-                Text("Type: ${document.documentType.name.replace("_", " ")}")
+                Text(stringResource(R.string.document_type_prefix, documentTypeLabel(document.documentType)))
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 VehicleDocumentType.entries.forEach { type ->
                     DropdownMenuItem(
-                        text = { 
-                            Text(type.name.replace("_", " ").lowercase(Locale.ROOT)
-                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }) 
-                        },
+                        text = { Text(documentTypeLabel(type)) },
                         onClick = {
                             onTypeChange(type)
                             expanded = false
@@ -560,19 +564,19 @@ fun DocumentReviewForm(
         AppTextField(
             value = document.documentTitle ?: "",
             onValueChange = { title -> onUpdateField { it.copy(documentTitle = title) } },
-            label = "Document Title"
+            label = stringResource(R.string.label_document_title)
         )
 
         AppTextField(
             value = document.documentDate ?: "",
             onValueChange = { date -> onUpdateField { it.copy(documentDate = date) } },
-            label = "Document Date (YYYY-MM-DD)"
+            label = stringResource(R.string.label_document_date)
         )
 
         AppTextField(
             value = document.summary ?: "",
             onValueChange = { sum -> onUpdateField { it.copy(summary = sum) } },
-            label = "Short Summary"
+            label = stringResource(R.string.label_short_summary)
         )
 
         // Specific fields based on type
@@ -581,41 +585,41 @@ fun DocumentReviewForm(
                 AppTextField(
                     value = document.mileage?.toString() ?: "",
                     onValueChange = { m -> onUpdateField { it.copy(mileage = m.toIntOrNull()) } },
-                    label = "Mileage"
+                    label = stringResource(R.string.label_mileage)
                 )
                 AppTextField(
                     value = document.garageOrProvider ?: "",
                     onValueChange = { g -> onUpdateField { it.copy(garageOrProvider = g) } },
-                    label = "Garage Name"
+                    label = stringResource(R.string.label_garage_name)
                 )
-                
-                BooleanOption("Oil Changed", document.oilChanged) { v -> onUpdateField { it.copy(oilChanged = v) } }
-                BooleanOption("Filter Changed", document.oilFilterChanged) { v -> onUpdateField { it.copy(oilFilterChanged = v) } }
+
+                BooleanOption(stringResource(R.string.bool_oil_changed), document.oilChanged) { v -> onUpdateField { it.copy(oilChanged = v) } }
+                BooleanOption(stringResource(R.string.bool_filter_changed), document.oilFilterChanged) { v -> onUpdateField { it.copy(oilFilterChanged = v) } }
             }
             VehicleDocumentType.INSURANCE -> {
                 AppTextField(
                     value = document.insuranceProvider ?: "",
                     onValueChange = { p -> onUpdateField { it.copy(insuranceProvider = p) } },
-                    label = "Insurance Provider"
+                    label = stringResource(R.string.label_insurance_provider)
                 )
                 AppTextField(
                     value = document.insuranceExpiryDate ?: "",
                     onValueChange = { d -> onUpdateField { it.copy(insuranceExpiryDate = d) } },
-                    label = "Policy Expiry Date"
+                    label = stringResource(R.string.label_policy_expiry_date)
                 )
             }
             VehicleDocumentType.VEHICLE_LICENCE -> {
                 AppTextField(
                     value = document.licenceExpiryDate ?: "",
                     onValueChange = { d -> onUpdateField { it.copy(licenceExpiryDate = d) } },
-                    label = "Licence Expiry Date"
+                    label = stringResource(R.string.label_licence_expiry_date)
                 )
             }
             VehicleDocumentType.INSPECTION -> {
                 AppTextField(
                     value = document.inspectionExpiryDate ?: "",
                     onValueChange = { d -> onUpdateField { it.copy(inspectionExpiryDate = d) } },
-                    label = "Inspection Expiry Date"
+                    label = stringResource(R.string.label_inspection_expiry_date)
                 )
             }
             else -> {}
@@ -629,9 +633,9 @@ fun BooleanOption(label: String, value: Boolean?, onValueChange: (Boolean?) -> U
         Text(label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OptionChip("Yes", value == true) { onValueChange(true) }
-            OptionChip("No", value == false) { onValueChange(false) }
-            OptionChip("Unknown", value == null) { onValueChange(null) }
+            OptionChip(stringResource(R.string.action_yes), value == true) { onValueChange(true) }
+            OptionChip(stringResource(R.string.action_no), value == false) { onValueChange(false) }
+            OptionChip(stringResource(R.string.option_unknown), value == null) { onValueChange(null) }
         }
     }
 }
@@ -666,18 +670,18 @@ fun DocumentDetailView(
             CenterAlignedTopAppBar(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(document.documentType.name.replace("_", " "), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(documentTypeLabel(document.documentType), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(vehicleTitle, fontSize = 12.sp, color = Color.LightGray)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = Color.Red)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -695,41 +699,45 @@ fun DocumentDetailView(
                 .padding(paddingValues)
                 .padding(24.dp)
         ) {
-            DetailRow("Title", document.documentTitle)
-            DetailRow("Date", document.documentDate)
-            DetailRow("Mileage", document.mileage?.toString())
-            DetailRow("Provider", document.garageOrProvider ?: document.insuranceProvider)
-            DetailRow("Status", document.status.name)
-            DetailRow("Summary", document.summary)
-            
+            val yes = stringResource(R.string.action_yes)
+            val no = stringResource(R.string.action_no)
+            val unknown = stringResource(R.string.option_unknown)
+
+            DetailRow(stringResource(R.string.detail_title), document.documentTitle)
+            DetailRow(stringResource(R.string.detail_date), document.documentDate)
+            DetailRow(stringResource(R.string.label_mileage), document.mileage?.toString())
+            DetailRow(stringResource(R.string.detail_provider), document.garageOrProvider ?: document.insuranceProvider)
+            DetailRow(stringResource(R.string.detail_status), document.status.name)
+            DetailRow(stringResource(R.string.detail_summary), document.summary)
+
             if (document.documentType == VehicleDocumentType.MAINTENANCE) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Maintenance Details", fontWeight = FontWeight.Bold, color = Color.White)
-                DetailRow("Oil Changed", when(document.oilChanged) { true -> "Yes"; false -> "No"; else -> "Unknown" })
-                DetailRow("Filter Changed", when(document.oilFilterChanged) { true -> "Yes"; false -> "No"; else -> "Unknown" })
+                Text(stringResource(R.string.maintenance_details_title), fontWeight = FontWeight.Bold, color = Color.White)
+                DetailRow(stringResource(R.string.bool_oil_changed), when (document.oilChanged) { true -> yes; false -> no; else -> unknown })
+                DetailRow(stringResource(R.string.bool_filter_changed), when (document.oilFilterChanged) { true -> yes; false -> no; else -> unknown })
             }
-            
-            if (document.licenceExpiryDate != null) DetailRow("Licence Expiry", document.licenceExpiryDate)
-            if (document.insuranceExpiryDate != null) DetailRow("Insurance Expiry", document.insuranceExpiryDate)
-            if (document.inspectionExpiryDate != null) DetailRow("Inspection Expiry", document.inspectionExpiryDate)
+
+            if (document.licenceExpiryDate != null) DetailRow(stringResource(R.string.detail_licence_expiry), document.licenceExpiryDate)
+            if (document.insuranceExpiryDate != null) DetailRow(stringResource(R.string.detail_insurance_expiry), document.insuranceExpiryDate)
+            if (document.inspectionExpiryDate != null) DetailRow(stringResource(R.string.detail_inspection_expiry), document.inspectionExpiryDate)
         }
     }
 
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete document?") },
-            text = { Text("This will permanently remove this record.") },
+            title = { Text(stringResource(R.string.delete_document_confirm_title)) },
+            text = { Text(stringResource(R.string.delete_document_confirm_body)) },
             confirmButton = {
-                TextButton(onClick = { 
+                TextButton(onClick = {
                     onDelete(document.id)
-                    showDeleteConfirm = false 
-                }) { 
-                    Text("Delete", color = Color.Red) 
+                    showDeleteConfirm = false
+                }) {
+                    Text(stringResource(R.string.action_delete), color = Color.Red)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
             }
         )
     }

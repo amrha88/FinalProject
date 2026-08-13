@@ -17,11 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.components.AssistantBanner
 import com.example.automate.ui.components.VehicleCard
 import com.example.automate.ui.components.WelcomeCard
@@ -115,7 +117,7 @@ fun HomeScreenContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Your vehicles",
+                        text = stringResource(R.string.home_your_vehicles),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -199,7 +201,7 @@ fun EmptyVehicleState(onAddVehicleClick: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "No vehicles added yet",
+            text = stringResource(R.string.home_no_vehicles_title),
             color = Color.White,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
@@ -207,7 +209,7 @@ fun EmptyVehicleState(onAddVehicleClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Add your first vehicle to start tracking it",
+            text = stringResource(R.string.home_no_vehicles_subtitle),
             color = Color.White.copy(alpha = 0.6f),
             fontSize = 13.sp,
             textAlign = TextAlign.Center
@@ -226,7 +228,7 @@ fun EmptyVehicleState(onAddVehicleClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Add vehicle",
+                text = stringResource(R.string.action_add_vehicle),
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )

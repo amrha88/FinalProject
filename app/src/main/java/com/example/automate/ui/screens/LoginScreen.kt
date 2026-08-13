@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -109,7 +111,7 @@ private fun LoginScreenContent(
                 .background(Color.Gray, shape = MaterialTheme.shapes.small),
             contentAlignment = Alignment.Center
         ){
-            Text("Logo", color = Color.White, fontSize = 10.sp)
+            Text(stringResource(R.string.login_logo_placeholder), color = Color.White, fontSize = 10.sp)
         }
 
 
@@ -119,7 +121,7 @@ private fun LoginScreenContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Sign in",
+            text = stringResource(R.string.login_title),
             color = Color.White,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
@@ -131,7 +133,7 @@ private fun LoginScreenContent(
         AppTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = "Email address",
+            label = stringResource(R.string.label_email),
             keyboardType = KeyboardType.Email
         )
 
@@ -140,14 +142,14 @@ private fun LoginScreenContent(
         AppTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = "Password",
+            label = stringResource(R.string.label_password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardType = KeyboardType.Password,
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        contentDescription = stringResource(if (passwordVisible) R.string.cd_hide_password else R.string.cd_show_password),
                         tint = Color.Gray
                     )
                 }
@@ -155,7 +157,7 @@ private fun LoginScreenContent(
         )
 
         Text(
-            text = "Forgot password?",
+            text = stringResource(R.string.login_forgot_password),
             color = Color(0xFF007BFF),
             fontSize = 14.sp,
             modifier = Modifier
@@ -182,7 +184,7 @@ private fun LoginScreenContent(
         }
 
         PrimaryButton(
-            text = "Sign in",
+            text = stringResource(R.string.login_title),
             onClick = onLogin,
             enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading
         )
@@ -195,12 +197,12 @@ private fun LoginScreenContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Don't have an account? ",
+                text = stringResource(R.string.login_no_account),
                 color = Color.Gray,
                 fontSize = 14.sp
             )
             Text(
-                text = "Sign up",
+                text = stringResource(R.string.login_sign_up_link),
                 color = Color(0xFF007BFF),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -214,22 +216,24 @@ private fun LoginScreenContent(
         val linkStyle = TextLinkStyles(
             style = SpanStyle(color = Color(0xFF007BFF), textDecoration = TextDecoration.Underline)
         )
+        val termsOfService = stringResource(R.string.login_terms_of_service)
+        val privacyPolicy = stringResource(R.string.login_privacy_policy)
         val legalText = buildAnnotatedString {
-            append("By continuing you agree to our ")
+            append(stringResource(R.string.login_agree_prefix))
             withLink(
                 LinkAnnotation.Clickable(tag = "terms", styles = linkStyle) {
                     showTermsDialog = true
                 }
             ) {
-                append("Terms of Service")
+                append(termsOfService)
             }
-            append(" and ")
+            append(stringResource(R.string.login_and))
             withLink(
                 LinkAnnotation.Clickable(tag = "privacy", styles = linkStyle) {
                     showPrivacyDialog = true
                 }
             ) {
-                append("Privacy Policy")
+                append(privacyPolicy)
             }
             append(".")
         }
@@ -245,16 +249,16 @@ private fun LoginScreenContent(
 
     if (showTermsDialog) {
         LegalDialog(
-            title = "Terms of Service",
-            body = TERMS_OF_SERVICE_TEXT,
+            title = stringResource(R.string.login_terms_of_service),
+            body = stringResource(R.string.terms_of_service_body),
             onDismiss = { showTermsDialog = false }
         )
     }
 
     if (showPrivacyDialog) {
         LegalDialog(
-            title = "Privacy Policy",
-            body = PRIVACY_POLICY_TEXT,
+            title = stringResource(R.string.login_privacy_policy),
+            body = stringResource(R.string.privacy_policy_body),
             onDismiss = { showPrivacyDialog = false }
         )
     }
@@ -276,48 +280,11 @@ private fun LegalDialog(title: String, body: String, onDismiss: () -> Unit) {
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.action_close))
             }
         }
     )
 }
-
-private const val TERMS_OF_SERVICE_TEXT = """Welcome to Automate. By creating an account or signing in, you agree to these Terms of Service.
-
-1. Use of the App
-Automate helps you track vehicle maintenance, licences, and notifications. You agree to provide accurate information about your vehicles and to use the app only for lawful purposes.
-
-2. Account Responsibility
-You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account.
-
-3. Service Availability
-We aim to keep Automate available at all times but do not guarantee uninterrupted access. Features may change or be discontinued without notice.
-
-4. Limitation of Liability
-Automate is provided "as is". We are not liable for any damages arising from missed maintenance reminders, licence renewals, or other notifications.
-
-5. Changes to These Terms
-We may update these terms from time to time. Continued use of the app after changes constitutes acceptance of the new terms."""
-
-private const val PRIVACY_POLICY_TEXT = """Your privacy matters to us. This Privacy Policy explains how Automate collects, uses, and protects your information.
-
-1. Information We Collect
-We collect the information you provide when signing up (such as name and email) and the vehicle data you add to the app.
-
-2. How We Use Your Information
-Your information is used to operate your account, store your vehicle records, and send maintenance and licence notifications.
-
-3. Data Storage
-Your data is stored securely using Firebase services. We take reasonable measures to protect it from unauthorized access.
-
-4. Sharing of Information
-We do not sell your personal information. Data may be shared with service providers strictly to operate the app (e.g. cloud storage).
-
-5. Your Choices
-You can update or delete your account information at any time from within the app.
-
-6. Contact
-If you have questions about this policy, please contact us through the app's support channels."""
 
 @Preview(showBackground = true)
 @Composable

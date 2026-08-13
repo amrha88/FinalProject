@@ -19,11 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.domain.model.CarCatalog
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.AutocompleteTextField
@@ -31,6 +34,17 @@ import com.example.automate.ui.components.AvatarImage
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.components.rememberProfileImagePicker
 import com.example.automate.ui.viewmodel.AuthViewModel
+
+internal fun transmissionOptionKeys(): List<String> = listOf("Manual", "Automatic", "Electric", "Hybrid")
+
+@Composable
+internal fun transmissionLabel(value: String): String = when (value) {
+    "Manual" -> stringResource(R.string.transmission_manual)
+    "Automatic" -> stringResource(R.string.transmission_automatic)
+    "Electric" -> stringResource(R.string.transmission_electric)
+    "Hybrid" -> stringResource(R.string.transmission_hybrid)
+    else -> value
+}
 
 @Composable
 fun AddVehicleScreen(
@@ -110,6 +124,7 @@ fun AddVehicleScreenContent(
     var transmission by remember { mutableStateOf(initialTransmission) }
     var validationError by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val displayedError = validationError ?: serverError
     val hasPreview = manufacturer.isNotBlank() || model.isNotBlank()
@@ -125,7 +140,7 @@ fun AddVehicleScreenContent(
         IconButton(onClick = onBackClick) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.action_back),
                 tint = Color.White
             )
         }
@@ -156,13 +171,13 @@ fun AddVehicleScreenContent(
 
             Column {
                 Text(
-                    text = if (isEditing) "Edit vehicle" else "Add new vehicle",
+                    text = stringResource(if (isEditing) R.string.add_vehicle_edit_title else R.string.add_vehicle_add_title),
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = if (isEditing) "Update your car's details" else "Tell us about your car",
+                    text = stringResource(if (isEditing) R.string.add_vehicle_edit_subtitle else R.string.add_vehicle_add_subtitle),
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 13.sp
                 )
@@ -211,7 +226,7 @@ fun AddVehicleScreenContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
-                        contentDescription = "Add car photo",
+                        contentDescription = stringResource(R.string.cd_add_car_photo),
                         tint = Color.White,
                         modifier = Modifier.size(15.dp)
                     )
@@ -264,7 +279,7 @@ fun AddVehicleScreenContent(
                         text = listOf(manufacturer, model)
                             .filter { it.isNotBlank() }
                             .joinToString(" ")
-                            .ifBlank { "Your vehicle" },
+                            .ifBlank { stringResource(R.string.add_vehicle_default_name) },
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -272,8 +287,8 @@ fun AddVehicleScreenContent(
                     Text(
                         text = listOfNotNull(
                             year.ifBlank { null },
-                            plate.ifBlank { null }?.let { "number:$it" }
-                        ).joinToString(" • ").ifBlank { "Fill in the details below" },
+                            plate.ifBlank { null }?.let { stringResource(R.string.add_vehicle_plate_prefix, it) }
+                        ).joinToString(" • ").ifBlank { stringResource(R.string.add_vehicle_fill_details_below) },
                         color = Color.White.copy(alpha = 0.6f),
                         fontSize = 12.sp
                     )
@@ -291,7 +306,7 @@ fun AddVehicleScreenContent(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Vehicle details",
+                text = stringResource(R.string.vehicle_details_section_title),
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold
@@ -308,9 +323,9 @@ fun AddVehicleScreenContent(
                     manufacturer = newValue
                     validationError = null
                 },
-                label = "Manufacturer",
+                label = stringResource(R.string.label_manufacturer),
                 options = CarCatalog.manufacturers,
-                placeholder = "e.g. Toyota"
+                placeholder = stringResource(R.string.placeholder_manufacturer)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -324,9 +339,9 @@ fun AddVehicleScreenContent(
                     model = newValue
                     validationError = null
                 },
-                label = "Model",
+                label = stringResource(R.string.label_model),
                 options = CarCatalog.modelsFor(manufacturer),
-                placeholder = "e.g. Corolla"
+                placeholder = stringResource(R.string.placeholder_model)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -335,9 +350,9 @@ fun AddVehicleScreenContent(
                 AutocompleteTextField(
                     value = year,
                     onValueChange = { year = it; validationError = null },
-                    label = "Year",
+                    label = stringResource(R.string.label_year),
                     options = CarCatalog.yearsFor(manufacturer, model),
-                    placeholder = "e.g. 2020",
+                    placeholder = stringResource(R.string.placeholder_year),
                     keyboardType = KeyboardType.Number,
                     modifier = Modifier.weight(0.4f)
                 )
@@ -351,8 +366,8 @@ fun AddVehicleScreenContent(
                             .take(10)
                         validationError = null
                     },
-                    label = "Plate",
-                    placeholder = "AB-123-CD",
+                    label = stringResource(R.string.label_plate),
+                    placeholder = stringResource(R.string.placeholder_plate),
                     modifier = Modifier.weight(0.6f)
                 )
             }
@@ -360,7 +375,7 @@ fun AddVehicleScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Transmission",
+                text = stringResource(R.string.label_transmission),
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 13.sp
             )
@@ -368,7 +383,7 @@ fun AddVehicleScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                listOf("Manual", "Automatic", "Electric", "Hybrid").chunked(2).forEach { rowOptions ->
+                transmissionOptionKeys().chunked(2).forEach { rowOptions ->
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         rowOptions.forEach { option ->
                             val selected = transmission == option
@@ -385,7 +400,7 @@ fun AddVehicleScreenContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = option,
+                                    text = transmissionLabel(option),
                                     color = Color.White,
                                     fontSize = 14.sp,
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
@@ -414,19 +429,19 @@ fun AddVehicleScreenContent(
         }
 
         PrimaryButton(
-            text = if (isEditing) "Save changes" else "Save",
+            text = stringResource(if (isEditing) R.string.action_save_changes else R.string.action_save),
             enabled = !isSaving,
             onClick = {
                 fun trySave() {
                     if (manufacturer.isBlank() || model.isBlank() || year.isBlank() || plate.isBlank() || transmission.isBlank()) {
-                        validationError = "All fields are required"
+                        validationError = context.getString(R.string.add_vehicle_error_required)
                         return
                     }
 
                     val canonicalManufacturer = CarCatalog.manufacturers
                         .firstOrNull { it.equals(manufacturer.trim(), ignoreCase = true) }
                     if (canonicalManufacturer == null) {
-                        validationError = "Please choose a manufacturer from the list"
+                        validationError = context.getString(R.string.add_vehicle_error_manufacturer)
                         return
                     }
 
@@ -438,22 +453,27 @@ fun AddVehicleScreenContent(
                     val trimmedYear = year.trim()
                     val yearInt = trimmedYear.toIntOrNull()
                     if (yearInt == null || trimmedYear.length != 4) {
-                        validationError = "Please enter a valid year"
+                        validationError = context.getString(R.string.add_vehicle_error_year)
                         return
                     }
 
                     if (knownModel != null) {
                         val validYears = CarCatalog.yearsFor(canonicalManufacturer, knownModel)
                         if (trimmedYear !in validYears) {
-                            validationError =
-                                "$knownModel was made from ${validYears.last()} to ${validYears.first()}"
+                            validationError = context.getString(
+                                R.string.add_vehicle_error_model_year_range,
+                                knownModel, validYears.last(), validYears.first()
+                            )
                             return
                         }
                     } else {
                         val oldestYear = CarCatalog.years.last().toInt()
                         val newestYear = CarCatalog.years.first().toInt()
                         if (yearInt !in oldestYear..newestYear) {
-                            validationError = "Please enter a year between $oldestYear and $newestYear"
+                            validationError = context.getString(
+                                R.string.add_vehicle_error_year_range,
+                                oldestYear, newestYear
+                            )
                             return
                         }
                     }
@@ -473,7 +493,7 @@ fun AddVehicleScreenContent(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF5252)),
                 border = BorderStroke(1.dp, Color(0xFFFF5252).copy(alpha = 0.4f))
             ) {
-                Text(text = "Delete vehicle", fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.delete_vehicle_action), fontWeight = FontWeight.Bold)
             }
         }
 
@@ -483,19 +503,19 @@ fun AddVehicleScreenContent(
     if (showDeleteConfirm && onDeleteClick != null) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete vehicle?") },
-            text = { Text("This can't be undone.") },
+            title = { Text(stringResource(R.string.delete_vehicle_confirm_title)) },
+            text = { Text(stringResource(R.string.action_cannot_be_undone)) },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteConfirm = false
                     onDeleteClick()
                 }) {
-                    Text("Delete", color = Color(0xFFFF5252))
+                    Text(stringResource(R.string.action_delete), color = Color(0xFFFF5252))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )

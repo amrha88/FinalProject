@@ -10,10 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.components.AutomateRobot
 import com.example.automate.ui.components.RobotDisplayMode
 import com.example.automate.ui.theme.AutomateTheme
@@ -64,14 +66,14 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "AUTOMATE",
+                    text = stringResource(R.string.splash_brand),
                     color = Color.White,
                     fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 4.sp
                 )
                 Text(
-                    text = "Your intelligent vehicle assistant",
+                    text = stringResource(R.string.splash_tagline),
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal

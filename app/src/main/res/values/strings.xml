@@ -1,3 +1,385 @@
 <resources>
     <string name="app_name">Automate</string>
+
+    <!-- Splash -->
+    <string name="splash_brand">AUTOMATE</string>
+    <string name="splash_tagline">Your intelligent vehicle assistant</string>
+
+    <!-- Common -->
+    <string name="action_save">Save</string>
+    <string name="action_saving">Saving…</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_deleting">Deleting…</string>
+    <string name="action_back">Back</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
+    <string name="action_close">Close</string>
+    <string name="action_edit">Edit</string>
+    <string name="cd_show_password">Show password</string>
+    <string name="cd_hide_password">Hide password</string>
+    <string name="label_email">Email address</string>
+    <string name="label_password">Password</string>
+
+    <!-- Login -->
+    <string name="login_logo_placeholder">Logo</string>
+    <string name="login_title">Sign in</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_no_account">Don\'t have an account? </string>
+    <string name="login_sign_up_link">Sign up</string>
+    <string name="login_agree_prefix">By continuing you agree to our </string>
+    <string name="login_terms_of_service">Terms of Service</string>
+    <string name="login_and"> and </string>
+    <string name="login_privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service_body">Welcome to Automate. By creating an account or signing in, you agree to these Terms of Service.\n\n1. Use of the App\nAutomate helps you track vehicle maintenance, licences, and notifications. You agree to provide accurate information about your vehicles and to use the app only for lawful purposes.\n\n2. Account Responsibility\nYou are responsible for maintaining the confidentiality of your login credentials and for all activity under your account.\n\n3. Service Availability\nWe aim to keep Automate available at all times but do not guarantee uninterrupted access. Features may change or be discontinued without notice.\n\n4. Limitation of Liability\nAutomate is provided \"as is\". We are not liable for any damages arising from missed maintenance reminders, licence renewals, or other notifications.\n\n5. Changes to These Terms\nWe may update these terms from time to time. Continued use of the app after changes constitutes acceptance of the new terms.</string>
+    <string name="privacy_policy_body">Your privacy matters to us. This Privacy Policy explains how Automate collects, uses, and protects your information.\n\n1. Information We Collect\nWe collect the information you provide when signing up (such as name and email) and the vehicle data you add to the app.\n\n2. How We Use Your Information\nYour information is used to operate your account, store your vehicle records, and send maintenance and licence notifications.\n\n3. Data Storage\nYour data is stored securely using Firebase services. We take reasonable measures to protect it from unauthorized access.\n\n4. Sharing of Information\nWe do not sell your personal information. Data may be shared with service providers strictly to operate the app (e.g. cloud storage).\n\n5. Your Choices\nYou can update or delete your account information at any time from within the app.\n\n6. Contact\nIf you have questions about this policy, please contact us through the app\'s support channels.</string>
+
+    <!-- Sign Up -->
+    <string name="signup_title">Create account</string>
+    <string name="label_full_name">Full name</string>
+    <string name="label_age">Age</string>
+    <string name="label_confirm_email">Confirm email address</string>
+    <string name="signup_has_license_question">Do you have a driving license?</string>
+    <string name="signup_submit">Sign up</string>
+    <string name="signup_error_full_name">Please enter your full name.</string>
+    <string name="signup_error_age">Please enter a valid age.</string>
+    <string name="signup_error_email">Please enter your email address.</string>
+    <string name="signup_error_email_mismatch">Email addresses do not match.</string>
+    <string name="signup_error_password_length">Password must be at least 6 characters.</string>
+    <string name="signup_error_license">Please select whether you have a license.</string>
+
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">Reset your password</string>
+    <string name="forgot_password_subtitle">Enter the email address linked to your account and we\'ll send you a link to reset your password.</string>
+    <string name="forgot_password_sent">Reset email sent to %1$s. Check your inbox.</string>
+    <string name="forgot_password_resend">Resend email</string>
+    <string name="forgot_password_send">Send reset email</string>
+    <string name="forgot_password_remembered">Remembered your password? </string>
+    <string name="forgot_password_sign_in_link">Sign in</string>
+
+    <!-- Home -->
+    <string name="home_your_vehicles">Your vehicles</string>
+    <string name="home_no_vehicles_title">No vehicles added yet</string>
+    <string name="home_no_vehicles_subtitle">Add your first vehicle to start tracking it</string>
+    <string name="action_add_vehicle">Add vehicle</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Your profile</string>
+    <string name="cd_change_photo">Change photo</string>
+    <string name="profile_change_email">Change email</string>
+    <string name="profile_saved">Profile saved.</string>
+    <string name="profile_logout">Log out</string>
+    <string name="change_email_dialog_title">Change email</string>
+    <string name="change_email_confirmation_sent">We\'ve sent a confirmation link to %1$s. Your email will update once you click it.</string>
+    <string name="label_new_email">New email address</string>
+    <string name="action_sending">Sending…</string>
+    <string name="action_send_verification">Send verification</string>
+    <string name="action_done">Done</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_empty">No upcoming notifications</string>
+    <string name="reminder_expected_in">Expected in %1$s</string>
+    <string name="reminder_pending">Pending</string>
+    <string name="reminder_expired_days_ago">Expired %1$d days ago</string>
+    <string name="reminder_due_today">Due Today</string>
+    <string name="reminder_tomorrow">Tomorrow</string>
+    <string name="reminder_days_remaining">%1$d days remaining</string>
+
+    <!-- Add / Edit Vehicle -->
+    <string name="add_vehicle_edit_title">Edit vehicle</string>
+    <string name="add_vehicle_add_title">Add new vehicle</string>
+    <string name="add_vehicle_edit_subtitle">Update your car\'s details</string>
+    <string name="add_vehicle_add_subtitle">Tell us about your car</string>
+    <string name="cd_add_car_photo">Add car photo</string>
+    <string name="add_vehicle_default_name">Your vehicle</string>
+    <string name="add_vehicle_plate_prefix">number:%1$s</string>
+    <string name="add_vehicle_fill_details_below">Fill in the details below</string>
+    <string name="vehicle_details_section_title">Vehicle details</string>
+    <string name="label_manufacturer">Manufacturer</string>
+    <string name="placeholder_manufacturer">e.g. Toyota</string>
+    <string name="label_model">Model</string>
+    <string name="placeholder_model">e.g. Corolla</string>
+    <string name="label_year">Year</string>
+    <string name="placeholder_year">e.g. 2020</string>
+    <string name="label_plate">Plate</string>
+    <string name="placeholder_plate">AB-123-CD</string>
+    <string name="label_transmission">Transmission</string>
+    <string name="transmission_manual">Manual</string>
+    <string name="transmission_automatic">Automatic</string>
+    <string name="transmission_electric">Electric</string>
+    <string name="transmission_hybrid">Hybrid</string>
+    <string name="add_vehicle_error_required">All fields are required</string>
+    <string name="add_vehicle_error_manufacturer">Please choose a manufacturer from the list</string>
+    <string name="add_vehicle_error_year">Please enter a valid year</string>
+    <string name="add_vehicle_error_model_year_range">%1$s was made from %2$s to %3$s</string>
+    <string name="add_vehicle_error_year_range">Please enter a year between %1$d and %2$d</string>
+    <string name="action_save_changes">Save changes</string>
+    <string name="delete_vehicle_action">Delete vehicle</string>
+    <string name="delete_vehicle_confirm_title">Delete vehicle?</string>
+    <string name="action_cannot_be_undone">This can\'t be undone.</string>
+
+    <!-- Vehicle Details -->
+    <string name="vehicle_details_title">Vehicle details</string>
+    <string name="vehicle_default_name">Vehicle</string>
+    <string name="cd_menu">Menu</string>
+    <string name="vehicle_info_title">Vehicle info</string>
+    <string name="vehicle_info_unavailable">No vehicle info available right now. Try again later.</string>
+    <string name="vehicle_services_title">Vehicle services</string>
+    <string name="feature_ai_scanner_title">AI Warning Scanner</string>
+    <string name="feature_ai_scanner_subtitle">Scan dashboard warning lights</string>
+    <string name="feature_documents_title">Documents</string>
+    <string name="feature_documents_subtitle">Upload and manage vehicle documents</string>
+    <string name="feature_ai_powered_label">AI powered</string>
+    <string name="feature_ai_assistant_title">AI Assistant</string>
+    <string name="feature_ai_assistant_subtitle">Ask about your vehicle</string>
+    <string name="feature_notifications_subtitle">Maintenance and licence reminders</string>
+    <string name="feature_history_title">Vehicle history</string>
+    <string name="feature_history_subtitle">View maintenance and service history</string>
+    <string name="variant_multi_engine_hint">This model came with more than one engine. Pick yours for accurate figures:</string>
+    <string name="variant_default_name">Variant</string>
+    <string name="spec_fuel_consumption">Fuel consumption</string>
+    <string name="spec_fuel_type">Fuel type</string>
+    <string name="spec_engine">Engine</string>
+    <string name="spec_horsepower">Horsepower</string>
+    <string name="spec_horsepower_value">%1$d hp</string>
+    <string name="spec_fuel_tank">Fuel tank</string>
+    <string name="vehicle_info_empty">Vehicle info isn\'t available for this model yet.</string>
+    <string name="ai_specs_disclaimer">AI-estimated specs. It can make mistakes; actual figures vary by trim.</string>
+
+    <!-- Vehicle Documents -->
+    <string name="vehicle_not_found">Vehicle not found</string>
+    <string name="action_go_back">Go Back</string>
+    <string name="document_type_all">All</string>
+    <string name="doc_type_vehicle_licence">Vehicle Licence</string>
+    <string name="doc_type_maintenance">Maintenance</string>
+    <string name="doc_type_inspection">Inspection</string>
+    <string name="doc_type_insurance">Insurance</string>
+    <string name="doc_type_repair_invoice">Repair Invoice</string>
+    <string name="doc_type_other">Other</string>
+    <string name="documents_title">Documents</string>
+    <string name="documents_edit_title">Edit Document</string>
+    <string name="documents_review_title">Review AI Extraction</string>
+    <string name="documents_review_warning">Review the information before saving. AI extraction may contain errors.</string>
+    <string name="action_save_document">Save Document</string>
+    <string name="cd_selected_document">Selected document</string>
+    <string name="documents_analyzing">Analyzing vehicle document…</string>
+    <string name="action_analyze_document">Analyze document</string>
+    <string name="action_replace">Replace</string>
+    <string name="action_remove">Remove</string>
+    <string name="cd_add_document">Add Document</string>
+    <string name="documents_empty_title">No documents added yet</string>
+    <string name="documents_empty_subtitle">Upload vehicle documents and let AI organize the important information.</string>
+    <string name="action_take_photo">Take photo</string>
+    <string name="action_upload_document">Upload document</string>
+    <string name="documents_current_title">Current documents</string>
+    <string name="document_no_date">No date</string>
+    <string name="document_no_summary">No summary</string>
+    <string name="document_status_active">ACTIVE</string>
+    <string name="menu_view_details">View details</string>
+    <string name="menu_update_replace">Update / Replace</string>
+    <string name="menu_edit_information">Edit information</string>
+    <string name="documents_verify_fields">Please verify extracted fields:</string>
+    <string name="document_type_prefix">Type: %1$s</string>
+    <string name="label_document_title">Document Title</string>
+    <string name="label_document_date">Document Date (YYYY-MM-DD)</string>
+    <string name="label_short_summary">Short Summary</string>
+    <string name="label_mileage">Mileage</string>
+    <string name="label_garage_name">Garage Name</string>
+    <string name="bool_oil_changed">Oil Changed</string>
+    <string name="bool_filter_changed">Filter Changed</string>
+    <string name="label_insurance_provider">Insurance Provider</string>
+    <string name="label_policy_expiry_date">Policy Expiry Date</string>
+    <string name="label_licence_expiry_date">Licence Expiry Date</string>
+    <string name="label_inspection_expiry_date">Inspection Expiry Date</string>
+    <string name="option_unknown">Unknown</string>
+    <string name="detail_title">Title</string>
+    <string name="detail_date">Date</string>
+    <string name="detail_provider">Provider</string>
+    <string name="detail_status">Status</string>
+    <string name="detail_summary">Summary</string>
+    <string name="maintenance_details_title">Maintenance Details</string>
+    <string name="detail_licence_expiry">Licence Expiry</string>
+    <string name="detail_insurance_expiry">Insurance Expiry</string>
+    <string name="detail_inspection_expiry">Inspection Expiry</string>
+    <string name="delete_document_confirm_title">Delete document?</string>
+    <string name="delete_document_confirm_body">This will permanently remove this record.</string>
+    <string name="delete_document_dialog_title2">Delete this document?</string>
+    <string name="delete_document_body1">This will remove the document information from this vehicle.</string>
+
+    <!-- Vehicle History -->
+    <string name="maint_engine_oil">Engine Oil</string>
+    <string name="maint_oil_filter">Oil Filter</string>
+    <string name="maint_air_filter">Air Filter</string>
+    <string name="maint_cabin_filter">Cabin Filter</string>
+    <string name="maint_brake_pads">Brake Pads</string>
+    <string name="maint_brake_discs">Brake Discs</string>
+    <string name="maint_brake_fluid">Brake Fluid</string>
+    <string name="maint_coolant">Coolant</string>
+    <string name="maint_spark_plugs">Spark Plugs</string>
+    <string name="maint_battery">Battery</string>
+    <string name="maint_tires">Tires</string>
+    <string name="maint_timing_belt">Timing Belt</string>
+    <string name="maint_timing_chain">Timing Chain</string>
+    <string name="maint_transmission_oil">Transmission Oil</string>
+    <string name="maint_fuel_filter">Fuel Filter</string>
+    <string name="history_event_repair">Repair</string>
+    <string name="history_event_oil_change">Oil Change</string>
+    <string name="history_event_licence_renewal">Licence Renewal</string>
+    <string name="history_event_insurance_renewal">Insurance Renewal</string>
+    <string name="history_event_document_update">Document Update</string>
+    <string name="history_event_warning_analysis">Warning Analysis</string>
+    <string name="history_event_notification_sent">Notification Sent</string>
+    <string name="history_event_manual">Manual</string>
+    <string name="maint_action_replaced">Replaced</string>
+    <string name="maint_action_serviced">Serviced</string>
+    <string name="maint_action_checked">Checked</string>
+    <string name="history_title">Vehicle History</string>
+    <string name="history_analyzing_maintenance">Analyzing maintenance document…</string>
+    <string name="history_maintenance_status">Maintenance status</string>
+    <string name="action_add_history">+ Add history</string>
+    <string name="action_ai_quick_update">AI Quick Update</string>
+    <string name="history_component_last">Last: %1$s</string>
+    <string name="history_component_no_data">No data yet</string>
+    <string name="action_update">Update</string>
+    <string name="history_review_maintenance_title">Review Maintenance Update</string>
+    <string name="history_ai_understood">AI understood these items from your text:</string>
+    <string name="history_verify_prefix">Verify: %1$s</string>
+    <string name="label_date_ymd">Date (YYYY-MM-DD)</string>
+    <string name="label_notes">Notes</string>
+    <string name="action_confirm_update">Confirm update</string>
+    <string name="history_ai_quick_update_hint">Tell us what you replaced or serviced</string>
+    <string name="history_ai_quick_update_placeholder">e.g. Today I changed the engine oil and filter at 92,400 km.</string>
+    <string name="action_analyze">Analyze</string>
+    <string name="summary_events">Events</string>
+    <string name="summary_last_mileage">Last Mileage</string>
+    <string name="history_no_events">No history events yet</string>
+    <string name="unknown_year">Unknown Year</string>
+    <string name="add_history_dialog_title">Add to Vehicle History</string>
+    <string name="dialog_take_photo">Take Photo</string>
+    <string name="dialog_upload_image">Upload Image</string>
+    <string name="dialog_add_manually">Add Manually</string>
+    <string name="history_entry_title">Enter History Information</string>
+    <string name="history_entry_review_warning">Review this information before saving. AI extraction may contain errors.</string>
+    <string name="history_event_type_prefix">Event Type: %1$s</string>
+    <string name="label_title">Title</string>
+    <string name="label_garage">Garage</string>
+    <string name="label_description_notes">Description/Notes</string>
+    <string name="label_cost">Cost</string>
+    <string name="history_next_service_title">Next Service Recommendation</string>
+    <string name="label_next_service_date">Next Service Date</string>
+    <string name="label_next_service_mileage">Next Service Mileage</string>
+    <string name="action_save_to_history">Save to History</string>
+    <string name="history_event_details_title">Event Details</string>
+    <string name="detail_type">Type</string>
+    <string name="detail_description">Description</string>
+    <string name="history_upcoming_service_title">Upcoming Service</string>
+    <string name="history_maintenance_items_title">Maintenance Items</string>
+    <string name="history_linked_document_title">Linked Document</string>
+    <string name="history_linked_document_subtitle">Analyzed from uploaded image</string>
+    <string name="delete_history_event_title">Delete history event?</string>
+    <string name="delete_history_event_body">This will permanently remove this record from your car\'s history.</string>
+    <string name="value_km">%1$s km</string>
+
+    <!-- Vehicle Licence -->
+    <string name="vehicle_licence_title">Vehicle licence</string>
+    <string name="licence_ai_review_disclaimer">Review all details before saving. AI extraction can make mistakes.</string>
+    <string name="licence_uncertain_fields">Uncertain fields detected:</string>
+    <string name="cd_selected_licence">Selected licence</string>
+    <string name="licence_analyzing">Analyzing vehicle licence…</string>
+    <string name="licence_empty">No vehicle licence added yet</string>
+    <string name="action_upload_from_gallery">Upload from gallery</string>
+    <string name="licence_owner">Owner</string>
+    <string name="licence_chassis_short">Chassis #</string>
+    <string name="licence_expiry">Expiry</string>
+    <string name="label_owner_name">Owner Name</string>
+    <string name="label_licence_plate">Licence Plate</string>
+    <string name="label_chassis_number">Chassis Number</string>
+    <string name="label_engine_number">Engine Number</string>
+
+    <!-- Vehicle Setup Questions / Licences stub -->
+    <string name="setup_inspection_title">Vehicle Inspection</string>
+    <string name="setup_inspection_question">Do you know when your vehicle\'s next inspection/test is due?</string>
+    <string name="setup_licence_question">Do you know when the vehicle licence expires?</string>
+    <string name="action_exact_date">Exact date</string>
+    <string name="action_month_only">I only know the month</string>
+    <string name="action_dont_know">I don\'t know</string>
+    <string name="licences_screen_placeholder">Licences Screen for %1$s</string>
+
+    <!-- AI Assistant -->
+    <string name="save_to_history_dialog_title">Save to vehicle history?</string>
+    <string name="save_to_history_dialog_body">Do you want to save this warning event to this vehicle\'s history?</string>
+    <string name="action_dont_save">Don\'t save</string>
+    <string name="ai_car_assistant_title">AI Car Assistant</string>
+    <string name="ai_scan_title">Scan a dashboard warning light</string>
+    <string name="ai_scan_subtitle">Park safely, turn off the vehicle if necessary, and photograph the illuminated warning symbol.</string>
+    <string name="ai_no_camera_while_driving">Do not use the camera while driving.</string>
+    <string name="ai_chat_banner_title">Chat with the AI Assistant</string>
+    <string name="ai_chat_banner_subtitle">Skip the photo and ask a question about your car directly.</string>
+    <string name="action_choose_from_gallery">Choose from gallery</string>
+    <string name="cd_selected_warning_light">Selected warning light</string>
+    <string name="action_new_image">New image</string>
+    <string name="action_retake">Retake</string>
+    <string name="action_analyze_warning_light">Analyze warning light</string>
+    <string name="ai_analyzing_warning_light">Analyzing warning light…</string>
+    <string name="action_try_again">Try Again</string>
+    <string name="result_confidence">Confidence: %1$d%%</string>
+    <string name="result_explanation">Explanation</string>
+    <string name="result_recommendation">Recommendation</string>
+    <string name="result_can_drive_yes">You may continue driving with caution.</string>
+    <string name="result_can_drive_no">Stop driving immediately and seek assistance.</string>
+    <string name="result_can_drive_unknown">Status unknown. Exercise extreme caution.</string>
+    <string name="action_ask_ai_about_warning">Ask the AI about this warning</string>
+    <string name="severity_low">LOW</string>
+    <string name="severity_medium">MEDIUM</string>
+    <string name="severity_high">HIGH</string>
+    <string name="severity_critical">CRITICAL</string>
+    <string name="severity_unknown">UNKNOWN</string>
+
+    <!-- Chatbot -->
+    <string name="chat_ai_assistant_title">AI Assistant</string>
+    <string name="chat_empty_title">How can I help with your vehicle?</string>
+    <string name="chat_empty_subtitle">Ask me about warning lights, maintenance, documents, or your vehicle history.</string>
+    <string name="chat_suggestion_warning_light">Warning light</string>
+    <string name="chat_suggestion_maintenance">Maintenance</string>
+    <string name="chat_suggestion_documents">My documents</string>
+    <string name="chat_suggestion_history">Vehicle history</string>
+    <string name="chat_message_failed">Failed to send</string>
+    <string name="chat_ai_typing">AI is typing…</string>
+    <string name="chat_input_placeholder">Type your message…</string>
+    <string name="cd_send">Send</string>
+    <string name="chat_ai_disclaimer">AI guidance can make mistakes. For serious warnings, contact a qualified mechanic.</string>
+
+    <!-- Shared components -->
+    <string name="nav_my_cars">My Cars</string>
+    <string name="action_add">Add</string>
+    <string name="welcome_default">Welcome</string>
+    <string name="welcome_with_name">Welcome, %1$s</string>
+    <string name="welcome_manage_vehicles">Let\'s manage your vehicles</string>
+    <string name="ai_disclaimer_default">AI-generated result. It can make mistakes — please verify before relying on it.</string>
+    <string name="cd_profile_photo">Profile photo</string>
+    <string name="assistant_banner_title_default">Need a hand?</string>
+    <string name="assistant_banner_subtitle_default">Ask your car assistant about maintenance, licences, or history.</string>
+    <string name="cd_automate_ai_assistant">Automate AI Assistant</string>
+    <string name="cd_alert">Alert</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_profile_title">Profile</string>
+    <string name="settings_profile_subtitle">View and edit your personal information</string>
+    <string name="settings_change_password_title">Change password</string>
+    <string name="settings_change_password_subtitle">Update your account password</string>
+    <string name="settings_delete_account_title">Delete account</string>
+    <string name="settings_delete_account_subtitle">Permanently remove your account and data</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_subtitle">Choose your app language</string>
+    <string name="lang_english">English</string>
+    <string name="lang_hebrew">עברית</string>
+    <string name="current_password_label">Current password</string>
+    <string name="new_password_label">New password</string>
+    <string name="password_updated">Password updated.</string>
+    <string name="delete_account_dialog_title">Delete account?</string>
+    <string name="delete_account_warning">This permanently deletes your account and all your vehicles. This can\'t be undone.</string>
 </resources>

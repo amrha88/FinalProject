@@ -1,0 +1,385 @@
+<resources>
+    <string name="app_name">Automate</string>
+
+    <!-- Splash -->
+    <string name="splash_brand">AUTOMATE</string>
+    <string name="splash_tagline">עוזר הרכב החכם שלך</string>
+
+    <!-- Common -->
+    <string name="action_save">שמור</string>
+    <string name="action_saving">שומר…</string>
+    <string name="action_cancel">ביטול</string>
+    <string name="action_delete">מחק</string>
+    <string name="action_deleting">מוחק…</string>
+    <string name="action_back">חזרה</string>
+    <string name="action_retry">נסה שוב</string>
+    <string name="action_dismiss">התעלם</string>
+    <string name="action_yes">כן</string>
+    <string name="action_no">לא</string>
+    <string name="action_close">סגור</string>
+    <string name="action_edit">עריכה</string>
+    <string name="cd_show_password">הצג סיסמה</string>
+    <string name="cd_hide_password">הסתר סיסמה</string>
+    <string name="label_email">כתובת אימייל</string>
+    <string name="label_password">סיסמה</string>
+
+    <!-- Login -->
+    <string name="login_logo_placeholder">לוגו</string>
+    <string name="login_title">התחברות</string>
+    <string name="login_forgot_password">שכחת סיסמה?</string>
+    <string name="login_no_account">אין לך חשבון? </string>
+    <string name="login_sign_up_link">הרשמה</string>
+    <string name="login_agree_prefix">בהמשך השימוש הנך מסכים ל</string>
+    <string name="login_terms_of_service">תנאי השימוש</string>
+    <string name="login_and"> ול</string>
+    <string name="login_privacy_policy">מדיניות הפרטיות</string>
+    <string name="terms_of_service_body">ברוכים הבאים ל-Automate. ביצירת חשבון או התחברות, אתה מסכים לתנאי השימוש הבאים.\n\n1. שימוש באפליקציה\nAutomate עוזרת לך לעקוב אחר תחזוקת הרכב, רישיונות והתראות. אתה מסכים לספק מידע מדויק על הרכבים שלך ולהשתמש באפליקציה למטרות חוקיות בלבד.\n\n2. אחריות על החשבון\nאתה אחראי לשמור על סודיות פרטי ההתחברות שלך ועל כל פעילות המתבצעת תחת חשבונך.\n\n3. זמינות השירות\nאנו שואפים לשמור על זמינות Automate בכל עת, אך איננו מבטיחים גישה רציפה ללא הפרעות. תכונות עשויות להשתנות או להיפסק ללא הודעה מוקדמת.\n\n4. הגבלת אחריות\nAutomate מסופקת כפי שהיא. איננו אחראים לכל נזק הנובע מתזכורות תחזוקה שהוחמצו, חידוש רישיונות או התראות אחרות.\n\n5. שינויים בתנאים אלה\nאנו עשויים לעדכן תנאים אלה מעת לעת. המשך השימוש באפליקציה לאחר שינויים מהווה הסכמה לתנאים החדשים.</string>
+    <string name="privacy_policy_body">הפרטיות שלך חשובה לנו. מדיניות פרטיות זו מסבירה כיצד Automate אוספת, משתמשת ומגנה על המידע שלך.\n\n1. מידע שאנו אוספים\nאנו אוספים את המידע שאתה מספק בעת ההרשמה (כגון שם ואימייל) ואת נתוני הרכב שאתה מוסיף לאפליקציה.\n\n2. כיצד אנו משתמשים במידע שלך\nהמידע שלך משמש להפעלת החשבון שלך, לשמירת רשומות הרכב שלך ולשליחת התראות תחזוקה ורישיון.\n\n3. אחסון נתונים\nהנתונים שלך מאוחסנים בצורה מאובטחת באמצעות שירותי Firebase. אנו נוקטים אמצעים סבירים כדי להגן עליהם מפני גישה בלתי מורשית.\n\n4. שיתוף מידע\nאיננו מוכרים את המידע האישי שלך. ניתן לשתף נתונים עם ספקי שירות אך ורק לצורך הפעלת האפליקציה (למשל, אחסון ענן).\n\n5. הבחירות שלך\nתוכל לעדכן או למחוק את פרטי החשבון שלך בכל עת מתוך האפליקציה.\n\n6. יצירת קשר\nאם יש לך שאלות לגבי מדיניות זו, אנא צור איתנו קשר דרך ערוצי התמיכה של האפליקציה.</string>
+
+    <!-- Sign Up -->
+    <string name="signup_title">יצירת חשבון</string>
+    <string name="label_full_name">שם מלא</string>
+    <string name="label_age">גיל</string>
+    <string name="label_confirm_email">אימות כתובת אימייל</string>
+    <string name="signup_has_license_question">האם יש לך רישיון נהיגה?</string>
+    <string name="signup_submit">הרשמה</string>
+    <string name="signup_error_full_name">נא להזין שם מלא.</string>
+    <string name="signup_error_age">נא להזין גיל תקין.</string>
+    <string name="signup_error_email">נא להזין כתובת אימייל.</string>
+    <string name="signup_error_email_mismatch">כתובות האימייל אינן תואמות.</string>
+    <string name="signup_error_password_length">הסיסמה חייבת לכלול לפחות 6 תווים.</string>
+    <string name="signup_error_license">נא לבחור האם יש לך רישיון נהיגה.</string>
+
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">איפוס הסיסמה שלך</string>
+    <string name="forgot_password_subtitle">הזן את כתובת האימייל המשויכת לחשבון שלך ואנו נשלח לך קישור לאיפוס הסיסמה.</string>
+    <string name="forgot_password_sent">מייל איפוס נשלח אל %1$s. בדוק את תיבת הדואר שלך.</string>
+    <string name="forgot_password_resend">שלח מייל שוב</string>
+    <string name="forgot_password_send">שלח מייל איפוס</string>
+    <string name="forgot_password_remembered">נזכרת בסיסמה? </string>
+    <string name="forgot_password_sign_in_link">התחברות</string>
+
+    <!-- Home -->
+    <string name="home_your_vehicles">הרכבים שלך</string>
+    <string name="home_no_vehicles_title">עדיין לא נוספו רכבים</string>
+    <string name="home_no_vehicles_subtitle">הוסף את הרכב הראשון שלך כדי להתחיל לעקוב אחריו</string>
+    <string name="action_add_vehicle">הוספת רכב</string>
+
+    <!-- Profile -->
+    <string name="profile_title">הפרופיל שלך</string>
+    <string name="cd_change_photo">שנה תמונה</string>
+    <string name="profile_change_email">שינוי אימייל</string>
+    <string name="profile_saved">הפרופיל נשמר.</string>
+    <string name="profile_logout">התנתקות</string>
+    <string name="change_email_dialog_title">שינוי אימייל</string>
+    <string name="change_email_confirmation_sent">שלחנו קישור אישור אל %1$s. האימייל שלך יתעדכן לאחר שתלחץ עליו.</string>
+    <string name="label_new_email">כתובת אימייל חדשה</string>
+    <string name="action_sending">שולח…</string>
+    <string name="action_send_verification">שלח אימות</string>
+    <string name="action_done">סיום</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">התראות</string>
+    <string name="notifications_empty">אין התראות קרובות</string>
+    <string name="reminder_expected_in">צפוי ב-%1$s</string>
+    <string name="reminder_pending">ממתין</string>
+    <string name="reminder_expired_days_ago">פג תוקף לפני %1$d ימים</string>
+    <string name="reminder_due_today">מועד היעד היום</string>
+    <string name="reminder_tomorrow">מחר</string>
+    <string name="reminder_days_remaining">נותרו %1$d ימים</string>
+
+    <!-- Add / Edit Vehicle -->
+    <string name="add_vehicle_edit_title">עריכת רכב</string>
+    <string name="add_vehicle_add_title">הוספת רכב חדש</string>
+    <string name="add_vehicle_edit_subtitle">עדכן את פרטי הרכב שלך</string>
+    <string name="add_vehicle_add_subtitle">ספר לנו על הרכב שלך</string>
+    <string name="cd_add_car_photo">הוסף תמונת רכב</string>
+    <string name="add_vehicle_default_name">הרכב שלך</string>
+    <string name="add_vehicle_plate_prefix">מספר: %1$s</string>
+    <string name="add_vehicle_fill_details_below">מלא את הפרטים למטה</string>
+    <string name="vehicle_details_section_title">פרטי הרכב</string>
+    <string name="label_manufacturer">יצרן</string>
+    <string name="placeholder_manufacturer">לדוגמה, טויוטה</string>
+    <string name="label_model">דגם</string>
+    <string name="placeholder_model">לדוגמה, קורולה</string>
+    <string name="label_year">שנה</string>
+    <string name="placeholder_year">לדוגמה, 2020</string>
+    <string name="label_plate">מספר רישוי</string>
+    <string name="placeholder_plate">AB-123-CD</string>
+    <string name="label_transmission">תיבת הילוכים</string>
+    <string name="transmission_manual">ידנית</string>
+    <string name="transmission_automatic">אוטומטית</string>
+    <string name="transmission_electric">חשמלית</string>
+    <string name="transmission_hybrid">היברידית</string>
+    <string name="add_vehicle_error_required">יש למלא את כל השדות</string>
+    <string name="add_vehicle_error_manufacturer">נא לבחור יצרן מהרשימה</string>
+    <string name="add_vehicle_error_year">נא להזין שנה תקינה</string>
+    <string name="add_vehicle_error_model_year_range">%1$s יוצר בין %2$s ל-%3$s</string>
+    <string name="add_vehicle_error_year_range">נא להזין שנה בין %1$d ל-%2$d</string>
+    <string name="action_save_changes">שמור שינויים</string>
+    <string name="delete_vehicle_action">מחיקת רכב</string>
+    <string name="delete_vehicle_confirm_title">למחוק את הרכב?</string>
+    <string name="action_cannot_be_undone">לא ניתן לבטל פעולה זו.</string>
+
+    <!-- Vehicle Details -->
+    <string name="vehicle_details_title">פרטי הרכב</string>
+    <string name="vehicle_default_name">רכב</string>
+    <string name="cd_menu">תפריט</string>
+    <string name="vehicle_info_title">מידע על הרכב</string>
+    <string name="vehicle_info_unavailable">אין כרגע מידע זמין על הרכב. נסה שוב מאוחר יותר.</string>
+    <string name="vehicle_services_title">שירותי רכב</string>
+    <string name="feature_ai_scanner_title">סורק אזהרות AI</string>
+    <string name="feature_ai_scanner_subtitle">סרוק נורות אזהרה בלוח המחוונים</string>
+    <string name="feature_documents_title">מסמכים</string>
+    <string name="feature_documents_subtitle">העלה ונהל את מסמכי הרכב</string>
+    <string name="feature_ai_powered_label">מופעל בבינה מלאכותית</string>
+    <string name="feature_ai_assistant_title">עוזר AI</string>
+    <string name="feature_ai_assistant_subtitle">שאל על הרכב שלך</string>
+    <string name="feature_notifications_subtitle">תזכורות תחזוקה ורישיון</string>
+    <string name="feature_history_title">היסטוריית הרכב</string>
+    <string name="feature_history_subtitle">צפה בהיסטוריית תחזוקה ושירות</string>
+    <string name="variant_multi_engine_hint">לדגם זה יש יותר ממנוע אחד. בחר את שלך לקבלת נתונים מדויקים:</string>
+    <string name="variant_default_name">גרסה</string>
+    <string name="spec_fuel_consumption">צריכת דלק</string>
+    <string name="spec_fuel_type">סוג דלק</string>
+    <string name="spec_engine">מנוע</string>
+    <string name="spec_horsepower">כוח סוס</string>
+    <string name="spec_horsepower_value">%1$d כ״ס</string>
+    <string name="spec_fuel_tank">מכל דלק</string>
+    <string name="vehicle_info_empty">אין עדיין מידע זמין על דגם זה.</string>
+    <string name="ai_specs_disclaimer">נתונים משוערים על ידי בינה מלאכותית. ייתכנו טעויות; הנתונים בפועל משתנים בהתאם לרמת הגימור.</string>
+
+    <!-- Vehicle Documents -->
+    <string name="vehicle_not_found">הרכב לא נמצא</string>
+    <string name="action_go_back">חזרה</string>
+    <string name="document_type_all">הכל</string>
+    <string name="doc_type_vehicle_licence">רישיון רכב</string>
+    <string name="doc_type_maintenance">תחזוקה</string>
+    <string name="doc_type_inspection">טסט</string>
+    <string name="doc_type_insurance">ביטוח</string>
+    <string name="doc_type_repair_invoice">חשבונית תיקון</string>
+    <string name="doc_type_other">אחר</string>
+    <string name="documents_title">מסמכים</string>
+    <string name="documents_edit_title">עריכת מסמך</string>
+    <string name="documents_review_title">סקירת חילוץ AI</string>
+    <string name="documents_review_warning">בדוק את המידע לפני השמירה. חילוץ AI עלול לכלול טעויות.</string>
+    <string name="action_save_document">שמור מסמך</string>
+    <string name="cd_selected_document">המסמך שנבחר</string>
+    <string name="documents_analyzing">מנתח את מסמך הרכב…</string>
+    <string name="action_analyze_document">נתח מסמך</string>
+    <string name="action_replace">החלף</string>
+    <string name="action_remove">הסר</string>
+    <string name="cd_add_document">הוסף מסמך</string>
+    <string name="documents_empty_title">עדיין לא נוספו מסמכים</string>
+    <string name="documents_empty_subtitle">העלה מסמכי רכב ותן לבינה המלאכותית לארגן את המידע החשוב.</string>
+    <string name="action_take_photo">צילום תמונה</string>
+    <string name="action_upload_document">העלאת מסמך</string>
+    <string name="documents_current_title">מסמכים נוכחיים</string>
+    <string name="document_no_date">אין תאריך</string>
+    <string name="document_no_summary">אין תקציר</string>
+    <string name="document_status_active">פעיל</string>
+    <string name="menu_view_details">צפה בפרטים</string>
+    <string name="menu_update_replace">עדכן / החלף</string>
+    <string name="menu_edit_information">ערוך מידע</string>
+    <string name="documents_verify_fields">נא לאמת את השדות שחולצו:</string>
+    <string name="document_type_prefix">סוג: %1$s</string>
+    <string name="label_document_title">כותרת המסמך</string>
+    <string name="label_document_date">תאריך המסמך (YYYY-MM-DD)</string>
+    <string name="label_short_summary">תקציר קצר</string>
+    <string name="label_mileage">קילומטראז\'</string>
+    <string name="label_garage_name">שם המוסך</string>
+    <string name="bool_oil_changed">הוחלף שמן</string>
+    <string name="bool_filter_changed">הוחלף פילטר</string>
+    <string name="label_insurance_provider">חברת הביטוח</string>
+    <string name="label_policy_expiry_date">תאריך תפוגת הפוליסה</string>
+    <string name="label_licence_expiry_date">תאריך תפוגת הרישיון</string>
+    <string name="label_inspection_expiry_date">תאריך תפוגת הטסט</string>
+    <string name="option_unknown">לא ידוע</string>
+    <string name="detail_title">כותרת</string>
+    <string name="detail_date">תאריך</string>
+    <string name="detail_provider">ספק</string>
+    <string name="detail_status">סטטוס</string>
+    <string name="detail_summary">תקציר</string>
+    <string name="maintenance_details_title">פרטי תחזוקה</string>
+    <string name="detail_licence_expiry">תפוגת רישיון</string>
+    <string name="detail_insurance_expiry">תפוגת ביטוח</string>
+    <string name="detail_inspection_expiry">תפוגת טסט</string>
+    <string name="delete_document_confirm_title">למחוק את המסמך?</string>
+    <string name="delete_document_confirm_body">פעולה זו תסיר לצמיתות רשומה זו.</string>
+    <string name="delete_document_dialog_title2">למחוק מסמך זה?</string>
+    <string name="delete_document_body1">פעולה זו תסיר את פרטי המסמך מרכב זה.</string>
+
+    <!-- Vehicle History -->
+    <string name="maint_engine_oil">שמן מנוע</string>
+    <string name="maint_oil_filter">פילטר שמן</string>
+    <string name="maint_air_filter">פילטר אוויר</string>
+    <string name="maint_cabin_filter">פילטר תא נוסעים</string>
+    <string name="maint_brake_pads">רפידות בלם</string>
+    <string name="maint_brake_discs">דיסקיות בלם</string>
+    <string name="maint_brake_fluid">נוזל בלמים</string>
+    <string name="maint_coolant">נוזל קירור</string>
+    <string name="maint_spark_plugs">מצתים</string>
+    <string name="maint_battery">מצבר</string>
+    <string name="maint_tires">צמיגים</string>
+    <string name="maint_timing_belt">רצועת תזמון</string>
+    <string name="maint_timing_chain">שרשרת תזמון</string>
+    <string name="maint_transmission_oil">שמן תיבת הילוכים</string>
+    <string name="maint_fuel_filter">פילטר דלק</string>
+    <string name="history_event_repair">תיקון</string>
+    <string name="history_event_oil_change">החלפת שמן</string>
+    <string name="history_event_licence_renewal">חידוש רישיון</string>
+    <string name="history_event_insurance_renewal">חידוש ביטוח</string>
+    <string name="history_event_document_update">עדכון מסמך</string>
+    <string name="history_event_warning_analysis">ניתוח אזהרה</string>
+    <string name="history_event_notification_sent">התראה נשלחה</string>
+    <string name="history_event_manual">ידני</string>
+    <string name="maint_action_replaced">הוחלף</string>
+    <string name="maint_action_serviced">טופל</string>
+    <string name="maint_action_checked">נבדק</string>
+    <string name="history_title">היסטוריית הרכב</string>
+    <string name="history_analyzing_maintenance">מנתח את מסמך התחזוקה…</string>
+    <string name="history_maintenance_status">סטטוס תחזוקה</string>
+    <string name="action_add_history">+ הוסף היסטוריה</string>
+    <string name="action_ai_quick_update">עדכון מהיר AI</string>
+    <string name="history_component_last">אחרון: %1$s</string>
+    <string name="history_component_no_data">אין עדיין נתונים</string>
+    <string name="action_update">עדכן</string>
+    <string name="history_review_maintenance_title">סקירת עדכון תחזוקה</string>
+    <string name="history_ai_understood">הבינה המלאכותית זיהתה את הפריטים הבאים מהטקסט שלך:</string>
+    <string name="history_verify_prefix">לאמת: %1$s</string>
+    <string name="label_date_ymd">תאריך (YYYY-MM-DD)</string>
+    <string name="label_notes">הערות</string>
+    <string name="action_confirm_update">אשר עדכון</string>
+    <string name="history_ai_quick_update_hint">ספר לנו מה החלפת או טיפלת בו</string>
+    <string name="history_ai_quick_update_placeholder">לדוגמה: היום החלפתי שמן מנוע ופילטר ב-92,400 ק״מ.</string>
+    <string name="action_analyze">נתח</string>
+    <string name="summary_events">אירועים</string>
+    <string name="summary_last_mileage">קילומטראז\' אחרון</string>
+    <string name="history_no_events">עדיין אין אירועי היסטוריה</string>
+    <string name="unknown_year">שנה לא ידועה</string>
+    <string name="add_history_dialog_title">הוספה להיסטוריית הרכב</string>
+    <string name="dialog_take_photo">צילום תמונה</string>
+    <string name="dialog_upload_image">העלאת תמונה</string>
+    <string name="dialog_add_manually">הוספה ידנית</string>
+    <string name="history_entry_title">הזנת מידע היסטוריה</string>
+    <string name="history_entry_review_warning">בדוק את המידע לפני השמירה. חילוץ AI עלול לכלול טעויות.</string>
+    <string name="history_event_type_prefix">סוג אירוע: %1$s</string>
+    <string name="label_title">כותרת</string>
+    <string name="label_garage">מוסך</string>
+    <string name="label_description_notes">תיאור/הערות</string>
+    <string name="label_cost">עלות</string>
+    <string name="history_next_service_title">המלצה לטיפול הבא</string>
+    <string name="label_next_service_date">תאריך הטיפול הבא</string>
+    <string name="label_next_service_mileage">קילומטראז\' הטיפול הבא</string>
+    <string name="action_save_to_history">שמור להיסטוריה</string>
+    <string name="history_event_details_title">פרטי האירוע</string>
+    <string name="detail_type">סוג</string>
+    <string name="detail_description">תיאור</string>
+    <string name="history_upcoming_service_title">טיפול קרוב</string>
+    <string name="history_maintenance_items_title">פריטי תחזוקה</string>
+    <string name="history_linked_document_title">מסמך מקושר</string>
+    <string name="history_linked_document_subtitle">נותח מתמונה שהועלתה</string>
+    <string name="delete_history_event_title">למחוק את אירוע ההיסטוריה?</string>
+    <string name="delete_history_event_body">פעולה זו תסיר לצמיתות רשומה זו מהיסטוריית הרכב שלך.</string>
+    <string name="value_km">%1$s ק״מ</string>
+
+    <!-- Vehicle Licence -->
+    <string name="vehicle_licence_title">רישיון רכב</string>
+    <string name="licence_ai_review_disclaimer">בדוק את כל הפרטים לפני השמירה. חילוץ AI עלול לטעות.</string>
+    <string name="licence_uncertain_fields">זוהו שדות לא ודאיים:</string>
+    <string name="cd_selected_licence">הרישיון שנבחר</string>
+    <string name="licence_analyzing">מנתח את רישיון הרכב…</string>
+    <string name="licence_empty">עדיין לא נוסף רישיון רכב</string>
+    <string name="action_upload_from_gallery">העלאה מהגלריה</string>
+    <string name="licence_owner">בעלים</string>
+    <string name="licence_chassis_short">שלדה #</string>
+    <string name="licence_expiry">תפוגה</string>
+    <string name="label_owner_name">שם הבעלים</string>
+    <string name="label_licence_plate">מספר רישוי</string>
+    <string name="label_chassis_number">מספר שלדה</string>
+    <string name="label_engine_number">מספר מנוע</string>
+
+    <!-- Vehicle Setup Questions / Licences stub -->
+    <string name="setup_inspection_title">בדיקת טסט</string>
+    <string name="setup_inspection_question">האם ידוע לך מתי מועד הטסט הבא של הרכב שלך?</string>
+    <string name="setup_licence_question">האם ידוע לך מתי פג תוקף רישיון הרכב?</string>
+    <string name="action_exact_date">תאריך מדויק</string>
+    <string name="action_month_only">אני יודע רק את החודש</string>
+    <string name="action_dont_know">אני לא יודע</string>
+    <string name="licences_screen_placeholder">מסך רישיונות עבור %1$s</string>
+
+    <!-- AI Assistant -->
+    <string name="save_to_history_dialog_title">לשמור בהיסטוריית הרכב?</string>
+    <string name="save_to_history_dialog_body">האם לשמור אירוע אזהרה זה בהיסטוריית הרכב?</string>
+    <string name="action_dont_save">אל תשמור</string>
+    <string name="ai_car_assistant_title">עוזר רכב AI</string>
+    <string name="ai_scan_title">סרוק נורת אזהרה בלוח המחוונים</string>
+    <string name="ai_scan_subtitle">חנה במקום בטוח, כבה את הרכב אם צריך, וצלם את סמל האזהרה הדולק.</string>
+    <string name="ai_no_camera_while_driving">אין להשתמש במצלמה בזמן נהיגה.</string>
+    <string name="ai_chat_banner_title">שוחח עם עוזר ה-AI</string>
+    <string name="ai_chat_banner_subtitle">דלג על התמונה ושאל שאלה על הרכב שלך ישירות.</string>
+    <string name="action_choose_from_gallery">בחירה מהגלריה</string>
+    <string name="cd_selected_warning_light">נורת האזהרה שנבחרה</string>
+    <string name="action_new_image">תמונה חדשה</string>
+    <string name="action_retake">צלם שוב</string>
+    <string name="action_analyze_warning_light">נתח נורת אזהרה</string>
+    <string name="ai_analyzing_warning_light">מנתח את נורת האזהרה…</string>
+    <string name="action_try_again">נסה שוב</string>
+    <string name="result_confidence">רמת ביטחון: %1$d%%</string>
+    <string name="result_explanation">הסבר</string>
+    <string name="result_recommendation">המלצה</string>
+    <string name="result_can_drive_yes">ניתן להמשיך בנהיגה בזהירות.</string>
+    <string name="result_can_drive_no">הפסק לנהוג מיד ופנה לעזרה.</string>
+    <string name="result_can_drive_unknown">מצב לא ידוע. יש לנקוט זהירות מרבית.</string>
+    <string name="action_ask_ai_about_warning">שאל את ה-AI על אזהרה זו</string>
+    <string name="severity_low">נמוכה</string>
+    <string name="severity_medium">בינונית</string>
+    <string name="severity_high">גבוהה</string>
+    <string name="severity_critical">קריטית</string>
+    <string name="severity_unknown">לא ידוע</string>
+
+    <!-- Chatbot -->
+    <string name="chat_ai_assistant_title">עוזר AI</string>
+    <string name="chat_empty_title">איך אני יכול לעזור עם הרכב שלך?</string>
+    <string name="chat_empty_subtitle">שאל אותי על נורות אזהרה, תחזוקה, מסמכים או היסטוריית הרכב שלך.</string>
+    <string name="chat_suggestion_warning_light">נורת אזהרה</string>
+    <string name="chat_suggestion_maintenance">תחזוקה</string>
+    <string name="chat_suggestion_documents">המסמכים שלי</string>
+    <string name="chat_suggestion_history">היסטוריית הרכב</string>
+    <string name="chat_message_failed">השליחה נכשלה</string>
+    <string name="chat_ai_typing">ה-AI מקליד…</string>
+    <string name="chat_input_placeholder">הקלד הודעה…</string>
+    <string name="cd_send">שלח</string>
+    <string name="chat_ai_disclaimer">הדרכת AI עלולה לטעות. עבור אזהרות רציניות, פנה למוסך מוסמך.</string>
+
+    <!-- Shared components -->
+    <string name="nav_my_cars">הרכבים שלי</string>
+    <string name="action_add">הוסף</string>
+    <string name="welcome_default">ברוך הבא</string>
+    <string name="welcome_with_name">ברוך הבא, %1$s</string>
+    <string name="welcome_manage_vehicles">בואו ננהל את הרכבים שלך</string>
+    <string name="ai_disclaimer_default">תוצאה שנוצרה על ידי בינה מלאכותית. ייתכנו טעויות — נא לוודא לפני הסתמכות עליה.</string>
+    <string name="cd_profile_photo">תמונת פרופיל</string>
+    <string name="assistant_banner_title_default">צריך עזרה?</string>
+    <string name="assistant_banner_subtitle_default">שאל את עוזר הרכב שלך על תחזוקה, רישיונות או היסטוריה.</string>
+    <string name="cd_automate_ai_assistant">עוזר ה-AI של Automate</string>
+    <string name="cd_alert">התראה</string>
+
+    <!-- Settings -->
+    <string name="settings_title">הגדרות</string>
+    <string name="settings_profile_title">פרופיל</string>
+    <string name="settings_profile_subtitle">צפה וערוך את הפרטים האישיים שלך</string>
+    <string name="settings_change_password_title">שינוי סיסמה</string>
+    <string name="settings_change_password_subtitle">עדכן את סיסמת החשבון שלך</string>
+    <string name="settings_delete_account_title">מחיקת חשבון</string>
+    <string name="settings_delete_account_subtitle">הסר לצמיתות את החשבון והנתונים שלך</string>
+    <string name="settings_language_title">שפה</string>
+    <string name="settings_language_subtitle">בחר את שפת האפליקציה</string>
+    <string name="lang_english">English</string>
+    <string name="lang_hebrew">עברית</string>
+    <string name="current_password_label">סיסמה נוכחית</string>
+    <string name="new_password_label">סיסמה חדשה</string>
+    <string name="password_updated">הסיסמה עודכנה.</string>
+    <string name="delete_account_dialog_title">למחוק את החשבון?</string>
+    <string name="delete_account_warning">פעולה זו מוחקת לצמיתות את החשבון וכל הרכבים שלך. לא ניתן לבטל פעולה זו.</string>
+</resources>

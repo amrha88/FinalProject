@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -18,14 +19,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AuthViewModel
+import com.example.automate.util.AppLanguage
+import com.example.automate.util.LocaleManager
 
 @Composable
 fun SettingsScreen(
@@ -38,6 +44,7 @@ fun SettingsScreen(
 
     var showChangePassword by remember { mutableStateOf(false) }
     var showDeleteAccount by remember { mutableStateOf(false) }
+    var showLanguagePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.passwordChanged) {
         if (uiState.passwordChanged) {
@@ -66,7 +73,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Settings",
+                text = stringResource(R.string.settings_title),
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
@@ -76,17 +83,26 @@ fun SettingsScreen(
 
             SettingsRow(
                 icon = Icons.Default.Person,
-                title = "Profile",
-                subtitle = "View and edit your personal information",
+                title = stringResource(R.string.settings_profile_title),
+                subtitle = stringResource(R.string.settings_profile_subtitle),
                 onClick = onProfileClick
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             SettingsRow(
+                icon = Icons.Default.Language,
+                title = stringResource(R.string.settings_language_title),
+                subtitle = stringResource(R.string.settings_language_subtitle),
+                onClick = { showLanguagePicker = true }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SettingsRow(
                 icon = Icons.Default.Lock,
-                title = "Change password",
-                subtitle = "Update your account password",
+                title = stringResource(R.string.settings_change_password_title),
+                subtitle = stringResource(R.string.settings_change_password_subtitle),
                 onClick = {
                     viewModel.clearChangePasswordError()
                     showChangePassword = true
@@ -97,8 +113,8 @@ fun SettingsScreen(
 
             SettingsRow(
                 icon = Icons.Default.DeleteForever,
-                title = "Delete account",
-                subtitle = "Permanently remove your account and data",
+                title = stringResource(R.string.settings_delete_account_title),
+                subtitle = stringResource(R.string.settings_delete_account_subtitle),
                 iconTint = Color(0xFFFF5252),
                 onClick = {
                     viewModel.clearDeleteAccountError()
@@ -106,6 +122,17 @@ fun SettingsScreen(
                 }
             )
         }
+    }
+
+    if (showLanguagePicker) {
+        val context = LocalContext.current
+        LanguagePickerDialog(
+            onDismiss = { showLanguagePicker = false },
+            onSelect = { language ->
+                showLanguagePicker = false
+                LocaleManager.setLanguage(context, language)
+            }
+        )
     }
 
     if (showChangePassword) {
@@ -181,6 +208,56 @@ private fun SettingsRow(
 }
 
 @Composable
+private fun LanguagePickerDialog(
+    onDismiss: () -> Unit,
+    onSelect: (AppLanguage) -> Unit
+) {
+    val current = LocaleManager.currentLanguage()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_language_title)) },
+        text = {
+            Column {
+                LanguageOptionRow(
+                    label = stringResource(R.string.lang_english),
+                    selected = current == AppLanguage.ENGLISH,
+                    onClick = { onSelect(AppLanguage.ENGLISH) }
+                )
+                LanguageOptionRow(
+                    label = stringResource(R.string.lang_hebrew),
+                    selected = current == AppLanguage.HEBREW,
+                    onClick = { onSelect(AppLanguage.HEBREW) }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
+        }
+    )
+}
+
+@Composable
+private fun LanguageOptionRow(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label)
+    }
+}
+
+@Composable
 private fun ChangePasswordDialog(
     isSaving: Boolean,
     error: String?,
@@ -193,13 +270,13 @@ private fun ChangePasswordDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Change password") },
+        title = { Text(stringResource(R.string.settings_change_password_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = currentPassword,
                     onValueChange = { currentPassword = it },
-                    label = { Text("Current password") },
+                    label = { Text(stringResource(R.string.current_password_label)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -209,7 +286,7 @@ private fun ChangePasswordDialog(
                 OutlinedTextField(
                     value = newPassword,
                     onValueChange = { newPassword = it },
-                    label = { Text("New password") },
+                    label = { Text(stringResource(R.string.new_password_label)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -221,7 +298,7 @@ private fun ChangePasswordDialog(
                 }
                 if (success) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Password updated.", color = Color(0xFF4CAF50), fontSize = 13.sp)
+                    Text(text = stringResource(R.string.password_updated), color = Color(0xFF4CAF50), fontSize = 13.sp)
                 }
             }
         },
@@ -230,11 +307,11 @@ private fun ChangePasswordDialog(
                 enabled = !isSaving,
                 onClick = { onConfirm(currentPassword, newPassword) }
             ) {
-                Text(if (isSaving) "Saving..." else "Save")
+                Text(stringResource(if (isSaving) R.string.action_saving else R.string.action_save))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }
@@ -250,15 +327,15 @@ private fun DeleteAccountDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete account?") },
+        title = { Text(stringResource(R.string.delete_account_dialog_title)) },
         text = {
             Column {
-                Text("This permanently deletes your account and all your vehicles. This can't be undone.")
+                Text(stringResource(R.string.delete_account_warning))
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Current password") },
+                    label = { Text(stringResource(R.string.current_password_label)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -276,13 +353,13 @@ private fun DeleteAccountDialog(
                 onClick = { onConfirm(password) }
             ) {
                 Text(
-                    text = if (isDeleting) "Deleting..." else "Delete",
+                    text = stringResource(if (isDeleting) R.string.action_deleting else R.string.action_delete),
                     color = Color(0xFFFF5252)
                 )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }

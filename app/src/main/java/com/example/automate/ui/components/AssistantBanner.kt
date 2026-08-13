@@ -16,15 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 
 @Composable
 fun AssistantBanner(
     modifier: Modifier = Modifier,
-    title: String = "Need a hand?",
-    subtitle: String = "Ask your car assistant about maintenance, licences, or history.",
+    title: String = stringResource(R.string.assistant_banner_title_default),
+    subtitle: String = stringResource(R.string.assistant_banner_subtitle_default),
     onClick: (() -> Unit)? = null
 ) {
     Row(

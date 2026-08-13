@@ -14,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 
 @Composable
 fun WelcomeCard(
@@ -27,9 +29,9 @@ fun WelcomeCard(
     onAvatarClick: (() -> Unit)? = null
 ) {
     val welcomeText = if (userName.isNullOrBlank()) {
-        "Welcome"
+        stringResource(R.string.welcome_default)
     } else {
-        "Welcome, $userName"
+        stringResource(R.string.welcome_with_name, userName)
     }
 
     Card(
@@ -76,7 +78,7 @@ fun WelcomeCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CameraAlt,
-                                contentDescription = "Change photo",
+                                contentDescription = stringResource(R.string.cd_change_photo),
                                 tint = Color.White,
                                 modifier = Modifier.size(11.dp)
                             )
@@ -94,7 +96,7 @@ fun WelcomeCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Let's manage your vehicles",
+                        text = stringResource(R.string.welcome_manage_vehicles),
                         color = Color.Gray,
                         fontSize = 12.sp
                     )
@@ -115,7 +117,7 @@ fun WelcomeCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Add",
+                    text = stringResource(R.string.action_add),
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold

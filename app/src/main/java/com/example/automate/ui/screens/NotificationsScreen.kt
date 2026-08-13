@@ -16,10 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.domain.model.DatePrecision
 import com.example.automate.domain.model.ReminderType
 import com.example.automate.domain.model.VehicleReminder
@@ -57,10 +59,10 @@ fun NotificationsContent(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Notifications", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.notifications_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -82,7 +84,7 @@ fun NotificationsContent(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("No upcoming notifications", color = Color.Gray)
+                        Text(stringResource(R.string.notifications_empty), color = Color.Gray)
                     }
                 }
             } else {
@@ -140,12 +142,12 @@ fun ReminderCard(reminder: VehicleReminder) {
                 Text(text = reminder.title, fontWeight = FontWeight.Bold, color = Color(0xFF0B1730), fontSize = 16.sp)
                 Text(
                     text = when {
-                        reminder.datePrecision == DatePrecision.MONTH_ONLY -> "Expected in ${reminder.dueDate?.substring(0, 7) ?: ""}"
-                        daysLeft == null -> "Pending"
-                        daysLeft < 0 -> "Expired ${-daysLeft} days ago"
-                        daysLeft == 0 -> "Due Today"
-                        daysLeft == 1 -> "Tomorrow"
-                        else -> "$daysLeft days remaining"
+                        reminder.datePrecision == DatePrecision.MONTH_ONLY -> stringResource(R.string.reminder_expected_in, reminder.dueDate?.substring(0, 7) ?: "")
+                        daysLeft == null -> stringResource(R.string.reminder_pending)
+                        daysLeft < 0 -> stringResource(R.string.reminder_expired_days_ago, -daysLeft)
+                        daysLeft == 0 -> stringResource(R.string.reminder_due_today)
+                        daysLeft == 1 -> stringResource(R.string.reminder_tomorrow)
+                        else -> stringResource(R.string.reminder_days_remaining, daysLeft)
                     },
                     color = priority.color,
                     fontSize = 13.sp,

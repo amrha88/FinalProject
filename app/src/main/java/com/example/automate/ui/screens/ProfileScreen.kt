@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.AvatarImage
 import com.example.automate.ui.components.PrimaryButton
@@ -82,6 +84,9 @@ private fun ProfileScreenContent(
         }
     }
 
+    val errorFullName = stringResource(R.string.signup_error_full_name)
+    val errorAge = stringResource(R.string.signup_error_age)
+
     Scaffold(
         containerColor = Color(0xFF000C1F),
         bottomBar = bottomBar
@@ -95,7 +100,7 @@ private fun ProfileScreenContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Your profile",
+            text = stringResource(R.string.profile_title),
             color = Color.White,
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold
@@ -125,7 +130,7 @@ private fun ProfileScreenContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
-                        contentDescription = "Change photo",
+                        contentDescription = stringResource(R.string.cd_change_photo),
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
@@ -138,7 +143,7 @@ private fun ProfileScreenContent(
         AppTextField(
             value = fullName,
             onValueChange = { fullName = it; validationError = null },
-            label = "Full name"
+            label = stringResource(R.string.label_full_name)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -146,7 +151,7 @@ private fun ProfileScreenContent(
         AppTextField(
             value = age,
             onValueChange = { if (it.length <= 3) { age = it.filter(Char::isDigit); validationError = null } },
-            label = "Age",
+            label = stringResource(R.string.label_age),
             keyboardType = KeyboardType.Number
         )
 
@@ -155,13 +160,13 @@ private fun ProfileScreenContent(
         AppTextField(
             value = uiState.userEmail ?: "",
             onValueChange = {},
-            label = "Email address"
+            label = stringResource(R.string.label_email)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Change email",
+            text = stringResource(R.string.profile_change_email),
             color = Color(0xFF4FA8FF),
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
@@ -171,7 +176,7 @@ private fun ProfileScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Do you have a driving license?",
+            text = stringResource(R.string.signup_has_license_question),
             color = Color.White,
             fontSize = 15.sp
         )
@@ -183,13 +188,13 @@ private fun ProfileScreenContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ProfileLicenseOption(
-                text = "Yes",
+                text = stringResource(R.string.action_yes),
                 selected = hasLicense,
                 onClick = { hasLicense = true },
                 modifier = Modifier.weight(1f)
             )
             ProfileLicenseOption(
-                text = "No",
+                text = stringResource(R.string.action_no),
                 selected = !hasLicense,
                 onClick = { hasLicense = false },
                 modifier = Modifier.weight(1f)
@@ -211,7 +216,7 @@ private fun ProfileScreenContent(
 
         if (uiState.profileSaved) {
             Text(
-                text = "Profile saved.",
+                text = stringResource(R.string.profile_saved),
                 color = Color(0xFF4CAF50),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
@@ -227,13 +232,13 @@ private fun ProfileScreenContent(
         Spacer(modifier = Modifier.weight(1f))
 
         PrimaryButton(
-            text = "Save changes",
+            text = stringResource(R.string.action_save_changes),
             enabled = !uiState.isSavingProfile,
             onClick = {
                 val ageValue = age.toIntOrNull()
                 when {
-                    fullName.isBlank() -> validationError = "Please enter your full name."
-                    ageValue == null || ageValue !in 1..120 -> validationError = "Please enter a valid age."
+                    fullName.isBlank() -> validationError = errorFullName
+                    ageValue == null || ageValue !in 1..120 -> validationError = errorAge
                     else -> onSave(fullName, ageValue, hasLicense)
                 }
             }
@@ -254,7 +259,7 @@ private fun ProfileScreenContent(
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Log out", fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.profile_logout), fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -288,12 +293,12 @@ private fun ChangeEmailDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Change email") },
+        title = { Text(stringResource(R.string.change_email_dialog_title)) },
         text = {
             Column {
                 if (requested) {
                     Text(
-                        text = "We've sent a confirmation link to $newEmail. Your email will update once you click it.",
+                        text = stringResource(R.string.change_email_confirmation_sent, newEmail),
                         color = Color(0xFF4CAF50),
                         fontSize = 13.sp
                     )
@@ -301,7 +306,7 @@ private fun ChangeEmailDialog(
                     OutlinedTextField(
                         value = newEmail,
                         onValueChange = { newEmail = it },
-                        label = { Text("New email address") },
+                        label = { Text(stringResource(R.string.label_new_email)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier.fillMaxWidth()
@@ -310,7 +315,7 @@ private fun ChangeEmailDialog(
                     OutlinedTextField(
                         value = currentPassword,
                         onValueChange = { currentPassword = it },
-                        label = { Text("Current password") },
+                        label = { Text(stringResource(R.string.current_password_label)) },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -329,12 +334,12 @@ private fun ChangeEmailDialog(
                     enabled = !isSaving,
                     onClick = { onConfirm(currentPassword, newEmail) }
                 ) {
-                    Text(if (isSaving) "Sending..." else "Send verification")
+                    Text(stringResource(if (isSaving) R.string.action_sending else R.string.action_send_verification))
                 }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(if (requested) "Done" else "Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(if (requested) R.string.action_done else R.string.action_cancel)) }
         }
     )
 }

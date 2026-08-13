@@ -24,12 +24,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
+import com.example.automate.R
 import com.example.automate.domain.model.*
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
@@ -39,7 +41,47 @@ import com.example.automate.ui.viewmodel.VehicleHistoryViewModel
 import com.example.automate.util.FileUtils
 import com.example.automate.util.ImageProcessingUtils
 import kotlinx.coroutines.launch
-import java.util.*
+
+@Composable
+internal fun maintenanceItemLabel(type: MaintenanceItemType): String = when (type) {
+    MaintenanceItemType.ENGINE_OIL -> stringResource(R.string.maint_engine_oil)
+    MaintenanceItemType.OIL_FILTER -> stringResource(R.string.maint_oil_filter)
+    MaintenanceItemType.AIR_FILTER -> stringResource(R.string.maint_air_filter)
+    MaintenanceItemType.CABIN_FILTER -> stringResource(R.string.maint_cabin_filter)
+    MaintenanceItemType.BRAKE_PADS -> stringResource(R.string.maint_brake_pads)
+    MaintenanceItemType.BRAKE_DISCS -> stringResource(R.string.maint_brake_discs)
+    MaintenanceItemType.BRAKE_FLUID -> stringResource(R.string.maint_brake_fluid)
+    MaintenanceItemType.COOLANT -> stringResource(R.string.maint_coolant)
+    MaintenanceItemType.SPARK_PLUGS -> stringResource(R.string.maint_spark_plugs)
+    MaintenanceItemType.BATTERY -> stringResource(R.string.maint_battery)
+    MaintenanceItemType.TIRES -> stringResource(R.string.maint_tires)
+    MaintenanceItemType.TIMING_BELT -> stringResource(R.string.maint_timing_belt)
+    MaintenanceItemType.TIMING_CHAIN -> stringResource(R.string.maint_timing_chain)
+    MaintenanceItemType.TRANSMISSION_OIL -> stringResource(R.string.maint_transmission_oil)
+    MaintenanceItemType.FUEL_FILTER -> stringResource(R.string.maint_fuel_filter)
+    MaintenanceItemType.OTHER -> stringResource(R.string.doc_type_other)
+}
+
+@Composable
+internal fun historyEventTypeLabel(type: VehicleHistoryEventType): String = when (type) {
+    VehicleHistoryEventType.MAINTENANCE -> stringResource(R.string.doc_type_maintenance)
+    VehicleHistoryEventType.REPAIR -> stringResource(R.string.history_event_repair)
+    VehicleHistoryEventType.OIL_CHANGE -> stringResource(R.string.history_event_oil_change)
+    VehicleHistoryEventType.INSPECTION -> stringResource(R.string.doc_type_inspection)
+    VehicleHistoryEventType.LICENCE_RENEWAL -> stringResource(R.string.history_event_licence_renewal)
+    VehicleHistoryEventType.INSURANCE_RENEWAL -> stringResource(R.string.history_event_insurance_renewal)
+    VehicleHistoryEventType.DOCUMENT_UPDATE -> stringResource(R.string.history_event_document_update)
+    VehicleHistoryEventType.WARNING_ANALYSIS -> stringResource(R.string.history_event_warning_analysis)
+    VehicleHistoryEventType.NOTIFICATION_SENT -> stringResource(R.string.history_event_notification_sent)
+    VehicleHistoryEventType.MANUAL -> stringResource(R.string.history_event_manual)
+}
+
+@Composable
+internal fun maintenanceActionLabel(action: MaintenanceAction): String = when (action) {
+    MaintenanceAction.REPLACED -> stringResource(R.string.maint_action_replaced)
+    MaintenanceAction.SERVICED -> stringResource(R.string.maint_action_serviced)
+    MaintenanceAction.CHECKED -> stringResource(R.string.maint_action_checked)
+}
 
 @Composable
 fun VehicleHistoryScreen(
@@ -79,9 +121,9 @@ fun VehicleHistoryScreen(
     if (vehicle == null) {
         Box(modifier = Modifier.fillMaxSize().background(Color(0xFF000C1F)), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Vehicle not found", color = Color.White)
+                Text(stringResource(R.string.vehicle_not_found), color = Color.White)
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onBackClick) { Text("Go Back") }
+                Button(onClick = onBackClick) { Text(stringResource(R.string.action_go_back)) }
             }
         }
         return
@@ -180,18 +222,20 @@ fun VehicleHistoryContent(
     onEventClick: (VehicleHistoryEvent) -> Unit,
     onUpdateComponent: (MaintenanceItemType) -> Unit
 ) {
+    val unknownYear = stringResource(R.string.unknown_year)
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Vehicle History", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(stringResource(R.string.history_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(vehicleTitle, fontSize = 12.sp, color = Color.LightGray)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -214,23 +258,23 @@ fun VehicleHistoryContent(
                 Spacer(modifier = Modifier.height(16.dp))
                 HistorySummary(uiState.historyEvents)
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 if (uiState.editableEvent == null && uiState.selectedImageUri == null && uiState.maintenanceUpdate == null) {
                     Text(
-                        text = "Maintenance status",
+                        text = stringResource(R.string.history_maintenance_status),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                     )
-                    
+
                     MaintenanceStatusSection(uiState.maintenanceStates, onUpdateComponent)
-                    
+
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         PrimaryButton(
-                            text = "+ Add history", 
+                            text = stringResource(R.string.action_add_history),
                             onClick = onAddClick,
                             modifier = Modifier.weight(1f)
                         )
@@ -242,7 +286,7 @@ fun VehicleHistoryContent(
                         ) {
                             Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("AI Quick Update", fontSize = 14.sp)
+                            Text(stringResource(R.string.action_ai_quick_update), fontSize = 14.sp)
                         }
                     }
                     
@@ -283,7 +327,7 @@ fun VehicleHistoryContent(
                         ) {
                             AsyncImage(
                                 model = uiState.selectedImageUri,
-                                contentDescription = "Selected document",
+                                contentDescription = stringResource(R.string.cd_selected_document),
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
@@ -291,15 +335,15 @@ fun VehicleHistoryContent(
                         Spacer(modifier = Modifier.height(24.dp))
                         if (uiState.isAnalyzing) {
                             CircularProgressIndicator(color = Color(0xFF007BFF))
-                            Text("Analyzing maintenance document...", color = Color.White, modifier = Modifier.padding(top = 16.dp))
+                            Text(stringResource(R.string.history_analyzing_maintenance), color = Color.White, modifier = Modifier.padding(top = 16.dp))
                         } else {
-                            PrimaryButton(text = "Analyze document", onClick = onAnalyze)
+                            PrimaryButton(text = stringResource(R.string.action_analyze_document), onClick = onAnalyze)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 TextButton(onClick = onAddClick, modifier = Modifier.weight(1f)) {
-                                    Text("Replace", color = Color.White)
+                                    Text(stringResource(R.string.action_replace), color = Color.White)
                                 }
                                 TextButton(onClick = onRemoveImage, modifier = Modifier.weight(1f)) {
-                                    Text("Remove", color = Color.Red)
+                                    Text(stringResource(R.string.action_remove), color = Color.Red)
                                 }
                             }
                         }
@@ -313,12 +357,12 @@ fun VehicleHistoryContent(
                     ) {
                         Icon(Icons.Default.History, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("No history events yet", color = Color.Gray, fontSize = 16.sp)
+                        Text(stringResource(R.string.history_no_events), color = Color.Gray, fontSize = 16.sp)
                     }
                 }
             } else {
-                val groupedEvents = uiState.filteredEvents.groupBy { 
-                    it.eventDate?.split("-")?.firstOrNull() ?: "Unknown Year"
+                val groupedEvents = uiState.filteredEvents.groupBy {
+                    it.eventDate?.split("-")?.firstOrNull() ?: unknownYear
                 }
                 
                 groupedEvents.forEach { (year, events) ->
@@ -373,8 +417,8 @@ fun ComponentStatusCard(
     state: VehicleMaintenanceItemState?,
     onUpdateClick: (MaintenanceItemType) -> Unit
 ) {
-    val name = type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }
-    
+    val name = maintenanceItemLabel(type)
+
     Card(
         modifier = Modifier.width(180.dp),
         shape = RoundedCornerShape(16.dp),
@@ -383,25 +427,25 @@ fun ComponentStatusCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = name, color = Color(0xFF0B1730), fontWeight = FontWeight.Bold, fontSize = 15.sp)
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             if (state?.lastServiceDate != null) {
-                Text(text = "Last: ${state.lastServiceDate}", color = Color.Gray, fontSize = 11.sp)
+                Text(text = stringResource(R.string.history_component_last, state.lastServiceDate), color = Color.Gray, fontSize = 11.sp)
                 if (state.lastServiceMileage != null) {
-                    Text(text = "${state.lastServiceMileage} km", color = Color.Gray, fontSize = 11.sp)
+                    Text(text = stringResource(R.string.value_km, state.lastServiceMileage.toString()), color = Color.Gray, fontSize = 11.sp)
                 }
             } else {
-                Text(text = "No data yet", color = Color.LightGray, fontSize = 11.sp)
+                Text(text = stringResource(R.string.history_component_no_data), color = Color.LightGray, fontSize = 11.sp)
             }
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             TextButton(
                 onClick = { onUpdateClick(type) },
                 modifier = Modifier.align(Alignment.End),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                 colors = ButtonDefaults.textButtonColors(containerColor = Color(0xFF007BFF).copy(alpha = 0.1f))
             ) {
-                Text("Update", color = Color(0xFF007BFF), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.action_update), color = Color(0xFF007BFF), fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -417,13 +461,13 @@ fun MaintenanceUpdateReviewForm(
     onCancel: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("Review Maintenance Update", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text("AI understood these items from your text:", color = Color.Yellow, fontSize = 13.sp)
+        Text(stringResource(R.string.history_review_maintenance_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(stringResource(R.string.history_ai_understood), color = Color.Yellow, fontSize = 13.sp)
 
         if (uncertainFields.isNotEmpty()) {
             Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f))) {
                 Text(
-                    text = "Verify: ${uncertainFields.joinToString(", ")}",
+                    text = stringResource(R.string.history_verify_prefix, uncertainFields.joinToString(", ")),
                     modifier = Modifier.padding(12.dp),
                     color = Color.Red,
                     fontSize = 12.sp
@@ -442,7 +486,7 @@ fun MaintenanceUpdateReviewForm(
                         Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.Green, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "${item.type.name.replace("_", " ").lowercase(Locale.ROOT).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }} ${item.action.name.lowercase(Locale.ROOT)}",
+                            text = "${maintenanceItemLabel(item.type)} ${maintenanceActionLabel(item.action)}",
                             color = Color.White,
                             fontSize = 14.sp
                         )
@@ -451,13 +495,13 @@ fun MaintenanceUpdateReviewForm(
             }
         }
 
-        AppTextField(value = update.eventDate, onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = "Date (YYYY-MM-DD)")
-        AppTextField(value = update.mileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(mileage = m.toIntOrNull()) } }, label = "Mileage")
-        AppTextField(value = update.notes ?: "", onValueChange = { n -> onUpdateField { it.copy(notes = n) } }, label = "Notes")
-        
+        AppTextField(value = update.eventDate, onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = stringResource(R.string.label_date_ymd))
+        AppTextField(value = update.mileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(mileage = m.toIntOrNull()) } }, label = stringResource(R.string.label_mileage))
+        AppTextField(value = update.notes ?: "", onValueChange = { n -> onUpdateField { it.copy(notes = n) } }, label = stringResource(R.string.label_notes))
+
         Spacer(modifier = Modifier.height(16.dp))
-        PrimaryButton(text = if (isSaving) "Saving..." else "Confirm update", onClick = onSave, enabled = !isSaving)
-        TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) { Text("Cancel", color = Color.White) }
+        PrimaryButton(text = stringResource(if (isSaving) R.string.action_saving else R.string.action_confirm_update), onClick = onSave, enabled = !isSaving)
+        TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_cancel), color = Color.White) }
     }
 }
 
@@ -470,22 +514,22 @@ fun AiQuickUpdateDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { 
+        title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF673AB7))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("AI Quick Update")
+                Text(stringResource(R.string.action_ai_quick_update))
             }
         },
         text = {
             Column {
-                Text("Tell us what you replaced or serviced", fontSize = 14.sp, color = Color.Gray)
+                Text(stringResource(R.string.history_ai_quick_update_hint), fontSize = 14.sp, color = Color.Gray)
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
                     modifier = Modifier.fillMaxWidth().height(120.dp),
-                    placeholder = { Text("e.g. Today I changed the engine oil and filter at 92,400 km.", fontSize = 13.sp) },
+                    placeholder = { Text(stringResource(R.string.history_ai_quick_update_placeholder), fontSize = 13.sp) },
                     shape = RoundedCornerShape(12.dp)
                 )
             }
@@ -496,11 +540,11 @@ fun AiQuickUpdateDialog(
                 enabled = text.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
             ) {
-                Text("Analyze")
+                Text(stringResource(R.string.action_analyze))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }
@@ -520,10 +564,10 @@ fun HistorySummary(events: List<VehicleHistoryEvent>) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SummaryItem(label = "Events", value = events.size.toString())
-            SummaryItem(label = "Maintenance", value = totalMaintenance.toString())
+            SummaryItem(label = stringResource(R.string.summary_events), value = events.size.toString())
+            SummaryItem(label = stringResource(R.string.doc_type_maintenance), value = totalMaintenance.toString())
             if (latestMileage != null) {
-                SummaryItem(label = "Last Mileage", value = "${latestMileage} km")
+                SummaryItem(label = stringResource(R.string.summary_last_mileage), value = stringResource(R.string.value_km, latestMileage.toString()))
             }
         }
     }
@@ -544,7 +588,7 @@ fun HistoryFilters(selected: VehicleHistoryEventType?, onFilterChange: (VehicleH
             FilterChip(
                 selected = selected == null,
                 onClick = { onFilterChange(null) },
-                label = { Text("All") }
+                label = { Text(stringResource(R.string.document_type_all)) }
             )
         }
         val filters = listOf(
@@ -558,10 +602,7 @@ fun HistoryFilters(selected: VehicleHistoryEventType?, onFilterChange: (VehicleH
                 FilterChip(
                     selected = selected == filter,
                     onClick = { onFilterChange(filter) },
-                    label = { 
-                        Text(filter.name.lowercase(Locale.ROOT)
-                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }) 
-                    }
+                    label = { Text(historyEventTypeLabel(filter)) }
                 )
             }
         }
@@ -604,7 +645,7 @@ fun HistoryEventCard(event: VehicleHistoryEvent, onClick: () -> Unit) {
                 Text(text = event.title, color = Color(0xFF0B1730), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 val subtitle = listOfNotNull(
                     event.eventDate,
-                    event.mileage?.let { "$it km" }
+                    event.mileage?.let { stringResource(R.string.value_km, it.toString()) }
                 ).joinToString(" • ")
                 Text(text = subtitle, color = Color.Gray, fontSize = 12.sp)
             }
@@ -622,28 +663,28 @@ fun AddHistoryOptionsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add to Vehicle History") },
+        title = { Text(stringResource(R.string.add_history_dialog_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(onClick = onTakePhoto, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Take Photo")
+                    Text(stringResource(R.string.dialog_take_photo))
                 }
                 Button(onClick = onUploadImage, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Default.PhotoLibrary, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Upload Image")
+                    Text(stringResource(R.string.dialog_upload_image))
                 }
                 OutlinedButton(onClick = onAddManually, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Default.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Add Manually")
+                    Text(stringResource(R.string.dialog_add_manually))
                 }
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } }
     )
 }
 
@@ -659,13 +700,13 @@ fun HistoryEventEntryForm(
     var typeMenuExpanded by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("Enter History Information", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text("Review this information before saving. AI extraction may contain errors.", color = Color.Yellow, fontSize = 13.sp)
+        Text(stringResource(R.string.history_entry_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(stringResource(R.string.history_entry_review_warning), color = Color.Yellow, fontSize = 13.sp)
 
         if (uncertainFields.isNotEmpty()) {
             Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFB71C1C).copy(alpha = 0.1f))) {
                 Text(
-                    text = "Verify: ${uncertainFields.joinToString(", ")}",
+                    text = stringResource(R.string.history_verify_prefix, uncertainFields.joinToString(", ")),
                     modifier = Modifier.padding(12.dp),
                     color = Color.Red,
                     fontSize = 12.sp
@@ -681,12 +722,12 @@ fun HistoryEventEntryForm(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
             ) {
-                Text("Event Type: ${event.type.name.lowercase().replaceFirstChar { it.uppercase() }}")
+                Text(stringResource(R.string.history_event_type_prefix, historyEventTypeLabel(event.type)))
             }
             DropdownMenu(expanded = typeMenuExpanded, onDismissRequest = { typeMenuExpanded = false }) {
                 VehicleHistoryEventType.entries.forEach { type ->
                     DropdownMenuItem(
-                        text = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                        text = { Text(historyEventTypeLabel(type)) },
                         onClick = {
                             onUpdateField { it.copy(type = type) }
                             typeMenuExpanded = false
@@ -696,21 +737,21 @@ fun HistoryEventEntryForm(
             }
         }
 
-        AppTextField(value = event.title, onValueChange = { t -> onUpdateField { it.copy(title = t) } }, label = "Title")
-        AppTextField(value = event.eventDate ?: "", onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = "Date (YYYY-MM-DD)")
-        AppTextField(value = event.mileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(mileage = m.toIntOrNull()) } }, label = "Mileage")
-        AppTextField(value = event.garageName ?: "", onValueChange = { g -> onUpdateField { it.copy(garageName = g) } }, label = "Garage")
-        AppTextField(value = event.description ?: "", onValueChange = { d -> onUpdateField { it.copy(description = d) } }, label = "Description/Notes")
-        AppTextField(value = event.totalAmount?.toString() ?: "", onValueChange = { c -> onUpdateField { it.copy(totalAmount = c.toDoubleOrNull()) } }, label = "Cost")
-        
+        AppTextField(value = event.title, onValueChange = { t -> onUpdateField { it.copy(title = t) } }, label = stringResource(R.string.label_title))
+        AppTextField(value = event.eventDate ?: "", onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = stringResource(R.string.label_date_ymd))
+        AppTextField(value = event.mileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(mileage = m.toIntOrNull()) } }, label = stringResource(R.string.label_mileage))
+        AppTextField(value = event.garageName ?: "", onValueChange = { g -> onUpdateField { it.copy(garageName = g) } }, label = stringResource(R.string.label_garage))
+        AppTextField(value = event.description ?: "", onValueChange = { d -> onUpdateField { it.copy(description = d) } }, label = stringResource(R.string.label_description_notes))
+        AppTextField(value = event.totalAmount?.toString() ?: "", onValueChange = { c -> onUpdateField { it.copy(totalAmount = c.toDoubleOrNull()) } }, label = stringResource(R.string.label_cost))
+
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Next Service Recommendation", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        AppTextField(value = event.nextServiceDate ?: "", onValueChange = { d -> onUpdateField { it.copy(nextServiceDate = d) } }, label = "Next Service Date")
-        AppTextField(value = event.nextServiceMileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(nextServiceMileage = m.toIntOrNull()) } }, label = "Next Service Mileage")
+        Text(stringResource(R.string.history_next_service_title), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        AppTextField(value = event.nextServiceDate ?: "", onValueChange = { d -> onUpdateField { it.copy(nextServiceDate = d) } }, label = stringResource(R.string.label_next_service_date))
+        AppTextField(value = event.nextServiceMileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(nextServiceMileage = m.toIntOrNull()) } }, label = stringResource(R.string.label_next_service_mileage))
 
         Spacer(modifier = Modifier.height(16.dp))
-        PrimaryButton(text = if (isSaving) "Saving..." else "Save to History", onClick = onSave, enabled = !isSaving)
-        TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) { Text("Cancel", color = Color.White) }
+        PrimaryButton(text = stringResource(if (isSaving) R.string.action_saving else R.string.action_save_to_history), onClick = onSave, enabled = !isSaving)
+        TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_cancel), color = Color.White) }
     }
 }
 
@@ -728,18 +769,18 @@ fun HistoryEventDetailView(
             CenterAlignedTopAppBar(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Event Details", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(stringResource(R.string.history_event_details_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(vehicleTitle, fontSize = 12.sp, color = Color.LightGray)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = Color.Red)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF000C1F), titleContentColor = Color.White, navigationIconContentColor = Color.White)
@@ -751,32 +792,32 @@ fun HistoryEventDetailView(
             item {
                 Text(text = event.title, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(16.dp))
-                DetailItem(label = "Type", value = event.type.name.lowercase(Locale.ROOT).replaceFirstChar { it.uppercase(Locale.ROOT) })
-                DetailItem(label = "Date", value = event.eventDate)
-                DetailItem(label = "Mileage", value = event.mileage?.let { "$it km" })
-                DetailItem(label = "Garage", value = event.garageName)
-                DetailItem(label = "Cost", value = event.totalAmount?.let { "$it" })
-                DetailItem(label = "Description", value = event.description)
-                
+                DetailItem(label = stringResource(R.string.detail_type), value = historyEventTypeLabel(event.type))
+                DetailItem(label = stringResource(R.string.detail_date), value = event.eventDate)
+                DetailItem(label = stringResource(R.string.label_mileage), value = event.mileage?.let { stringResource(R.string.value_km, it.toString()) })
+                DetailItem(label = stringResource(R.string.label_garage), value = event.garageName)
+                DetailItem(label = stringResource(R.string.label_cost), value = event.totalAmount?.let { "$it" })
+                DetailItem(label = stringResource(R.string.detail_description), value = event.description)
+
                 if (event.nextServiceDate != null || event.nextServiceMileage != null) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("Upcoming Service", color = Color(0xFF007BFF), fontWeight = FontWeight.Bold)
-                    DetailItem(label = "Next Service Date", value = event.nextServiceDate)
-                    DetailItem(label = "Next Service Mileage", value = event.nextServiceMileage?.let { "$it km" })
+                    Text(stringResource(R.string.history_upcoming_service_title), color = Color(0xFF007BFF), fontWeight = FontWeight.Bold)
+                    DetailItem(label = stringResource(R.string.label_next_service_date), value = event.nextServiceDate)
+                    DetailItem(label = stringResource(R.string.label_next_service_mileage), value = event.nextServiceMileage?.let { stringResource(R.string.value_km, it.toString()) })
                 }
 
                 if (event.maintenanceItems.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("Maintenance Items", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.history_maintenance_items_title), color = Color.White, fontWeight = FontWeight.Bold)
                     event.maintenanceItems.forEach { item ->
-                        Text("• ${item.type.name.replace("_", " ").lowercase(Locale.ROOT).replaceFirstChar { it.uppercase(Locale.ROOT) }}", color = Color.LightGray)
+                        Text("• ${maintenanceItemLabel(item.type)}", color = Color.LightGray)
                     }
                 }
-                
+
                 if (event.sourceDocumentId != null) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("Linked Document", color = Color.Gray, fontSize = 12.sp)
-                    Text("Analyzed from uploaded image", color = Color.LightGray, fontSize = 14.sp)
+                    Text(stringResource(R.string.history_linked_document_title), color = Color.Gray, fontSize = 12.sp)
+                    Text(stringResource(R.string.history_linked_document_subtitle), color = Color.LightGray, fontSize = 14.sp)
                 }
             }
         }
@@ -785,10 +826,10 @@ fun HistoryEventDetailView(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete history event?") },
-            text = { Text("This will permanently remove this record from your car's history.") },
-            confirmButton = { TextButton(onClick = { onDelete(event.id) }) { Text("Delete", color = Color.Red) } },
-            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } }
+            title = { Text(stringResource(R.string.delete_history_event_title)) },
+            text = { Text(stringResource(R.string.delete_history_event_body)) },
+            confirmButton = { TextButton(onClick = { onDelete(event.id) }) { Text(stringResource(R.string.action_delete), color = Color.Red) } },
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.action_cancel)) } }
         )
     }
 }

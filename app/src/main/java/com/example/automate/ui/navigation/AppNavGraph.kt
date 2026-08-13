@@ -16,7 +16,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.automate.R
 import com.example.automate.data.repository.*
 import com.example.automate.ui.components.BottomNavBar
 import com.example.automate.ui.components.BottomNavItem
@@ -124,13 +126,13 @@ fun AppNavGraph(navController: NavHostController) {
             items = listOf(
                 BottomNavItem(
                     icon = Icons.Default.DirectionsCar,
-                    label = "My Cars",
+                    label = stringResource(R.string.nav_my_cars),
                     selected = currentRoute == Screen.Home.route,
                     onClick = { navigateToTab(Screen.Home.route) }
                 ),
                 BottomNavItem(
                     icon = Icons.AutoMirrored.Filled.Chat,
-                    label = "AI Assistant",
+                    label = stringResource(R.string.chat_ai_assistant_title),
                     selected = currentRoute?.startsWith("ai_assistant") == true,
                     onClick = { 
                         val firstVehicleId = authUiState.vehicles.firstOrNull()?.id ?: "unknown"
@@ -139,13 +141,13 @@ fun AppNavGraph(navController: NavHostController) {
                 ),
                 BottomNavItem(
                     icon = Icons.Default.Person,
-                    label = "Profile",
+                    label = stringResource(R.string.settings_profile_title),
                     selected = currentRoute == Screen.Profile.route,
                     onClick = { navigateToTab(Screen.Profile.route) }
                 ),
                 BottomNavItem(
                     icon = Icons.Default.Settings,
-                    label = "Settings",
+                    label = stringResource(R.string.settings_title),
                     selected = currentRoute == Screen.Settings.route,
                     onClick = { navigateToTab(Screen.Settings.route) }
                 )
