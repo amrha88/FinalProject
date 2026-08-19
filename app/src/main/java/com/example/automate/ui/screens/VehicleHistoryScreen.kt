@@ -34,6 +34,7 @@ import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.example.automate.R
 import com.example.automate.domain.model.*
+import com.example.automate.ui.components.AppDateField
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -506,7 +507,7 @@ fun MaintenanceUpdateReviewForm(
             }
         }
 
-        AppTextField(value = update.eventDate, onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = stringResource(R.string.label_date_ymd))
+        AppDateField(value = update.eventDate, onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = stringResource(R.string.label_date_ymd))
         AppTextField(value = update.mileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(mileage = m.toIntOrNull()) } }, label = stringResource(R.string.label_mileage))
         AppTextField(value = update.notes ?: "", onValueChange = { n -> onUpdateField { it.copy(notes = n) } }, label = stringResource(R.string.label_notes))
 
@@ -749,7 +750,7 @@ fun HistoryEventEntryForm(
         }
 
         AppTextField(value = event.title, onValueChange = { t -> onUpdateField { it.copy(title = t) } }, label = stringResource(R.string.label_title))
-        AppTextField(value = event.eventDate ?: "", onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = stringResource(R.string.label_date_ymd))
+        AppDateField(value = event.eventDate, onValueChange = { d -> onUpdateField { it.copy(eventDate = d) } }, label = stringResource(R.string.label_date_ymd))
         AppTextField(value = event.mileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(mileage = m.toIntOrNull()) } }, label = stringResource(R.string.label_mileage))
         AppTextField(value = event.garageName ?: "", onValueChange = { g -> onUpdateField { it.copy(garageName = g) } }, label = stringResource(R.string.label_garage))
         AppTextField(value = event.description ?: "", onValueChange = { d -> onUpdateField { it.copy(description = d) } }, label = stringResource(R.string.label_description_notes))
@@ -757,7 +758,7 @@ fun HistoryEventEntryForm(
 
         Spacer(modifier = Modifier.height(8.dp))
         Text(stringResource(R.string.history_next_service_title), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        AppTextField(value = event.nextServiceDate ?: "", onValueChange = { d -> onUpdateField { it.copy(nextServiceDate = d) } }, label = stringResource(R.string.label_next_service_date))
+        AppDateField(value = event.nextServiceDate, onValueChange = { d -> onUpdateField { it.copy(nextServiceDate = d) } }, label = stringResource(R.string.label_next_service_date))
         AppTextField(value = event.nextServiceMileage?.toString() ?: "", onValueChange = { m -> onUpdateField { it.copy(nextServiceMileage = m.toIntOrNull()) } }, label = stringResource(R.string.label_next_service_mileage))
 
         Spacer(modifier = Modifier.height(16.dp))

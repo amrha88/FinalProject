@@ -2,9 +2,14 @@ package com.example.automate.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.automate.data.repository.FirestoreReminderRepository
+import com.example.automate.domain.engine.ReminderEngine
+import com.example.automate.domain.model.DatePrecision
+import com.example.automate.domain.model.ReminderType
 import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.VehicleLicence
 import com.example.automate.domain.model.VehicleLicenceExtraction
+import com.example.automate.domain.repository.ReminderRepository
 import com.example.automate.domain.repository.VehicleLicenceAnalysisRepository
 import com.example.automate.domain.repository.VehicleLicenceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +21,11 @@ import android.graphics.Bitmap
 
 class VehicleLicenceViewModel(
     private val analysisRepository: VehicleLicenceAnalysisRepository,
-    private val licenceRepository: VehicleLicenceRepository
+    private val licenceRepository: VehicleLicenceRepository,
+    private val reminderRepository: ReminderRepository = FirestoreReminderRepository()
 ) : ViewModel() {
+
+    private val reminderEngine = ReminderEngine(reminderRepository)
 
     private val _uiState = MutableStateFlow(VehicleLicenceUiState())
     val uiState: StateFlow<VehicleLicenceUiState> = _uiState.asStateFlow()
@@ -87,6 +95,16 @@ class VehicleLicenceViewModel(
             licenceRepository.saveLicence(vehicleId, licence).fold(
                 onSuccess = {
                     _uiState.update { it.copy(isSaving = false, saveSuccess = true, savedLicence = licence, selectedImageUri = null, extraction = null, editableLicence = null) }
+                    val expiryDate = licence.licenceExpiryDate
+                    if (!expiryDate.isNullOrBlank()) {
+                        reminderEngine.syncRemindersFromManual(
+                            vehicleId = vehicleId,
+                            type = ReminderType.VEHICLE_LICENCE,
+                            title = "Vehicle Licence",
+                            dueDate = expiryDate,
+                            precision = DatePrecision.EXACT
+                        )
+                    }
                 },
                 onFailure = {
                     _uiState.update { it.copy(isSaving = false, errorMessage = "The licence details could not be saved.") }
@@ -100,6 +118,7 @@ class VehicleLicenceViewModel(
             licenceRepository.deleteLicence(vehicleId).fold(
                 onSuccess = {
                     _uiState.update { it.copy(savedLicence = null) }
+                    reminderRepository.deactiveOldReminders(vehicleId, ReminderType.VEHICLE_LICENCE)
                 },
                 onFailure = {
                     _uiState.update { it.copy(errorMessage = "The licence could not be deleted.") }

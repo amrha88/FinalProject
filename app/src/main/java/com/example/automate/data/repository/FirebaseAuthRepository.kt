@@ -89,7 +89,8 @@ class FirebaseAuthRepository(
                 age = (snapshot.getLong("age") ?: 0L).toInt(),
                 email = snapshot.getString("email") ?: user.email ?: "",
                 hasLicense = snapshot.getBoolean("hasLicense") ?: false,
-                photoBase64 = snapshot.getString("photoBase64")
+                photoBase64 = snapshot.getString("photoBase64"),
+                licensePhotoBase64 = snapshot.getString("licensePhotoBase64")
             )
             Result.success(profile)
         } catch (e: Exception) {
@@ -108,6 +109,9 @@ class FirebaseAuthRepository(
             )
             if (profile.photoBase64 != null) {
                 updates["photoBase64"] = profile.photoBase64
+            }
+            if (profile.licensePhotoBase64 != null) {
+                updates["licensePhotoBase64"] = profile.licensePhotoBase64
             }
             firestore.collection("users").document(user.uid)
                 .set(updates, com.google.firebase.firestore.SetOptions.merge())

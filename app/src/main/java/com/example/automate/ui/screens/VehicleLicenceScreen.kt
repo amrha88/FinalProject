@@ -34,6 +34,7 @@ import com.example.automate.R
 import com.example.automate.domain.model.Vehicle
 import com.example.automate.domain.model.VehicleLicence
 import com.example.automate.ui.components.AiDisclaimerNote
+import com.example.automate.ui.components.AppDateField
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -375,7 +376,7 @@ fun LicenceForm(
         AppTextField(value = licence.year ?: "", onValueChange = { onUpdateField("year", it) }, label = stringResource(R.string.label_year))
         AppTextField(value = licence.chassisNumber ?: "", onValueChange = { onUpdateField("chassisNumber", it) }, label = stringResource(R.string.label_chassis_number))
         AppTextField(value = licence.engineNumber ?: "", onValueChange = { onUpdateField("engineNumber", it) }, label = stringResource(R.string.label_engine_number))
-        AppTextField(value = licence.licenceExpiryDate ?: "", onValueChange = { onUpdateField("licenceExpiryDate", it) }, label = stringResource(R.string.label_licence_expiry_date))
+        AppDateField(value = licence.licenceExpiryDate, onValueChange = { onUpdateField("licenceExpiryDate", it) }, label = stringResource(R.string.label_licence_expiry_date))
     }
 }
 

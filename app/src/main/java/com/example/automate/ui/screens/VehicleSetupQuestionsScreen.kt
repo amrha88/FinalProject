@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.automate.R
 import com.example.automate.domain.model.DatePrecision
+import com.example.automate.ui.components.AppDatePickerDialog
 import com.example.automate.ui.components.PrimaryButton
 import java.text.SimpleDateFormat
 import java.util.*
@@ -102,10 +103,13 @@ private fun SetupQuestion(
     }
 
     if (showDatePicker) {
-        // Simplified DatePicker for the task
-        val calendar = Calendar.getInstance()
-        val date = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(calendar.time)
-        onDateSelected(date, DatePrecision.EXACT)
-        showDatePicker = false
+        AppDatePickerDialog(
+            initialDateString = null,
+            onDismiss = { showDatePicker = false },
+            onDateSelected = { date ->
+                onDateSelected(date, DatePrecision.EXACT)
+                showDatePicker = false
+            }
+        )
     }
 }

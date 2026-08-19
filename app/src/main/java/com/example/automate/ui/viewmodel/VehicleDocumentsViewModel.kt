@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.automate.domain.model.*
+import com.example.automate.domain.repository.ReminderRepository
 import com.example.automate.domain.repository.VehicleDocumentAnalysisRepository
 import com.example.automate.domain.repository.VehicleDocumentRepository
 import com.example.automate.domain.repository.VehicleHistoryRepository
@@ -16,13 +17,14 @@ import kotlinx.coroutines.launch
 class VehicleDocumentsViewModel(
     private val analysisRepository: VehicleDocumentAnalysisRepository,
     private val documentRepository: VehicleDocumentRepository,
-    private val historyRepository: VehicleHistoryRepository
+    private val historyRepository: VehicleHistoryRepository,
+    private val reminderRepository: ReminderRepository = com.example.automate.data.repository.FirestoreReminderRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VehicleDocumentsUiState())
     val uiState: StateFlow<VehicleDocumentsUiState> = _uiState.asStateFlow()
 
-    private val reminderEngine = com.example.automate.domain.engine.ReminderEngine(com.example.automate.data.repository.FirestoreReminderRepository())
+    private val reminderEngine = com.example.automate.domain.engine.ReminderEngine(reminderRepository)
 
     fun loadDocuments(vehicleId: String) {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -118,6 +120,18 @@ class VehicleDocumentsViewModel(
         _uiState.update { it.copy(replacingDocumentId = documentId, isEditingExisting = false, editableDocument = null, selectedImageUri = null, extraction = null) }
     }
 
+    fun startManualEntry(vehicleId: String, documentType: VehicleDocumentType = VehicleDocumentType.VEHICLE_LICENCE) {
+        _uiState.update {
+            it.copy(
+                editableDocument = VehicleDocument(vehicleId = vehicleId, documentType = documentType),
+                isEditingExisting = false,
+                replacingDocumentId = null,
+                selectedImageUri = null,
+                extraction = null
+            )
+        }
+    }
+
     fun saveConfirmedDocument(vehicleId: String) {
         val document = _uiState.value.editableDocument ?: return
         val isEditing = _uiState.value.isEditingExisting
@@ -155,6 +169,14 @@ class VehicleDocumentsViewModel(
 
             result.fold(
                 onSuccess = { documentId ->
+                    if (isEditing) {
+                        // updateDocument() only writes the document itself, so reminders
+                        // (e.g. an edited licence expiry date) need to be synced separately.
+                        reminders.forEach { reminder ->
+                            reminderRepository.deactiveOldReminders(vehicleId, reminder.type)
+                            reminderRepository.saveReminder(reminder.copy(vehicleId = vehicleId, sourceDocumentId = documentId))
+                        }
+                    }
                     _uiState.update { it.copy(isSaving = false, saveSuccess = true, selectedImageUri = null, extraction = null, editableDocument = null, isEditingExisting = false, replacingDocumentId = null) }
                     loadDocuments(vehicleId)
                 },

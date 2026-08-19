@@ -10,6 +10,7 @@
     <string name="action_save">Save</string>
     <string name="action_saving">Saving…</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_confirm">Confirm</string>
     <string name="action_delete">Delete</string>
     <string name="action_deleting">Deleting…</string>
     <string name="action_back">Back</string>
@@ -65,6 +66,7 @@
     <string name="home_no_vehicles_title">No vehicles added yet</string>
     <string name="home_no_vehicles_subtitle">Add your first vehicle to start tracking it</string>
     <string name="action_add_vehicle">Add vehicle</string>
+    <string name="vehicle_licence_expired_badge">Expired</string>
 
     <!-- Profile -->
     <string name="profile_title">Your profile</string>
@@ -78,6 +80,13 @@
     <string name="action_sending">Sending…</string>
     <string name="action_send_verification">Send verification</string>
     <string name="action_done">Done</string>
+    <string name="profile_licence_photo_title">Driving licence</string>
+    <string name="profile_licence_photo_subtitle">Save a photo so you can show it if you forget the physical card</string>
+    <string name="profile_licence_photo_take">Take photo</string>
+    <string name="profile_licence_photo_choose">Choose from library</string>
+    <string name="cd_licence_photo">Driving licence photo</string>
+    <string name="cd_view_licence_photo">View licence photo</string>
+    <string name="cd_close">Close</string>
 
     <!-- Notifications -->
     <string name="notifications_title">Notifications</string>
@@ -166,7 +175,9 @@
     <string name="documents_title">Documents</string>
     <string name="documents_edit_title">Edit Document</string>
     <string name="documents_review_title">Review AI Extraction</string>
+    <string name="documents_manual_title">Add Document Details</string>
     <string name="documents_review_warning">Review the information before saving. AI extraction may contain errors.</string>
+    <string name="action_enter_manually">Enter manually</string>
     <string name="action_save_document">Save Document</string>
     <string name="cd_selected_document">Selected document</string>
     <string name="documents_analyzing">Analyzing vehicle document…</string>
@@ -182,6 +193,7 @@
     <string name="document_no_date">No date</string>
     <string name="document_no_summary">No summary</string>
     <string name="document_status_active">ACTIVE</string>
+    <string name="document_status_expired">EXPIRED</string>
     <string name="menu_view_details">View details</string>
     <string name="menu_update_replace">Update / Replace</string>
     <string name="menu_edit_information">Edit information</string>

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.automate.R
 
 @Composable
 fun VehicleCard(
@@ -29,7 +32,8 @@ fun VehicleCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     photoBase64: String? = null,
-    compact: Boolean = false
+    compact: Boolean = false,
+    isLicenceExpired: Boolean = false
 ) {
     val containerColor = if (isDark) Color(0xFF15203A) else Color.White
     val contentColor = if (isDark) Color.White else Color(0xFF0B1730)
@@ -37,10 +41,13 @@ fun VehicleCard(
     val borderColor = if (isDark) Color.White.copy(alpha = 0.08f) else Color(0xFF0B1730).copy(alpha = 0.06f)
 
     if (compact) {
-        Card(
+        Box(
             modifier = modifier
                 .fillMaxWidth()
-                .height(96.dp),
+                .height(96.dp)
+        ) {
+        Card(
+            modifier = Modifier.fillMaxSize(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = containerColor),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp, pressedElevation = 0.dp),
@@ -115,11 +122,16 @@ fun VehicleCard(
                 }
             }
         }
+        if (isLicenceExpired) {
+            ExpiredBadge(modifier = Modifier.align(Alignment.TopEnd).padding(10.dp))
+        }
+        }
         return
     }
 
+    Box(modifier = modifier) {
     Card(
-        modifier = modifier.aspectRatio(0.92f),
+        modifier = Modifier.aspectRatio(0.92f),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp, pressedElevation = 0.dp),
@@ -204,5 +216,34 @@ fun VehicleCard(
                 )
             }
         }
+    }
+    if (isLicenceExpired) {
+        ExpiredBadge(modifier = Modifier.align(Alignment.TopEnd).padding(10.dp))
+    }
+    }
+}
+
+@Composable
+private fun ExpiredBadge(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0xFFD32F2F))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(12.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.vehicle_licence_expired_badge),
+            color = Color.White,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

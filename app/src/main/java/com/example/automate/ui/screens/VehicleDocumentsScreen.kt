@@ -40,6 +40,7 @@ import com.example.automate.domain.model.VehicleDocument
 import com.example.automate.domain.model.VehicleDocumentExtraction
 import com.example.automate.domain.model.VehicleDocumentStatus
 import com.example.automate.domain.model.VehicleDocumentType
+import com.example.automate.ui.components.AppDateField
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.PrimaryButton
 import com.example.automate.ui.theme.AutomateTheme
@@ -129,6 +130,7 @@ fun VehicleDocumentsScreen(
             onChooseGallery = {
                 galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             },
+            onAddManually = { viewModel.startManualEntry(vehicleId) },
             onAnalyze = {
                 uiState.selectedImageUri?.let { uriString ->
                     scope.launch {
@@ -190,6 +192,7 @@ fun VehicleDocumentsContent(
     onBackClick: () -> Unit,
     onTakePhoto: () -> Unit,
     onChooseGallery: () -> Unit,
+    onAddManually: () -> Unit,
     onAnalyze: () -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
@@ -254,21 +257,30 @@ fun VehicleDocumentsContent(
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
             if (uiState.editableDocument != null) {
+                val isManualEntry = !uiState.isEditingExisting && uiState.selectedImageUri == null
                 item {
                     Text(
-                        text = stringResource(if (uiState.isEditingExisting) R.string.documents_edit_title else R.string.documents_review_title),
+                        text = stringResource(
+                            when {
+                                uiState.isEditingExisting -> R.string.documents_edit_title
+                                isManualEntry -> R.string.documents_manual_title
+                                else -> R.string.documents_review_title
+                            }
+                        ),
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    Text(
-                        stringResource(R.string.documents_review_warning),
-                        color = Color.Yellow,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    if (!isManualEntry) {
+                        Text(
+                            stringResource(R.string.documents_review_warning),
+                            color = Color.Yellow,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
 
                     DocumentReviewForm(
                         document = uiState.editableDocument,
@@ -375,17 +387,29 @@ fun VehicleDocumentsContent(
                             ) {
                                 Text(stringResource(R.string.action_upload_document))
                             }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextButton(onClick = onAddManually) {
+                                Text(stringResource(R.string.action_enter_manually), color = Color.White.copy(alpha = 0.8f))
+                            }
                         }
                     }
                 } else {
                     item {
-                        Text(
-                            text = stringResource(R.string.documents_current_title),
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.documents_current_title),
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            TextButton(onClick = onAddManually) {
+                                Text(stringResource(R.string.action_enter_manually), color = Color(0xFF4FA8FF), fontSize = 13.sp)
+                            }
+                        }
                     }
                     
                     items(filteredDocuments) { document ->
@@ -403,6 +427,30 @@ fun VehicleDocumentsContent(
             
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
+    }
+}
+
+private fun isDocumentExpired(document: VehicleDocument): Boolean {
+    val expiryDate = when (document.documentType) {
+        VehicleDocumentType.VEHICLE_LICENCE -> document.licenceExpiryDate
+        VehicleDocumentType.INSURANCE -> document.insuranceExpiryDate
+        VehicleDocumentType.INSPECTION -> document.inspectionExpiryDate
+        else -> null
+    } ?: return false
+
+    return try {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ROOT)
+        sdf.isLenient = false
+        val parsed = sdf.parse(expiryDate) ?: return false
+        val today = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }.time
+        parsed.before(today)
+    } catch (e: Exception) {
+        false
     }
 }
 
@@ -457,15 +505,16 @@ fun DocumentCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = typeLabel, color = Color(0xFF0B1730), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     if (document.status == VehicleDocumentStatus.ACTIVE) {
+                        val expired = isDocumentExpired(document)
                         Spacer(modifier = Modifier.width(8.dp))
                         Surface(
-                            color = Color(0xFFE8F5E9),
+                            color = if (expired) Color(0xFFFFEBEE) else Color(0xFFE8F5E9),
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
-                                stringResource(R.string.document_status_active),
+                                stringResource(if (expired) R.string.document_status_expired else R.string.document_status_active),
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                color = Color(0xFF2E7D32),
+                                color = if (expired) Color(0xFFC62828) else Color(0xFF2E7D32),
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -567,8 +616,8 @@ fun DocumentReviewForm(
             label = stringResource(R.string.label_document_title)
         )
 
-        AppTextField(
-            value = document.documentDate ?: "",
+        AppDateField(
+            value = document.documentDate,
             onValueChange = { date -> onUpdateField { it.copy(documentDate = date) } },
             label = stringResource(R.string.label_document_date)
         )
@@ -602,22 +651,22 @@ fun DocumentReviewForm(
                     onValueChange = { p -> onUpdateField { it.copy(insuranceProvider = p) } },
                     label = stringResource(R.string.label_insurance_provider)
                 )
-                AppTextField(
-                    value = document.insuranceExpiryDate ?: "",
+                AppDateField(
+                    value = document.insuranceExpiryDate,
                     onValueChange = { d -> onUpdateField { it.copy(insuranceExpiryDate = d) } },
                     label = stringResource(R.string.label_policy_expiry_date)
                 )
             }
             VehicleDocumentType.VEHICLE_LICENCE -> {
-                AppTextField(
-                    value = document.licenceExpiryDate ?: "",
+                AppDateField(
+                    value = document.licenceExpiryDate,
                     onValueChange = { d -> onUpdateField { it.copy(licenceExpiryDate = d) } },
                     label = stringResource(R.string.label_licence_expiry_date)
                 )
             }
             VehicleDocumentType.INSPECTION -> {
-                AppTextField(
-                    value = document.inspectionExpiryDate ?: "",
+                AppDateField(
+                    value = document.inspectionExpiryDate,
                     onValueChange = { d -> onUpdateField { it.copy(inspectionExpiryDate = d) } },
                     label = stringResource(R.string.label_inspection_expiry_date)
                 )
@@ -764,6 +813,7 @@ fun VehicleDocumentsEmptyPreview() {
             onBackClick = {},
             onTakePhoto = {},
             onChooseGallery = {},
+            onAddManually = {},
             onAnalyze = {},
             onSave = {},
             onCancel = {},

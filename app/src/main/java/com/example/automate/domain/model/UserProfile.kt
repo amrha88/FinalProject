@@ -5,5 +5,6 @@ data class UserProfile(
     val age: Int,
     val email: String,
     val hasLicense: Boolean,
-    val photoBase64: String? = null
+    val photoBase64: String? = null,
+    val licensePhotoBase64: String? = null
 )

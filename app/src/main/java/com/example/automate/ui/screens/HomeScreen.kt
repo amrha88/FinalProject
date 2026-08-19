@@ -61,6 +61,7 @@ fun HomeScreen(
         onAddVehicleClick = onAddVehicleClick,
         onVehicleClick = onVehicleClick,
         onNeedHelpClick = onNeedHelpClick,
+        expiredLicenceVehicleIds = uiState.expiredLicenceVehicleIds,
         bottomBar = bottomBar
     )
 }
@@ -75,6 +76,7 @@ fun HomeScreenContent(
     onAddVehicleClick: () -> Unit,
     onVehicleClick: (String) -> Unit,
     onNeedHelpClick: () -> Unit = {},
+    expiredLicenceVehicleIds: Set<String> = emptySet(),
     bottomBar: @Composable () -> Unit = {}
 ) {
     Scaffold(
@@ -157,7 +159,8 @@ fun HomeScreenContent(
                                     isDark = vehicle.isDark,
                                     photoBase64 = vehicle.photoBase64,
                                     onClick = { onVehicleClick(vehicle.id) },
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
+                                    isLicenceExpired = vehicle.id in expiredLicenceVehicleIds
                                 )
                             }
                             if (rowVehicles.size < 2) {

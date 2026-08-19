@@ -10,6 +10,7 @@
     <string name="action_save">שמור</string>
     <string name="action_saving">שומר…</string>
     <string name="action_cancel">ביטול</string>
+    <string name="action_confirm">אישור</string>
     <string name="action_delete">מחק</string>
     <string name="action_deleting">מוחק…</string>
     <string name="action_back">חזרה</string>
@@ -65,6 +66,7 @@
     <string name="home_no_vehicles_title">עדיין לא נוספו רכבים</string>
     <string name="home_no_vehicles_subtitle">הוסף את הרכב הראשון שלך כדי להתחיל לעקוב אחריו</string>
     <string name="action_add_vehicle">הוספת רכב</string>
+    <string name="vehicle_licence_expired_badge">פג תוקף</string>
 
     <!-- Profile -->
     <string name="profile_title">הפרופיל שלך</string>
@@ -78,6 +80,13 @@
     <string name="action_sending">שולח…</string>
     <string name="action_send_verification">שלח אימות</string>
     <string name="action_done">סיום</string>
+    <string name="profile_licence_photo_title">רישיון נהיגה</string>
+    <string name="profile_licence_photo_subtitle">שמור תמונה כדי שתוכל להציג אותה אם שכחת את הכרטיס הפיזי</string>
+    <string name="profile_licence_photo_take">צלם תמונה</string>
+    <string name="profile_licence_photo_choose">בחר מהגלריה</string>
+    <string name="cd_licence_photo">תמונת רישיון נהיגה</string>
+    <string name="cd_view_licence_photo">הצג תמונת רישיון נהיגה</string>
+    <string name="cd_close">סגור</string>
 
     <!-- Notifications -->
     <string name="notifications_title">התראות</string>
@@ -166,7 +175,9 @@
     <string name="documents_title">מסמכים</string>
     <string name="documents_edit_title">עריכת מסמך</string>
     <string name="documents_review_title">סקירת חילוץ AI</string>
+    <string name="documents_manual_title">הזנת פרטי מסמך</string>
     <string name="documents_review_warning">בדוק את המידע לפני השמירה. חילוץ AI עלול לכלול טעויות.</string>
+    <string name="action_enter_manually">הזנה ידנית</string>
     <string name="action_save_document">שמור מסמך</string>
     <string name="cd_selected_document">המסמך שנבחר</string>
     <string name="documents_analyzing">מנתח את מסמך הרכב…</string>
@@ -182,6 +193,7 @@
     <string name="document_no_date">אין תאריך</string>
     <string name="document_no_summary">אין תקציר</string>
     <string name="document_status_active">פעיל</string>
+    <string name="document_status_expired">פג תוקף</string>
     <string name="menu_view_details">צפה בפרטים</string>
     <string name="menu_update_replace">עדכן / החלף</string>
     <string name="menu_edit_information">ערוך מידע</string>

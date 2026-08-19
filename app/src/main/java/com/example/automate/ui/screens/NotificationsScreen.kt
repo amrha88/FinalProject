@@ -111,7 +111,7 @@ fun NotificationsContent(
 
 enum class NotificationPriority(val label: String, val color: Color, val icon: ImageVector) {
     UPCOMING("Upcoming", Color(0xFF007BFF), Icons.Default.Timer),
-    SOON("Soon", Color(0xFFFFB300), Icons.Default.Timer),
+    SOON("Soon", Color(0xFFE64A19), Icons.Default.Warning),
     DUE("Due Today", Color(0xFFF44336), Icons.Default.Warning),
     OVERDUE("Overdue", Color(0xFFB71C1C), Icons.Default.Warning)
 }
@@ -208,7 +208,7 @@ private fun daysUntil(dateString: String): Int? {
 private fun statusFor(daysLeft: Int?, mileageLeft: Int?): NotificationPriority {
     val isOverdue = (daysLeft != null && daysLeft < 0) || (mileageLeft != null && mileageLeft < 0)
     val isDue = (daysLeft != null && daysLeft == 0) || (mileageLeft != null && mileageLeft == 0)
-    val isSoon = (daysLeft != null && daysLeft <= 14) || (mileageLeft != null && mileageLeft <= 500)
+    val isSoon = (daysLeft != null && daysLeft <= 30) || (mileageLeft != null && mileageLeft <= 500)
 
     return when {
         isOverdue -> NotificationPriority.OVERDUE

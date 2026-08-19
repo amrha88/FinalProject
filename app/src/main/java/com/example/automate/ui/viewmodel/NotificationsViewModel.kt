@@ -26,19 +26,21 @@ class NotificationsViewModel(
         viewModelScope.launch {
             val vehicleResult = reminderRepository.getVehicleReminders(vehicleId)
             val userResult = reminderRepository.getUserReminders()
-            
-            if (vehicleResult.isSuccess && userResult.isSuccess) {
-                val allReminders = (vehicleResult.getOrNull() ?: emptyList()) + (userResult.getOrNull() ?: emptyList())
-                val activeReminders = allReminders.filter { it.status == ReminderStatus.ACTIVE }
-                
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        reminders = sortReminders(activeReminders)
-                    )
-                }
-            } else {
-                _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to load notifications.") }
+
+            // Each source is independent: a failure fetching one (e.g. the
+            // vehicle-independent reminders) must not hide reminders the other
+            // source did fetch successfully.
+            val allReminders = vehicleResult.getOrDefault(emptyList()) + userResult.getOrDefault(emptyList())
+            val activeReminders = allReminders.filter { it.status == ReminderStatus.ACTIVE }
+
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    reminders = sortReminders(activeReminders),
+                    errorMessage = if (vehicleResult.isFailure && userResult.isFailure) {
+                        "Failed to load notifications."
+                    } else null
+                )
             }
         }
     }

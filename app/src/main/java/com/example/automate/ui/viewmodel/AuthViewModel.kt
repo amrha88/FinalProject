@@ -25,7 +25,8 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    private val reminderEngine = com.example.automate.domain.engine.ReminderEngine(com.example.automate.data.repository.FirestoreReminderRepository())
+    private val reminderRepository: com.example.automate.domain.repository.ReminderRepository = com.example.automate.data.repository.FirestoreReminderRepository()
+    private val reminderEngine = com.example.automate.domain.engine.ReminderEngine(reminderRepository)
 
     init {
         if (repository.isUserLoggedIn()) {
@@ -72,7 +73,8 @@ class AuthViewModel(
                         userAge = profile.age,
                         userEmail = profile.email,
                         userHasLicense = profile.hasLicense,
-                        userPhotoBase64 = profile.photoBase64
+                        userPhotoBase64 = profile.photoBase64,
+                        userLicensePhotoBase64 = profile.licensePhotoBase64
                     )
                 }
             }
@@ -88,7 +90,8 @@ class AuthViewModel(
             age = age,
             email = current.userEmail.orEmpty(),
             hasLicense = hasLicense,
-            photoBase64 = current.userPhotoBase64
+            photoBase64 = current.userPhotoBase64,
+            licensePhotoBase64 = current.userLicensePhotoBase64
         )
         _uiState.update { it.copy(isSavingProfile = true, profileError = null) }
         viewModelScope.launch {
@@ -123,9 +126,26 @@ class AuthViewModel(
             age = current.userAge ?: 0,
             email = current.userEmail.orEmpty(),
             hasLicense = current.userHasLicense,
-            photoBase64 = photoBase64
+            photoBase64 = photoBase64,
+            licensePhotoBase64 = current.userLicensePhotoBase64
         )
         _uiState.update { it.copy(userPhotoBase64 = photoBase64) }
+        viewModelScope.launch {
+            repository.updateCurrentUserProfile(profile)
+        }
+    }
+
+    fun updateLicensePhoto(photoBase64: String) {
+        val current = _uiState.value
+        val profile = UserProfile(
+            fullName = current.userName.orEmpty(),
+            age = current.userAge ?: 0,
+            email = current.userEmail.orEmpty(),
+            hasLicense = current.userHasLicense,
+            photoBase64 = current.userPhotoBase64,
+            licensePhotoBase64 = photoBase64
+        )
+        _uiState.update { it.copy(userLicensePhotoBase64 = photoBase64) }
         viewModelScope.launch {
             repository.updateCurrentUserProfile(profile)
         }
@@ -249,7 +269,41 @@ class AuthViewModel(
         viewModelScope.launch {
             vehicleRepository.getVehicles().onSuccess { vehicles ->
                 _uiState.update { it.copy(vehicles = vehicles) }
+                refreshLicenceAlerts(vehicles)
             }
+        }
+    }
+
+    private suspend fun refreshLicenceAlerts(vehicles: List<Vehicle>) {
+        val expiredIds = mutableSetOf<String>()
+        for (vehicle in vehicles) {
+            val reminders = reminderRepository.getVehicleReminders(vehicle.id).getOrNull() ?: continue
+            val licenceReminder = reminders.firstOrNull {
+                it.type == com.example.automate.domain.model.ReminderType.VEHICLE_LICENCE &&
+                    it.status == com.example.automate.domain.model.ReminderStatus.ACTIVE
+            }
+            if (licenceReminder != null && isPastDue(licenceReminder.dueDate)) {
+                expiredIds.add(vehicle.id)
+            }
+        }
+        _uiState.update { it.copy(expiredLicenceVehicleIds = expiredIds) }
+    }
+
+    private fun isPastDue(dateString: String?): Boolean {
+        if (dateString.isNullOrBlank()) return false
+        return try {
+            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ROOT)
+            sdf.isLenient = false
+            val dueDate = sdf.parse(dateString) ?: return false
+            val today = java.util.Calendar.getInstance().apply {
+                set(java.util.Calendar.HOUR_OF_DAY, 0)
+                set(java.util.Calendar.MINUTE, 0)
+                set(java.util.Calendar.SECOND, 0)
+                set(java.util.Calendar.MILLISECOND, 0)
+            }.time
+            dueDate.before(today)
+        } catch (e: Exception) {
+            false
         }
     }
 

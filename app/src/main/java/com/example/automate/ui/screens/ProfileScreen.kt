@@ -1,21 +1,31 @@
 package com.example.automate.ui.screens
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,14 +34,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.automate.R
 import com.example.automate.ui.components.AppTextField
 import com.example.automate.ui.components.AvatarImage
 import com.example.automate.ui.components.PrimaryButton
+import com.example.automate.ui.components.rememberCameraImagePicker
 import com.example.automate.ui.components.rememberProfileImagePicker
 import com.example.automate.ui.theme.AutomateTheme
 import com.example.automate.ui.viewmodel.AuthUiState
 import com.example.automate.ui.viewmodel.AuthViewModel
+
+private const val LICENSE_PHOTO_MAX_DIMENSION_PX = 1280
 
 @Composable
 fun ProfileScreen(
@@ -41,10 +55,20 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pickImage = rememberProfileImagePicker(onImagePicked = { viewModel.updateProfilePhoto(it) })
+    val pickLicensePhotoFromGallery = rememberProfileImagePicker(
+        maxDimension = LICENSE_PHOTO_MAX_DIMENSION_PX,
+        onImagePicked = { viewModel.updateLicensePhoto(it) }
+    )
+    val takeLicensePhoto = rememberCameraImagePicker(
+        maxDimension = LICENSE_PHOTO_MAX_DIMENSION_PX,
+        onImagePicked = { viewModel.updateLicensePhoto(it) }
+    )
 
     ProfileScreenContent(
         uiState = uiState,
         onAvatarClick = pickImage,
+        onPickLicensePhoto = pickLicensePhotoFromGallery,
+        onTakeLicensePhoto = takeLicensePhoto,
         onSave = { fullName, age, hasLicense ->
             viewModel.clearProfileError()
             viewModel.updateProfile(fullName, age, hasLicense)
@@ -64,6 +88,8 @@ fun ProfileScreen(
 private fun ProfileScreenContent(
     uiState: AuthUiState,
     onAvatarClick: () -> Unit,
+    onPickLicensePhoto: () -> Unit = {},
+    onTakeLicensePhoto: () -> Unit = {},
     onSave: (String, Int, Boolean) -> Unit,
     onDismissSaved: () -> Unit,
     onChangeEmail: (String, String) -> Unit = { _, _ -> },
@@ -76,6 +102,7 @@ private fun ProfileScreenContent(
     var hasLicense by remember { mutableStateOf(uiState.userHasLicense) }
     var validationError by remember { mutableStateOf<String?>(null) }
     var showChangeEmail by remember { mutableStateOf(false) }
+    var showLicensePhotoViewer by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.profileSaved) {
         if (uiState.profileSaved) {
@@ -96,6 +123,7 @@ private fun ProfileScreenContent(
             .fillMaxSize()
             .padding(paddingValues)
             .padding(24.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -201,6 +229,94 @@ private fun ProfileScreenContent(
             )
         }
 
+        if (hasLicense) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(R.string.profile_licence_photo_title),
+                color = Color.White,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.profile_licence_photo_subtitle),
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 12.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            val licensePhoto = uiState.userLicensePhotoBase64
+            if (licensePhoto == null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onTakeLicensePhoto,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddAPhoto,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.profile_licence_photo_take))
+                    }
+                    OutlinedButton(
+                        onClick = onPickLicensePhoto,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PhotoLibrary,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.profile_licence_photo_choose))
+                    }
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    LicensePhotoImage(
+                        base64 = licensePhoto,
+                        modifier = Modifier
+                            .size(width = 96.dp, height = 64.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { showLicensePhotoViewer = true }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        TextButton(
+                            onClick = onTakeLicensePhoto,
+                            contentPadding = PaddingValues(vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.profile_licence_photo_take),
+                                color = Color(0xFF4FA8FF)
+                            )
+                        }
+                        TextButton(
+                            onClick = onPickLicensePhoto,
+                            contentPadding = PaddingValues(vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.profile_licence_photo_choose),
+                                color = Color(0xFF4FA8FF)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         val errorText = validationError ?: uiState.profileError
@@ -229,7 +345,7 @@ private fun ProfileScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(32.dp))
 
         PrimaryButton(
             text = stringResource(R.string.action_save_changes),
@@ -277,6 +393,58 @@ private fun ProfileScreenContent(
             },
             onConfirm = { currentPassword, newEmail -> onChangeEmail(currentPassword, newEmail) }
         )
+    }
+
+    if (showLicensePhotoViewer) {
+        uiState.userLicensePhotoBase64?.let { base64 ->
+            LicensePhotoViewerDialog(base64 = base64, onDismiss = { showLicensePhotoViewer = false })
+        }
+    }
+}
+
+@Composable
+private fun LicensePhotoImage(base64: String, modifier: Modifier = Modifier) {
+    val bitmap = remember(base64) { decodeLicensePhoto(base64) }
+    if (bitmap != null) {
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = stringResource(R.string.cd_licence_photo),
+            modifier = modifier,
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+@Composable
+private fun LicensePhotoViewerDialog(base64: String, onDismiss: () -> Unit) {
+    val bitmap = remember(base64) { decodeLicensePhoto(base64) }
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.Black)
+                .clickable(onClick = onDismiss),
+            contentAlignment = Alignment.Center
+        ) {
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = stringResource(R.string.cd_view_licence_photo),
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth
+                )
+            }
+        }
+    }
+}
+
+private fun decodeLicensePhoto(base64: String): Bitmap? {
+    return try {
+        val bytes = Base64.decode(base64, Base64.NO_WRAP)
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    } catch (e: Exception) {
+        null
     }
 }
 

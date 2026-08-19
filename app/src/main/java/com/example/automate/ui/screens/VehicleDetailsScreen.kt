@@ -79,6 +79,7 @@ fun VehicleDetailsScreen(
         specs = vehicle?.specs,
         isLoadingSpecs = uiState.isLoadingSpecs,
         specsLoadFailed = uiState.specsLoadFailed,
+        documentsAlert = vehicleId in uiState.expiredLicenceVehicleIds,
         onBackClick = onBackClick,
         onChatbotClick = { onChatbotClick(vehicleId) },
         onLicencesClick = { onLicencesClick(vehicleId) },
@@ -103,6 +104,7 @@ fun VehicleDetailsContent(
     specs: VehicleSpecs? = null,
     isLoadingSpecs: Boolean = false,
     specsLoadFailed: Boolean = false,
+    documentsAlert: Boolean = false,
     onBackClick: () -> Unit,
     onChatbotClick: () -> Unit,
     onLicencesClick: () -> Unit,
@@ -272,6 +274,7 @@ fun VehicleDetailsContent(
                             subtitle = stringResource(R.string.feature_documents_subtitle),
                             icon = Icons.Default.Description,
                             highlightLabel = stringResource(R.string.feature_ai_powered_label),
+                            showAlert = documentsAlert,
                             onClick = onDocumentsClick
                         )
                     },
@@ -280,7 +283,6 @@ fun VehicleDetailsContent(
                             title = stringResource(R.string.feature_ai_assistant_title),
                             subtitle = stringResource(R.string.feature_ai_assistant_subtitle),
                             icon = Icons.AutoMirrored.Filled.Chat,
-                            showAlert = true, // Preserve alert logic if needed
                             onClick = onChatbotClick
                         )
                     },
