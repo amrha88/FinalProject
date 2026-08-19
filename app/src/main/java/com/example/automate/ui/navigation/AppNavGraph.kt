@@ -198,11 +198,31 @@ fun AppNavGraph(navController: NavHostController) {
             SignUpScreen(
                 viewModel = authViewModel,
                 onSuccess = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.SignUp.route) { inclusive = true }
+                    navController.navigate("guide/true") {
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.Guide.route,
+            arguments = listOf(navArgument("onboarding") { type = NavType.BoolType })
+        ) { backStackEntry ->
+            val isOnboarding = backStackEntry.arguments?.getBoolean("onboarding") ?: false
+            AppGuideScreen(
+                isOnboarding = isOnboarding,
+                onBackClick = { navController.popBackStack() },
+                onDone = {
+                    if (isOnboarding) {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    } else {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
 
@@ -227,6 +247,7 @@ fun AppNavGraph(navController: NavHostController) {
             SettingsScreen(
                 viewModel = authViewModel,
                 onProfileClick = { navController.navigate(Screen.Profile.route) },
+                onHelpClick = { navController.navigate("guide/false") },
                 onAccountDeleted = {
                     authViewModel.logout()
                     navController.navigate(Screen.Login.route) {

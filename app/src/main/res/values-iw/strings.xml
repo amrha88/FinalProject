@@ -369,6 +369,29 @@
     <string name="cd_automate_ai_assistant">עוזר ה-AI של Automate</string>
     <string name="cd_alert">התראה</string>
 
+    <!-- App Guide -->
+    <string name="settings_help_title">איך להשתמש ב-Automate</string>
+    <string name="settings_help_subtitle">למד מה כל תכונה עושה</string>
+    <string name="guide_onboarding_title">ברוכים הבאים ל-Automate!</string>
+    <string name="guide_onboarding_subtitle">בצע את השלבים הבאים כדי לנצל את האפליקציה במלואה.</string>
+    <string name="guide_help_title">איך להשתמש ב-Automate</string>
+    <string name="guide_help_subtitle">הנה מה שכל שלב עושה.</string>
+    <string name="guide_step1_title">הוספת הרכב שלך</string>
+    <string name="guide_step1_desc">הקש על כפתור ה-+ במסך הבית והזן את היצרן, הדגם, השנה ומספר הרישוי של הרכב שלך. פעולה זו יוצרת פרופיל לרכב שלך כדי ש-Automate יוכל לעקוב אחר כל מה שקשור אליו במקום אחד.</string>
+    <string name="guide_step2_title">סריקת נורות אזהרה עם AI</string>
+    <string name="guide_step2_desc">רואה נורת אזהרה בלוח המחוונים? פתח את סורק האזהרות AI וצלם אותה. הבינה המלאכותית מזהה את האזהרה, מסבירה מה משמעותה, ומודיעה לך עד כמה זה דחוף והאם בטוח להמשיך לנהוג.</string>
+    <string name="guide_step3_title">שיחה עם עוזר ה-AI</string>
+    <string name="guide_step3_desc">יש לך שאלה על הרכב שלך? פתח את עוזר ה-AI ושאל כל דבר — עצות תחזוקה, הסברים על אזהרות או שאלות כלליות על הרכב — וקבל תשובה מיידית.</string>
+    <string name="guide_step4_title">העלאת המסמכים שלך</string>
+    <string name="guide_step4_desc">הוסף תמונות של הביטוח, הרישיון או מסמכים אחרים תחת מסמכים. הבינה המלאכותית קוראת אותם אוטומטית ומחלצת את הפרטים החשובים, כמו תאריכי תפוגה, כך שלא תצטרך להקליד דבר בעצמך.</string>
+    <string name="guide_step5_title">מעקב אחר היסטוריית הרכב</string>
+    <string name="guide_step5_desc">כל סריקה, טיפול ועדכון נרשמים אוטומטית תחת היסטוריית הרכב, כך שתמיד יהיה לך תיעוד מלא של כל מה שנעשה לרכב שלך.</string>
+    <string name="guide_step6_title">כל השאר</string>
+    <string name="guide_step6_desc">התראות מזכירות לך לפני שהרישיון או הטסט פגי תוקף. הגדרות מאפשרות לך לעדכן את הפרופיל, לשנות סיסמה, להחליף את שפת האפליקציה, או לנהל את החשבון שלך.</string>
+    <string name="guide_step_label">שלב %1$d</string>
+    <string name="action_get_started">בואו נתחיל</string>
+    <string name="action_got_it">הבנתי</string>
+
     <!-- Settings -->
     <string name="settings_title">הגדרות</string>
     <string name="settings_profile_title">פרופיל</string>

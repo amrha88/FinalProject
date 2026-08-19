@@ -369,6 +369,29 @@
     <string name="cd_automate_ai_assistant">Automate AI Assistant</string>
     <string name="cd_alert">Alert</string>
 
+    <!-- App Guide -->
+    <string name="settings_help_title">How to use Automate</string>
+    <string name="settings_help_subtitle">Learn what each feature does</string>
+    <string name="guide_onboarding_title">Welcome to Automate!</string>
+    <string name="guide_onboarding_subtitle">Follow these steps to get the most out of the app.</string>
+    <string name="guide_help_title">How to use Automate</string>
+    <string name="guide_help_subtitle">Here\'s what each step does.</string>
+    <string name="guide_step1_title">Add your vehicle</string>
+    <string name="guide_step1_desc">Tap the + button on the Home screen and enter your car\'s manufacturer, model, year, and licence plate. This creates a profile for your vehicle so Automate can keep track of everything about it in one place.</string>
+    <string name="guide_step2_title">Scan warning lights with AI</string>
+    <string name="guide_step2_desc">See a warning light on your dashboard? Open the AI Warning Scanner and take a photo of it. The AI identifies the warning, explains what it means, and tells you how urgent it is and whether it\'s safe to keep driving.</string>
+    <string name="guide_step3_title">Chat with the AI Assistant</string>
+    <string name="guide_step3_desc">Have a question about your car? Open the AI Assistant and ask anything — maintenance advice, warning explanations, or general vehicle questions — and get an instant answer.</string>
+    <string name="guide_step4_title">Upload your documents</string>
+    <string name="guide_step4_desc">Add photos of your insurance, licence, or other paperwork under Documents. The AI reads them automatically and pulls out the important details, like expiry dates, so you don\'t have to type anything yourself.</string>
+    <string name="guide_step5_title">Track your vehicle history</string>
+    <string name="guide_step5_desc">Every scan, service, and update is logged automatically under Vehicle History, so you always have a full record of everything that\'s been done to your car.</string>
+    <string name="guide_step6_title">Everything else</string>
+    <string name="guide_step6_desc">Notifications reminds you before your licence or inspection expires. Settings lets you update your profile, change your password, switch the app language, or manage your account.</string>
+    <string name="guide_step_label">Step %1$d</string>
+    <string name="action_get_started">Get Started</string>
+    <string name="action_got_it">Got it</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_profile_title">Profile</string>

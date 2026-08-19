@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -357,7 +358,17 @@ fun VehicleHistoryContent(
                     ) {
                         Icon(Icons.Default.History, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(stringResource(R.string.history_no_events), color = Color.Gray, fontSize = 16.sp)
+                        if (uiState.errorMessage != null) {
+                            Text(
+                                uiState.errorMessage,
+                                color = Color(0xFFFF5252),
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 32.dp)
+                            )
+                        } else {
+                            Text(stringResource(R.string.history_no_events), color = Color.Gray, fontSize = 16.sp)
+                        }
                     }
                 }
             } else {

@@ -37,7 +37,11 @@ class VehicleHistoryViewModel(
                         )
                     }
                 },
-                onFailure = { /* handled by general loading */ }
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(errorMessage = throwable.message ?: "Vehicle history could not be loaded.")
+                    }
+                }
             )
             
             // Load maintenance states

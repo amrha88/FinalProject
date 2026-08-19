@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MaintenanceItem(
-    val type: MaintenanceItemType,
+    val type: MaintenanceItemType = MaintenanceItemType.OTHER,
     val action: String? = null,
     val confirmed: Boolean = true,
     val nextDueDate: String? = null,

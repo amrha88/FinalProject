@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class VehicleReminder(
     val id: String = "",
     val vehicleId: String = "", // empty for user-level reminders
-    val type: ReminderType,
+    val type: ReminderType = ReminderType.OTHER,
     val title: String = "",
     val description: String? = null,
     val dueDate: String? = null,

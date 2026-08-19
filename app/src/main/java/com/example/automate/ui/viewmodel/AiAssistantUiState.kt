@@ -8,6 +8,8 @@ data class AiAssistantUiState(
     val isAnalyzing: Boolean = false,
     val analysisResult: WarningLightResult? = null,
     val isSavedToHistory: Boolean = false,
+    val isSavingToHistory: Boolean = false,
+    val saveHistoryError: String? = null,
     val errorMessage: String? = null
 ) {
     val hasUnsavedResult: Boolean get() = analysisResult != null && !isSavedToHistory

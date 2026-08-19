@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class VehicleMaintenanceItemState(
-    val type: MaintenanceItemType,
+    val type: MaintenanceItemType = MaintenanceItemType.OTHER,
     val lastAction: MaintenanceAction? = null,
     val lastServiceDate: String? = null,
     val lastServiceMileage: Int? = null,

@@ -18,4 +18,5 @@ sealed class Screen(val route: String) {
     object AiAssistant : Screen("ai_assistant/{vehicleId}")
     object VehicleDocuments : Screen("vehicle_documents/{vehicleId}")
     object VehicleSetup : Screen("vehicle_setup/{vehicleId}")
+    object Guide : Screen("guide/{onboarding}")
 }

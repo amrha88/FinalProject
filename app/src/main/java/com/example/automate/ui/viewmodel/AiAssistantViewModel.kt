@@ -62,6 +62,7 @@ class AiAssistantViewModel(
             onComplete()
             return
         }
+        if (_uiState.value.isSavingToHistory) return
 
         val event = VehicleHistoryEvent(
             vehicleId = vehicleId,
@@ -72,12 +73,28 @@ class AiAssistantViewModel(
             confirmedByUser = true
         )
 
+        _uiState.update { it.copy(isSavingToHistory = true, saveHistoryError = null) }
+
         viewModelScope.launch {
-            historyRepository.saveHistoryEvent(vehicleId, event).onSuccess {
-                _uiState.update { it.copy(isSavedToHistory = true) }
-                onComplete()
-            }
+            historyRepository.saveHistoryEvent(vehicleId, event).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isSavingToHistory = false, isSavedToHistory = true) }
+                    onComplete()
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            isSavingToHistory = false,
+                            saveHistoryError = throwable.message ?: "Failed to save to history."
+                        )
+                    }
+                }
+            )
         }
+    }
+
+    fun clearSaveHistoryError() {
+        _uiState.update { it.copy(saveHistoryError = null) }
     }
 
     fun resetState() {

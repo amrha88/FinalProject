@@ -58,13 +58,24 @@ fun AiAssistantScreen(
     val scope = rememberCoroutineScope()
     var tempUri by remember { mutableStateOf<Uri?>(null) }
     var showSaveDialog by remember { mutableStateOf(false) }
+    var pendingContinuation by remember { mutableStateOf<() -> Unit>({}) }
 
     val handleBack: () -> Unit = {
         if (uiState.hasUnsavedResult) {
+            pendingContinuation = { onBackClick?.invoke() }
             showSaveDialog = true
         } else {
             viewModel.resetState()
             onBackClick?.invoke()
+        }
+    }
+
+    val handleNewImage: () -> Unit = {
+        if (uiState.hasUnsavedResult) {
+            pendingContinuation = {}
+            showSaveDialog = true
+        } else {
+            viewModel.resetState()
         }
     }
 
@@ -123,36 +134,65 @@ fun AiAssistantScreen(
         onAskAi = { result -> onNavigateToChat(result) },
         onOpenChatClick = onOpenChatClick,
         onBackClick = handleBack,
-        onNewImage = { viewModel.resetState() },
+        onNewImage = handleNewImage,
         bottomBar = bottomBar
     )
 
     if (showSaveDialog) {
         AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
-            title = { Text(stringResource(R.string.save_to_history_dialog_title)) },
-            text = { Text(stringResource(R.string.save_to_history_dialog_body)) },
-            confirmButton = {
-                TextButton(onClick = {
+            onDismissRequest = {
+                if (!uiState.isSavingToHistory) {
                     showSaveDialog = false
-                    viewModel.saveToHistory(vehicleId) {
-                        viewModel.resetState()
-                        onBackClick?.invoke()
+                    viewModel.clearSaveHistoryError()
+                }
+            },
+            title = { Text(stringResource(R.string.save_to_history_dialog_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.save_to_history_dialog_body))
+                    if (uiState.saveHistoryError != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(uiState.saveHistoryError!!, color = Color.Red, fontSize = 13.sp)
                     }
-                }) {
+                    if (uiState.isSavingToHistory) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        CircularProgressIndicator(color = Color(0xFF007BFF), modifier = Modifier.size(20.dp))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !uiState.isSavingToHistory,
+                    onClick = {
+                        viewModel.saveToHistory(vehicleId) {
+                            showSaveDialog = false
+                            viewModel.resetState()
+                            pendingContinuation()
+                        }
+                    }
+                ) {
                     Text(stringResource(R.string.action_save), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 Row {
-                    TextButton(onClick = {
-                        showSaveDialog = false
-                        viewModel.resetState()
-                        onBackClick?.invoke()
-                    }) {
+                    TextButton(
+                        enabled = !uiState.isSavingToHistory,
+                        onClick = {
+                            showSaveDialog = false
+                            viewModel.resetState()
+                            pendingContinuation()
+                        }
+                    ) {
                         Text(stringResource(R.string.action_dont_save))
                     }
-                    TextButton(onClick = { showSaveDialog = false }) {
+                    TextButton(
+                        enabled = !uiState.isSavingToHistory,
+                        onClick = {
+                            showSaveDialog = false
+                            viewModel.clearSaveHistoryError()
+                        }
+                    ) {
                         Text(stringResource(R.string.action_cancel))
                     }
                 }

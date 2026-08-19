@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class VehicleHistoryEvent(
     val id: String = "",
     val vehicleId: String = "",
-    val type: VehicleHistoryEventType,
+    val type: VehicleHistoryEventType = VehicleHistoryEventType.MANUAL,
     val title: String = "",
     val description: String? = null,
     val eventDate: String? = null,

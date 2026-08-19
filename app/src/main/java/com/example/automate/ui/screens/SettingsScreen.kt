@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
@@ -37,6 +38,7 @@ import com.example.automate.util.LocaleManager
 fun SettingsScreen(
     viewModel: AuthViewModel,
     onProfileClick: () -> Unit = {},
+    onHelpClick: () -> Unit = {},
     onAccountDeleted: () -> Unit = {},
     bottomBar: @Composable () -> Unit = {}
 ) {
@@ -86,6 +88,15 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_profile_title),
                 subtitle = stringResource(R.string.settings_profile_subtitle),
                 onClick = onProfileClick
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SettingsRow(
+                icon = Icons.AutoMirrored.Filled.HelpOutline,
+                title = stringResource(R.string.settings_help_title),
+                subtitle = stringResource(R.string.settings_help_subtitle),
+                onClick = onHelpClick
             )
 
             Spacer(modifier = Modifier.height(12.dp))
